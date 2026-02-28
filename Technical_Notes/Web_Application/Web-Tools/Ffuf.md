@@ -1,16 +1,28 @@
-# Enumeration with FFUF
+# Target Profiling (FFUF-dan əvvəl)
 
 ```
-ffuf -w WORDLIST -u http://example.com/FUZZ
+# Default response size
+curl -s http://target.com/asdasdasd | wc -w
+
+# Default word count
+curl -s http://target.com/asdasdasd | wc -c
+
+ffuf -w WORDLIST -u http://example.com/FUZZ -fs -fw
+-fs <baseline_size>
+-fw <baseline_word> 
+
 ```
 
 # Directory Traversal
 
 ```
+ffuf -w common.txt -u http://target/FUZZ -ac -t 40
+Auto calibration false positive 20–30% azaldır.
+
 ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt \
      -u http://target.com/FUZZ \
      -fs 0 -fc 404,403 \
-     -t 100 -timeout 10 \
+     -t 50 -timeout 10 \
      -o dirscan.json
 
 ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft-large-directories.txt:EXT \
@@ -19,6 +31,7 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
      -mc 200,301,302 \
      -fs 0,1234 \
      -recursion -recursion-depth 2 \
+     -e .php,.asp,.aspx,.jsp,.bak,.old,.html,.txt,.info \
      -o pro_dir.json
 
 -fs 0: 0 byte response filtrele
@@ -27,6 +40,7 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 -o: JSON output
 -H Custom Header
 -mc Status Code
+-e Extensions
 ```
 
 # Page Fuzzing
@@ -78,7 +92,7 @@ ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.
      -H "Host: FUZZ.target.com" \
      -mc 200,403 \
      -fw 0 \
-     -t 200 \
+     -t 50 \
      -o subdomains.json
 ```
 
