@@ -91,9 +91,7 @@ ffuf -w raft-large-directories.txt \
 ```
 ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt \
      -u https://FUZZ.target.com \
-     -H "Host: FUZZ.target.com" \
      -mc 200,403 \
-     -fw 0 \
      -t 50 \
      -o subdomains.json
 ```
