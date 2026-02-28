@@ -46,6 +46,8 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 # Page Fuzzing
 
 ```
+ffuf -w /opt/useful/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://SERVER_IP:PORT/blog/indexFUZZ
+
 # GET Parameter Fuzzing
 ffuf -w params.txt:PARAM,/usr/share/wordlists/SecLists/Discovery/Web-Content/burp-parameter-names.txt:VAL \
      -u "http://target.com/page?FUZZ=VAL" \
