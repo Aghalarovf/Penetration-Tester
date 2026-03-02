@@ -131,5 +131,8 @@ Get-DomainTrustMapping
 Test-AdminAccess -ComputerName ACADEMY-EA-MS01
 
 Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
-# 
+
+# Snaffler
+
+.\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data 
 
