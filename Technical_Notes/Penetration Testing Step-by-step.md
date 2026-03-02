@@ -121,4 +121,15 @@ Get-ADGroup -Filter * | select name
 Get-ADGroup -Identity "Backup Operators"
 Get-ADGroupMember -Identity "Backup Operators"
 
+# PoverView
+Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
+
+Get-DomainGroupMember -Identity "Domain Admins" -Recurse
+
+Get-DomainTrustMapping
+
+Test-AdminAccess -ComputerName ACADEMY-EA-MS01
+
+Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
+# 
 
