@@ -115,7 +115,16 @@ Import-Module ActiveDirectory
 Get-ADDomain
 
 # User & Group
-Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
+Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName | Select Name
+
+# SPN Users List
+Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName,ServicePrincipalNames | 
+Where-Object {$_.ServicePrincipalName -match "HTTP/|MSSQL/|CIFS/"} | 
+Select Name, ServicePrincipalName
+
+# Kerberoastable Users
+Get-ADUser -Filter {ServicePrincipalName -ne "$null" -and ServicePrincipalNames -like "*/*"} -Properties ServicePrincipalName,ServicePrincipalNames | Select Name, ServicePrincipalName | Sort Name
+
 Get-ADTrust -Filter *
 Get-ADGroup -Filter * | select name
 Get-ADGroup -Identity "Backup Operators"
