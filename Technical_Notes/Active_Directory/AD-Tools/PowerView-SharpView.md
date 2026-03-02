@@ -1,5 +1,9 @@
 # Misc Functions:
 ```
+Export-PowerViewCSV	            -   Append results to a CSV file
+ConvertTo-SID	                  -   Convert a User or group name to its SID value
+Get-DomainSPNTicket	            -   Requests the Kerberos ticket for a specified Service Principal Name (SPN) account
+
 Export-PowerViewCSV             -   thread-safe CSV append
 Resolve-IPAddress               -   resolves a hostname to an IP
 ConvertTo-SID                   -   converts a given user/group name to a security identifier (SID)
