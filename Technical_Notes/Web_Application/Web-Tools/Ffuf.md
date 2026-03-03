@@ -107,6 +107,8 @@ ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-20000
      -fw 12 \
      -ac \
      -o vhosts.json
+
+ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb'
 ```
 
 # DNS RECORDS (Zone Transfer Style)
