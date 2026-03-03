@@ -138,6 +138,22 @@ ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/fierce-namelist.txt \
      -o dns_records.json
 ```
 
+# Parameter Discovery
+
+```
+# GET
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php?FUZZ=key -fs xxx
+
+# POST
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs 798
+
+for i in $(seq 1 1000); do echo $i >> ids.txt; done
+
+ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs 768
+
+curl http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=<VALUE>' -H 'Content-Type: application/x-www-form-urlencoded'
+```
+
 # VALUE FUZZING (Parameter Pollution)
 
 ```
@@ -159,22 +175,6 @@ ffuf -w /usr/share/wordlists/SecLists/Fuzzing/SQL-Injection/sqli-5.txt \
      -u "http://target.com/user?id=1'FUZZ" \
      -mc 500 \
      -o sqli.json
-```
-
-# Parameter Discovery
-
-```
-# GET
-ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php?FUZZ=key -fs xxx
-
-# POST
-ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs 798
-
-for i in $(seq 1 1000); do echo $i >> ids.txt; done
-
-ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs 768
-
-curl http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=<VALUE>' -H 'Content-Type: application/x-www-form-urlencoded'
 ```
 
 # Important Flags
