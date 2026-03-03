@@ -75,6 +75,22 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 -e Extensions
 ```
 
+# Parameter Discovery
+
+```
+# GET
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php?FUZZ=key -fs xxx
+
+# POST
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs 798
+
+for i in $(seq 1 1000); do echo $i >> ids.txt; done
+
+ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs 768
+
+curl http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=<VALUE>' -H 'Content-Type: application/x-www-form-urlencoded'
+```
+
 # Page Fuzzing
 
 ```
@@ -116,37 +132,6 @@ ffuf -w raft-large-directories.txt \
      -recursion -recursion-depth 2 \
      -match-extension txt,php,asp,jsp,aspx \
      -o deepscan.json
-```
-
-# VHOST FUZZING
-
-```
-ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-20000.txt \
-     -u http://target.com \
-     -H "Host: FUZZ.target.com" \
-     -H "User-Agent: Mozilla/5.0" \
-     -mc 200,403,401 \
-     -fw 12 \
-     -ac \
-     -o vhosts.json
-
-ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb'
-```
-
-# Parameter Discovery
-
-```
-# GET
-ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php?FUZZ=key -fs xxx
-
-# POST
-ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'FUZZ=key' -H 'Content-Type: application/x-www-form-urlencoded' -fs 798
-
-for i in $(seq 1 1000); do echo $i >> ids.txt; done
-
-ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs 768
-
-curl http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=<VALUE>' -H 'Content-Type: application/x-www-form-urlencoded'
 ```
 
 # DNS RECORDS (Zone Transfer Style)
