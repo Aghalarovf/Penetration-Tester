@@ -128,16 +128,6 @@ ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-20000
 ffuf -w /opt/useful/seclists/Discovery/DNS/subdomains-top1million-5000.txt:FUZZ -u http://academy.htb:PORT/ -H 'Host: FUZZ.academy.htb'
 ```
 
-# DNS RECORDS (Zone Transfer Style)
-
-```
-ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/fierce-namelist.txt \
-     -u http://dns.target.com/FUZZ \
-     -H "Host: FUZZ.target.com" \
-     -mc 200,403 \
-     -o dns_records.json
-```
-
 # Parameter Discovery
 
 ```
@@ -152,6 +142,16 @@ for i in $(seq 1 1000); do echo $i >> ids.txt; done
 ffuf -w ids.txt:FUZZ -u http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=FUZZ' -H 'Content-Type: application/x-www-form-urlencoded' -fs 768
 
 curl http://admin.academy.htb:30979/admin/admin.php -X POST -d 'id=<VALUE>' -H 'Content-Type: application/x-www-form-urlencoded'
+```
+
+# DNS RECORDS (Zone Transfer Style)
+
+```
+ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/fierce-namelist.txt \
+     -u http://dns.target.com/FUZZ \
+     -H "Host: FUZZ.target.com" \
+     -mc 200,403 \
+     -o dns_records.json
 ```
 
 # VALUE FUZZING (Parameter Pollution)
