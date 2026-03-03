@@ -13,27 +13,46 @@ ffuf -w WORDLIST -u http://example.com/FUZZ -fs -fw
 
 ```
 
+# SUBDOMAIN FUZZING
+
+```
+ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+     -u http://154.57.164.78:31996 \
+     -H "Host: FUZZ.academy.htb" -t 50 -fs 985
+
+archive, faculty, test
+```
+
+# Extension Fuzzing
+
+```
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://archive.academy.htb:31996/indexFUZZ
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://test.academy.htb:31996/indexFUZZ
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://faculty.academy.htb:31996/indexFUZZ
+```
+
 # Directory Traversal
 
 ```
 ffuf -w common.txt -u http://target/FUZZ -ac -t 40
 Auto calibration false positive 20–30% azaldır.
 
-ffuf -w /usr/share/wordlists/SecLists/Discovery/Web-Content/common.txt \
-     -u http://target.com/FUZZ \
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt \
+     -u http://faculty.academy.htb:31996/FUZZ \
      -fs 0 -fc 404,403 \
-     -t 50 -timeout 10 \
-     -o dirscan.json
+     -t 1000 -timeout 3
 
-ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft-large-directories.txt:EXT \
-     -u "http://target.com/FUZZ.PATH" \
-     -H "User-Agent: Mozilla/5.0..." \
-     -mc 200,301,302 \
-     -fs 0,1234 \
-     -recursion -recursion-depth 2 \
-     -e .php,.asp,.aspx,.jsp,.bak,.old,.html,.txt,.info \
-     -o pro_dir.json
+ffuf -w /usr/share/wordlists/seclists/Discovery/Web-Content/directory-list-2.3-small.txt \
+     -u http://faculty.academy.htb:31996/courses/FUZZ \
+     -fs 0 -fc 404,403 \
+     -t 1000 -timeout 3 -e .php,.phps,.php7
 
+ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft-large-directories.txt:FUZZ /usr/share/wordlists/seclist/extension.txt:EXT
+
+-H "User-Agent: Mozilla/5.0..." \
+-recursion -recursion-depth 2 \
+-e .php,.asp,.aspx,.jsp,.bak,.old,.html,.txt,.info \
+-o pro_dir.json
 -fs 0: 0 byte response filtrele
 -fc 404,403: False positive filtrele
 -t 100: 100 thread
