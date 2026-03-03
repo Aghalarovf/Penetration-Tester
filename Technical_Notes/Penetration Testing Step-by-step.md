@@ -134,6 +134,9 @@ Get-ADGroupMember -Identity "Backup Operators"
 ## Special User
 Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
 
+# Local Admin
+Get-NetLocalGroupMember -ComputerName TARGETHOST -GroupName "Administrators"
+
 Get-DomainGroupMember -Identity "Domain Admins" -Recurse
 
 Get-DomainTrustMapping
