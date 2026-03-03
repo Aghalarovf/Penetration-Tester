@@ -16,6 +16,19 @@ ffuf -w WORDLIST -u http://example.com/FUZZ -fs -fw
 # SUBDOMAIN FUZZING
 
 ```
+/etc/hosts yazılmalıdır
+10.10.10.10 academy.htb
+
+ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+     -u http://FUZZ.academy.htb:31996 \
+     -t 50 -fs 985
+
+archive, faculty, test
+```
+
+# VHOST FUZZING
+
+```
 ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
      -u http://154.57.164.78:31996 \
      -H "Host: FUZZ.academy.htb" -t 50 -fs 985
@@ -103,14 +116,6 @@ ffuf -w raft-large-directories.txt \
      -recursion -recursion-depth 2 \
      -match-extension txt,php,asp,jsp,aspx \
      -o deepscan.json
-```
-
-# SUBDOMAIN FUZZING
-
-```
-ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
-     -u http://154.57.164.78:31996 \
-     -H "Host: FUZZ.academy.htb" -t 50 -fs 985
 ```
 
 # VHOST FUZZING
