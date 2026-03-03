@@ -44,7 +44,7 @@ ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u htt
 ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://faculty.academy.htb:31996/indexFUZZ
 ```
 
-# Directory Traversal
+# Directory Discovery
 
 ```
 ffuf -w common.txt -u http://target/FUZZ -ac -t 40
