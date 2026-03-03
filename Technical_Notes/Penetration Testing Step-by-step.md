@@ -137,6 +137,9 @@ Get-DomainUser -Identity mmorgan -Domain inlanefreight.local | Select-Object -Pr
 # Local Admin
 Get-NetLocalGroupMember -ComputerName TARGETHOST -GroupName "Administrators"
 
+# Deactive Account
+Get-DomainUser -LDAPFilter "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))"
+
 Get-DomainGroupMember -Identity "Domain Admins" -Recurse
 
 Get-DomainTrustMapping
