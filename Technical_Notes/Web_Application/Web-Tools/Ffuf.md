@@ -89,11 +89,9 @@ ffuf -w raft-large-directories.txt \
 # SUBDOMAIN FUZZING
 
 ```
-ffuf -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt \
-     -u https://FUZZ.target.com \
-     -mc 200,403 \
-     -t 50 \
-     -o subdomains.json
+ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.txt \
+     -u http://154.57.164.78:31996 \
+     -H "Host: FUZZ.academy.htb" -t 50 -fs 985
 ```
 
 # VHOST FUZZING
