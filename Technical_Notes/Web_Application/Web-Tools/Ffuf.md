@@ -36,14 +36,6 @@ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.
 archive, faculty, test
 ```
 
-# Extension Fuzzing
-
-```
-ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://archive.academy.htb:31996/indexFUZZ
-ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://test.academy.htb:31996/indexFUZZ
-ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://faculty.academy.htb:31996/indexFUZZ
-```
-
 # Directory Discovery
 
 ```
@@ -74,6 +66,15 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 -mc Status Code
 -e Extensions
 ```
+
+# Extension Fuzzing
+
+```
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://archive.academy.htb:31996/indexFUZZ
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://test.academy.htb:31996/indexFUZZ
+ffuf -w /usr/share/seclists/Discovery/Web-Content/web-extensions.txt:FUZZ -u http://faculty.academy.htb:31996/indexFUZZ
+```
+
 
 # Parameter Discovery
 
