@@ -67,6 +67,25 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 -e Extensions
 ```
 
+# RECURSIVE FUZZING (Deep Scan)
+
+```
+ffuf -w common.txt \
+     -u http://target.com/FUZZ \
+     -recursion \
+     -recursion-depth 3 \
+     -recursion-threads 50 \
+     -mc all \
+     -fs 0 \
+     -o recursive.json
+
+ffuf -w raft-large-directories.txt \
+     -u http://target.com/FUZZ \
+     -recursion -recursion-depth 2 \
+     -match-extension txt,php,asp,jsp,aspx \
+     -o deepscan.json
+```
+
 # Extension Fuzzing
 
 ```
@@ -114,25 +133,6 @@ ffuf -w users.txt:USER,passes.txt:PASS \
      -mc 200,302 \
      -fr "Invalid|Error" \
      -o brute.json
-```
-
-# RECURSIVE FUZZING (Deep Scan)
-
-```
-ffuf -w common.txt \
-     -u http://target.com/FUZZ \
-     -recursion \
-     -recursion-depth 3 \
-     -recursion-threads 50 \
-     -mc all \
-     -fs 0 \
-     -o recursive.json
-
-ffuf -w raft-large-directories.txt \
-     -u http://target.com/FUZZ \
-     -recursion -recursion-depth 2 \
-     -match-extension txt,php,asp,jsp,aspx \
-     -o deepscan.json
 ```
 
 # DNS RECORDS (Zone Transfer Style)
