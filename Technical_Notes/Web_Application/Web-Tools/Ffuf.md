@@ -144,6 +144,12 @@ ffuf -w /usr/share/wordlists/SecLists/Fuzzing/SQL-Injection/sqli-5.txt \
      -o sqli.json
 ```
 
+# Parameter Discovery
+
+```
+ffuf -w /opt/useful/seclists/Discovery/Web-Content/burp-parameter-names.txt:FUZZ -u http://admin.academy.htb:PORT/admin/admin.php?FUZZ=key -fs xxx
+```
+
 # Important Flags
 
 ```
