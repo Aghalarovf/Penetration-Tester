@@ -3,31 +3,60 @@
 
 ## Access Control List Command
 ```
-# Bütün domain object-lərinin ACL-lərini enum
+Import-Module .\PowerView.ps1
+Get-Module ActiveDirectory
+
+# Bütün domain obyektlərinin ACL xəritəsi
 Get-DomainObjectAcl -ResolveGUIDs | Select ObjectDN,ActiveDirectoryRights,IdentityReference
 
-# User-ların ACL-ləri (GenericAll, WriteOwner, etc.)
-Get-ObjectAcl -Identity user.samaccountname | ?{$_.ActiveDirectoryRights -match "GenericAll|WriteDacl|Owner"}
+# Riskli Hüquqlar
+Get-DomainObjectAcl -ResolveGUIDs |
+? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } |
+ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
 
-# Group-ların ACL-ləri (DCSync potensialı)
-Get-ObjectAcl -Identity "Domain Admins" | Select AceType,ActiveDirectoryRights,IdentityReference
+# User ACL-ləri
+Get-ObjectAcl -Identity <USER> -ResolveGUIDs |
+? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" }
 
-# Computer-ların ACL-ləri (MachineAccountQuota abuse)
-Get-ObjectAcl -Identity computer$ | ?{$_.ActiveDirectoryRights -match "GenericAll"}
+# Group ACL-ləri
+Get-ObjectAcl -Identity "<GROUP NAME>" -ResolveGUIDs
 
-# OU-ların ACL-ləri (Child creation)
-Get-DomainOU | Get-ObjectAcl | ?{$_.ActiveDirectoryRights -match "CreateChild"}
+# Computer ACL-ləri
+Get-ObjectAcl -Identity <COMPUTERNAME>$ -ResolveGUIDs |
+? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite" }
 
-# Domain root ACL (kritik)
-Get-DomainObjectAcl -DomainController dc-ip | ?{$_.ObjectDN -eq "DC=domain,DC=com"}
+# OU ACL-ləri (Child Creation Abuse)
+Get-DomainOU | Get-ObjectAcl -ResolveGUIDs |
+? { $_.ActiveDirectoryRights -match "CreateChild" }
 
-# Abuse potensialı olan ACL-lər filtrlə
-Get-DomainObjectAcl | ?{ $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|Owner|WriteOwner|DeleteChild" } | ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
+# Domain Root ACL
+Get-DomainObjectAcl -ResolveGUIDs |
+? { $_.ObjectDN -match "^DC=" }
+
+# SID-Based Targeted Hunt
+$sid = Convert-NameToSid username
+
+Get-DomainObjectACL -ResolveGUIDs -Identity * |
+? { $_.SecurityIdentifier -eq $sid }
+
+# Extended Rights Manual Analysis
+$guid= "00299570-246d-11d0-a768-00aa006e0529"
+
+Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" `
+-Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |
+Select Name,DisplayName,DistinguishedName,rightsGuid |
+? { $_.rightsGuid -eq $guid }
+
+# Group → MemberOf Chain Analysis
+Get-DomainGroup -Identity "Help Desk Level 1" | select memberof
+
+# Auto Discovery
+Find-InterestingDomainAcl
 ```
 
 ## SharpHound
 ```
-SharpHound.exe --CollectionMethods All --Domain domain.com --OutputDirectory /tmp/bloodhound
+SharpHound.exe --CollectionMethods All --Domain domain.com --OutputDirectory C:\Users\htb-student\Desktop\bloodhound
 ```
 
 ## Impacket ilə LDAP ACL Enum
