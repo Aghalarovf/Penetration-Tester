@@ -10,28 +10,22 @@ Get-Module ActiveDirectory
 Get-DomainObjectAcl -ResolveGUIDs | Select ObjectDN,ActiveDirectoryRights,IdentityReference
 
 # Riskli Hüquqlar
-Get-DomainObjectAcl -ResolveGUIDs |
-? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } |
-ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
+Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } | ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
 
 # User ACL-ləri
-Get-ObjectAcl -Identity <USER> -ResolveGUIDs |
-? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" }
+Get-ObjectAcl -Identity <USER> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" }
 
 # Group ACL-ləri
 Get-ObjectAcl -Identity "<GROUP NAME>" -ResolveGUIDs
 
 # Computer ACL-ləri
-Get-ObjectAcl -Identity <COMPUTERNAME>$ -ResolveGUIDs |
-? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite" }
+Get-ObjectAcl -Identity <COMPUTERNAME>$ -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite" }
 
 # OU ACL-ləri (Child Creation Abuse)
-Get-DomainOU | Get-ObjectAcl -ResolveGUIDs |
-? { $_.ActiveDirectoryRights -match "CreateChild" }
+Get-DomainOU | Get-ObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "CreateChild" }
 
 # Domain Root ACL
-Get-DomainObjectAcl -ResolveGUIDs |
-? { $_.ObjectDN -match "^DC=" }
+Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ObjectDN -match "^DC=" }
 
 # SID-Based Targeted Hunt
 $sid = Convert-NameToSid username
