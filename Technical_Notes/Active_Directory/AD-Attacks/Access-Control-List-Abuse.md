@@ -13,10 +13,27 @@ Get-DomainObjectAcl -ResolveGUIDs | Select ObjectDN,ActiveDirectoryRights,Identi
 Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } | ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
 
 # User ACL-ləri
-Get-ObjectAcl -Identity <USER> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" }
+Get-ObjectAcl -Identity <USER> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" } ( Single User )
+
+Get-DomainUser | ForEach-Object {
+    Get-ObjectAcl -Identity $_.SamAccountName -ResolveGUIDs
+} | ? {
+    $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite"
+} | 
+Select ObjectDN,ActiveDirectoryRights,IdentityReference ( All Users )
 
 # Group ACL-ləri
 Get-ObjectAcl -Identity "<GROUP NAME>" -ResolveGUIDs
+
+Get-ObjectAcl -Identity "Help Desk Level 1" -ResolveGUIDs |
+? { $_.IdentityReference -match "damundsen" } 
+
+# User-Force-Change-Password ExtendedRight
+Get-ADObject `
+-SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" `
+-LDAPFilter "(name=*Force*)" `
+-Properties rightsGuid |
+Select Name,DisplayName,RightsGuid
 
 # Computer ACL-ləri
 Get-ObjectAcl -Identity <COMPUTERNAME>$ -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite" }
