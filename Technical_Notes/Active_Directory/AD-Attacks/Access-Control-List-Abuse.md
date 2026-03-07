@@ -140,5 +140,21 @@ Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Cre
 Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose
 ```
 
+# Change Password ACL
+```
+Get-DomainObjectACL -ResolveGUIDs | ? {$_.ActiveDirectoryRights -match 'GenericAll' -or $_.ObjectAceType -match 'User-Force-Change-Password'} | ? {$_.SecurityIdentifier -match (Get-DomainUser -Identity $env:USERNAME -Properties objectsid).objectsid}
+
+Get-DomainObjectACL -ResolveGUIDs | ? {$_.ObjectAceType -match 'User-Force-Change-Password'} | Select-Object ObjectDN, SecurityIdentifier | Out-GridView
+```
+<img width="894" height="464" alt="Screenshot 2026-03-07 163209" src="https://github.com/user-attachments/assets/098da167-3eb9-4148-9e00-24f1ba0906f6" />
+```
+Get-DomainUser -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
+Get-DomainGroup -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
+Get-DomainComputer -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
+
+Get-DomainGroupMember -Identity "<samaccountname>" | Select-Object MemberName
+
+
+
 
 
