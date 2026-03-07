@@ -50,6 +50,25 @@ $sid = Convert-NameToSid username
 Get-DomainObjectACL -ResolveGUIDs -Identity * |
 ? { $_.SecurityIdentifier -eq $sid }
 
+# Bir userin ( USER1 ) digər userlər üzərindəki ACL ləri
+Get-DomainObjectACL -ResolveGUIDs | ? { $_.SecurityIdentifier -eq (Get-DomainUser -Identity <USER1> -Properties objectsid).objectsid } | ? { $_.ObjectType -eq "User" -or $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl" } | Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
+
+# Bir Userin ( USER1 ) digər User ( USER2 ) üzərindəki ACL ləri
+$SID = (Get-DomainUser -Identity <USER1>).objectsid
+Get-DomainObjectACL -Identity <USER2> -ResolveGUIDs | ? { $_.SecurityIdentifier -eq $SID }
+
+$UserGroupsSIDs = Get-DomainGroup -MemberIdentity <USER1> | Select-Object -ExpandProperty objectsid
+$UserSID = (Get-DomainUser -Identity <USER1>).objectsid
+$AllSIDs = $UserGroupsSIDs + $UserSID
+Get-DomainObjectACL -Identity adunn -ResolveGUIDs | ? { $AllSIDs -contains $_.SecurityIdentifier } | Select-Object ObjectDN, ActiveDirectoryRights, SecurityIdentifier, ObjectAceType
+
+# Digər userlərin müəyyən bir user <USER1> üzərindəki ACL ləri
+Get-DomainObjectACL -Identity <USER1> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl|GenericWrite|AllExtendedRights" } | Select-Object SecurityIdentifier, ActiveDirectoryRights, ObjectAceType
+
+"SID1", "SID2" | ConvertFrom-SID
+
+Get-DomainGroupMember -Identity "<GROUP_NAME>" | Select-Object MemberName
+
 # Extended Rights Manual Analysis
 $guid= "00299570-246d-11d0-a768-00aa006e0529"
 
