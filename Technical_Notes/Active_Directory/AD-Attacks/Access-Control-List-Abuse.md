@@ -127,6 +127,14 @@ jq -r --arg group "HELP DESK LEVEL 1@DOMAIN.LOCAL" --arg user "DAMUNDSEN@DOMAIN.
 ' groups.json 2>/dev/null
 ```
 
+## Bir Userin hansı qruplarda olduğuna baxmaq
+```
+# Birbaşa üzv olduğu qrupları görmək üçün
+Get-DomainGroup -MemberIdentity "adunn" | Select-Object Name, DistinguishedName
+
+(Get-ADUser -Identity adunn -Properties MemberOf).MemberOf
+```
+
 ## Search Extended Right ( User-Force-Change-Password )
 ```
 Get-ADObject `
