@@ -239,6 +239,10 @@ Get-DomainObjectACL -ResolveGUIDs | ? {
     ($_.SecurityIdentifier -eq $CurrentSID) -and 
     ($_.ActiveDirectoryRights -match 'GenericAll' -or $_.ObjectAceType -match 'User-Force-Change-Password')
 } | Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType | Out-GridView
+
+Yada
+
+Find-InterestingDomainAcl -ResolveGUIDs | ? { $_.IdentityReferenceName -match "htb-student" } | Select-Object ObjectDN, ActiveDirectoryRights
 ```
 
 ## Parolun Sıfırlanması (The Abuse)
