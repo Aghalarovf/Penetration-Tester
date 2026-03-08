@@ -15,7 +15,15 @@ SharpHound.exe --CollectionMethods All --Domain domain.com --OutputDirectory C:\
 Get-DomainObjectAcl -ResolveGUIDs | Select ObjectDN,ActiveDirectoryRights,IdentityReference
 
 # Sharphound nəticəsi
-cat *_users.json *_computers.json *_groups.json | jq -r '.data[] | .Properties.name as $target | .Acls[] | [$target, .RightName, .PrincipalName] | @tsv'
+cat *_users.json *_computers.json *_groups.json | jq -r '
+  (if type == "array" then .[] elif .data then .data[] else empty end)
+  | select(. != null)
+  | .Properties.name as $target
+  | (.Acls // empty)[]
+  | select(. != null)
+  | [$target, .RightName, .PrincipalName]
+  | @tsv
+' 2>/dev/null
 
 ===================================================================================================================================================================
 
@@ -23,7 +31,17 @@ cat *_users.json *_computers.json *_groups.json | jq -r '.data[] | .Properties.n
 Get-DomainObjectAcl -ResolveGUIDs | ? { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteDacl|WriteOwner|Owner|DeleteChild" } | ft ObjectDN,ActiveDirectoryRights,IdentityReference -AutoSize
 
 # Sharphound nəticəsi
-cat *.json | jq -r '.data[] | .Properties.name as $target | .Acls[] | select(.RightName | test("GenericAll|GenericWrite|WriteDacl|WriteOwner|DeleteChild"; "i")) | [$target, .RightName, .PrincipalName] | @tsv'
+jq -rs '
+  [.[][]]
+  | (if type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $target
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select(.RightName // "" | test("GenericAll|GenericWrite|WriteDacl|WriteOwner|DeleteChild"; "i"))
+  | [$target, .RightName, .PrincipalName]
+  | @tsv
+' *.json 2>/dev/null
 ```
 
 ## Bütün Userlərin müəyyən User üzərindəki ACL-ləri
@@ -37,7 +55,16 @@ Get-DomainUser | ForEach-Object { Get-ObjectAcl -Identity $_.SamAccountName -Res
 } | Select ObjectDN, ActiveDirectoryRights, IdentityReference
 
 # Sharphound nəticəsi
-cat users.json | jq -r '.data[] | select(.Properties.name == "<USER>@DOMAIN.LOCAL") | .Acls[] | select(.RightName | test("GenericAll|WriteDacl|WriteOwner|GenericWrite"; "i")) | [.PrincipalName, .RightName] | @tsv'
+jq -r --arg user "<USER>@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | select((.Properties.name // "") == $user)
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select(.RightName // "" | test("GenericAll|WriteDacl|WriteOwner|GenericWrite"; "i"))
+  | [.PrincipalName, .RightName]
+  | @tsv
+' users.json 2>/dev/null
 ```
 
 ## Bir qrupun ACL-ləri
@@ -45,7 +72,15 @@ cat users.json | jq -r '.data[] | select(.Properties.name == "<USER>@DOMAIN.LOCA
 Get-ObjectAcl -Identity "<GROUP NAME>" -ResolveGUIDs
 
 # Sharphound nəticəsi
-cat groups.json | jq -r '.data[] | select(.Properties.name == "<GROUP_NAME>@DOMAIN.LOCAL") | .Acls[] | [$PrincipalName, .RightName] | @tsv'
+jq -r --arg grp "<GROUP_NAME>@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | select((.Properties.name // "") == $grp)
+  | (.Acls // empty)[]
+  | select(. != null)
+  | [.PrincipalName, .RightName]
+  | @tsv
+' groups.json 2>/dev/null
 ```
 
 ## Bir Userin bütün qruplar üzrə ACL-ləri
@@ -61,7 +96,17 @@ Get-DomainGroup | ForEach-Object {
 }
 
 # Sharphound nəticəsi
-cat groups.json | jq -r '.data[] | .Properties.name as $group | .Acls[] | select(.PrincipalName | contains("<USER>@DOMAIN.LOCAL")) | select(.RightName | test("GenericAll|WriteDacl|WriteOwner|GenericWrite|AddMember"; "i")) | [$group, .RightName] | @tsv'
+jq -r --arg user "<USER>@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $group
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalName // "") | contains($user))
+  | select(.RightName // "" | test("GenericAll|WriteDacl|WriteOwner|GenericWrite|AddMember"; "i"))
+  | [$group, .RightName]
+  | @tsv
+' groups.json 2>/dev/null
 ```
 
 ## Bir userin müəyyən qrup üzərində hansı hüquqları var
@@ -69,8 +114,17 @@ cat groups.json | jq -r '.data[] | .Properties.name as $group | .Acls[] | select
 Get-ObjectAcl -Identity "Help Desk Level 1" -ResolveGUIDs |
 ? { $_.IdentityReference -match "damundsen" }
 
-# Sharphound nətiəsi
-cat groups.json | jq -r --arg group "HELP DESK LEVEL 1@DOMAIN.LOCAL" --arg user "DAMUNDSEN@DOMAIN.LOCAL" '.data[] | select(.Properties.name == $group) | .Acls[] | select(.PrincipalName == $user) | [$user, "has", .RightName, "over", $group] | @tsv'a
+# Sharphound nəticəsi
+jq -r --arg group "HELP DESK LEVEL 1@DOMAIN.LOCAL" --arg user "DAMUNDSEN@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | select((.Properties.name // "") == $group)
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalName // "") == $user)
+  | [$user, "has", .RightName, "over", $group]
+  | @tsv
+' groups.json 2>/dev/null
 ```
 
 ## Search Extended Right ( User-Force-Change-Password )
@@ -82,7 +136,16 @@ Get-ADObject `
 Select Name,DisplayName,RightsGuid
 
 # Sharphound nəticəsi
-cat users.json | jq -r '.data[] | .Properties.name as $target | .Acls[] | select(.RightName == "ForceChangePassword") | [.PrincipalName, " can RESET password of ", $target] | @tsv'
+jq -r '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $target
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.RightName // "") == "ForceChangePassword")
+  | [.PrincipalName, " can RESET password of ", $target]
+  | @tsv
+' users.json 2>/dev/null
 ```
 
 ## Spesifik kompüter və ya bütün kompüterlərdəki riskli ACL-ləri tapmaq
@@ -98,7 +161,17 @@ Get-DomainComputer | ForEach-Object {
 } | ft -AutoSize
 
 # SharpHound nəticəsi
-cat computers.json | jq -r '.data[] | .Properties.name as $pc | .Acls[] | select(.RightName | test("GenericAll|GenericWrite|WriteDacl|WriteOwner"; "i")) | select(.PrincipalName | test("Admins|SYSTEM"; "i") | not) | [$pc, .RightName, .PrincipalName] | @tsv'
+jq -r '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $pc
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select(.RightName // "" | test("GenericAll|GenericWrite|WriteDacl|WriteOwner"; "i"))
+  | select(.PrincipalName // "" | test("Admins|SYSTEM"; "i") | not)
+  | [$pc, .RightName, .PrincipalName]
+  | @tsv
+' computers.json 2>/dev/null
 ```
 
 ## OU üzərində obyekt yaratma və ya GPO manipulyasiya hüquqlarını tapmaq
@@ -114,7 +187,17 @@ Get-DomainOU | ForEach-Object {
         @{Name="AccessType";Expression={if($_.ActiveDirectoryRights -match "CreateChild"){"Object Creation"}else{"Possible GPO Link Abuse"}}}
 
 # SharpHound nəticəsi
-cat ous.json | jq -r '.data[] | .Properties.name as $ou | .Acls[] | select(.RightName | test("CreateChild|WriteDacl|WriteProperty"; "i")) | select(.PrincipalName | test("Admins|SYSTEM"; "i") | not) | [$ou, .RightName, .PrincipalName] | @tsv'
+jq -r '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $ou
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select(.RightName // "" | test("CreateChild|WriteDacl|WriteProperty"; "i"))
+  | select(.PrincipalName // "" | test("Admins|SYSTEM"; "i") | not)
+  | [$ou, .RightName, .PrincipalName]
+  | @tsv
+' ous.json 2>/dev/null
 ```
 
 # Domain Root ACL
@@ -135,7 +218,15 @@ Get-DomainObjectAcl -ResolveGUIDs | ? { ($_.ObjectDN -match "^DC=") -and ($_.Act
 Select-Object ObjectDN, IdentityReference, ActiveDirectoryRights
 
 # SharpHound nəticəsi
-cat domains.json | jq -r '.data[] | .Acls[] | select(.RightName | test("GetChanges"; "i")) | [.PrincipalName, .RightName] | @tsv'
+jq -r '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select(.RightName // "" | test("GetChanges"; "i"))
+  | [.PrincipalName, .RightName]
+  | @tsv
+' domains.json 2>/dev/null
 ```
 
 ## SID-Based Targeted Hunt
@@ -147,7 +238,17 @@ Get-DomainObjectAcl -ResolveGUIDs -PrincipalSID $sid |
 Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
 
 # SharpHound nəticəsi
-cat *.json | jq -r '.data[] | .Properties.name as $target | .Acls[] | select(.PrincipalSID == "$sid") | [$target, .RightName] | @tsv'
+SID="S-1-5-21-XXXX"   # dəyiştir
+jq -r --arg sid "$SID" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $target
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalSID // "") == $sid)
+  | [$target, .RightName]
+  | @tsv
+' *.json 2>/dev/null
 ```
 
 ## Bir userin ( USER1 ) digər userlər üzərindəki ACL ləri
@@ -160,7 +261,17 @@ Get-DomainUser | ForEach-Object {
 Select-Object ObjectDN, ActiveDirectoryRights, @{Name="TargetType";Expression={"User"}}
 
 # SharpHound nəticəsi
-cat users.json | jq -r --arg u1 "USER1@DOMAIN.LOCAL" '.data[] | .Properties.name as $target | .Acls[] | select(.PrincipalName == $u1) | select(.RightName | test("GenericAll|WriteProperty|WriteDacl|WriteOwner|All"; "i")) | [$u1, " controls ", $target, " via ", .RightName] | @tsv'
+jq -r --arg u1 "USER1@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | .Properties.name as $target
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalName // "") == $u1)
+  | select(.RightName // "" | test("GenericAll|WriteProperty|WriteDacl|WriteOwner|All"; "i"))
+  | [$u1, " controls ", $target, " via ", .RightName]
+  | @tsv
+' users.json 2>/dev/null
 ```
 
 ## Bir Userin ( USER1 ) digər User ( USER2 ) üzərindəki ACL ləri
@@ -172,7 +283,16 @@ Get-DomainObjectAcl -Identity "USER2" -ResolveGUIDs |
 Select-Object ObjectDN, ActiveDirectoryRights, ObjectAceType
 
 # SharpHound
-cat users.json | jq -r --arg u1 "USER1@DOMAIN.LOCAL" --arg u2 "USER2@DOMAIN.LOCAL" '.data[] | select(.Properties.name == $u2) | .Acls[] | select(.PrincipalName == $u1) | [$u1, " has ", .RightName, " over ", $u2] | @tsv'
+jq -r --arg u1 "USER1@DOMAIN.LOCAL" --arg u2 "USER2@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | select((.Properties.name // "") == $u2)
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalName // "") == $u1)
+  | [$u1, " has ", .RightName, " over ", $u2]
+  | @tsv
+' users.json 2>/dev/null
 ```
 
 ## Compromise ACL
@@ -191,7 +311,17 @@ Get-DomainObjectAcl -Identity "adunn" -ResolveGUIDs |
 Select-Object @{Name="Grantor";Expression={$targetUser}}, ObjectDN, ActiveDirectoryRights, SecurityIdentifier
 
 # Sharphound
-cat *.json | jq -r --arg name "USER1@DOMAIN.LOCAL" '.data[] | select(.Properties.name == $name) | .Properties.name as $un | .Acls[] | select(.PrincipalName == $un) | [.RightName]'
+jq -r --arg name "USER1@DOMAIN.LOCAL" '
+  (if .data then .data[] elif type == "array" then .[] else empty end)
+  | select(. != null)
+  | select((.Properties.name // "") == $name)
+  | .Properties.name as $un
+  | (.Acls // empty)[]
+  | select(. != null)
+  | select((.PrincipalName // "") == $un)
+  | [.RightName]
+  | @tsv
+' *.json 2>/dev/null
 ```
 
 ## Digər Userlərin Müəyyən Bir User (<USER1>) Üzərindəki ACL-ləri
