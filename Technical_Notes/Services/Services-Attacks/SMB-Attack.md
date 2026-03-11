@@ -187,6 +187,7 @@ smbmap -H 10.10.10.10 -u user -p password | grep WRITE
 ```bash
 # Anonymous bağlanma
 rpcclient -U "" 10.10.10.10
+rpcclient -U "" 10.10.10.10 --port 10000
 
 # Username + password ilə
 rpcclient -U 'username%password' 10.10.10.10
