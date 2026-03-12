@@ -49,6 +49,7 @@ Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Managem
 $password = ConvertTo-SecureString "Klmcargo2" -AsPlainText -Force
 $cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\forend", $password)
 Enter-PSSession -ComputerName ACADEMY-EA-MS01 -Credential $cred
+Exit-PSSession
 
 # WINRM
 gem install evil-winrm
