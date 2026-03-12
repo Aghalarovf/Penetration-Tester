@@ -42,6 +42,7 @@ Get-ADComputer -Filter 'ServicePrincipalName -like "*mssql*"' | Select name,serv
 ## Privileged Access
 ```
 # Remote Desktop
+Import-Module .\PowerView.ps1
 Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"
 Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
 
