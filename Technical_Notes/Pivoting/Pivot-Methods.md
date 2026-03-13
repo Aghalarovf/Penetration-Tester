@@ -137,6 +137,14 @@ meterpreter > exit
 proxychains nmap -sT 172.160.20 -p-
 ```
 
+# Ligolo-Proxy
+```
+# Tunel interfeysini yarat
+sudo ip tuntap add user [SƏNİN_USER_ADIN] mode tun ligolo
+
+# İnterfeysi aktivləşdir
+sudo ip link set ligolo up
+
 
 
 
