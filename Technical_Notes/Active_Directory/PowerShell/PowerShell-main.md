@@ -11,6 +11,8 @@
 Get-ADUser -Filter * | Select samaccountname
 Get-ADUser -Identity "admin"
 Get-ADUser -Identity "admin" -Properties "Description" -like "*pass*" | Select samaccountname, description
+Get-DomainUser * | Select-Object samaccountname,description |Where-Object {$_.Description -ne $null}
+
 Get-ADUser -Identity "admin" | Select SID
 Get-ADUser -Filter 'AdminCount -eq 1' | Select samaccountname,sid
 Get-ADUser -Filter 'ServicePrincipalName -ne $null' -Properties serviceprincipalname | Select samaccountname,serviceprincipalname
