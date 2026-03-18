@@ -2,32 +2,186 @@
 
 ---
 
-# 1. Nmap
+# Enumeration
 
-## Identify Current Domain Context
 
-```bash
 # Basic SMB discovery (ports + services)
-nmap -p445 --open -sV -sC $IP
-
-# Full SMB scripting (detailed enum)
-nmap -p445 --script=smb* -sV -sC $IP
-
-# Aggressive SMB enum (null sessions + shares)
-nmap -p445 --script smb-enum-shares,smb-enum-users,smb-security-mode,smb-os-discovery,smb2-security-mode $IP
-
-# Targeted share enum + vuln check
-nmap -p445 --script smb-vuln*,smb-enum* $IP
-
-# SMB protocol & signing check (əlavə edilməli kritik hissə)
-nmap -p445 --script smb-protocols,smb2-security-mode $IP
-
-# Time drift (Kerberos üçün vacibdir)
-nmap -p445 --script smb2-time $IP
-
-# Multiple targets + output
-nmap -iL targets.txt -p445 --script smb* -oA smb_enum
 ```
+nmap -p445,139 --open -sV -sC $IP
+```
+
+# Banner Grabbing
+```
+nmap -p 445 --script smb-os-discovery <Hədəf-IP>
+nmap -p 445 --script smb-protocols <Hədəf-IP>
+
+use auxiliary/scanner/smb/smb_version
+set RHOSTS <Hədəf-IP>
+run
+```
+
+# Anonymous Access
+```
+nmap -p 445 --script smb-enum-shares --script-args smbusername="",smbpassword="" <Hədəf-IP>
+enum4linux-ng -A <Hədəf-IP>
+nexec smb <Hədəf-IP> -u '' -p '' --shares
+rpcclient -U "" -N <Hədəf-IP>
+smbclient -L //<Hədəf-IP> -N
+```
+
+# Guest Access
+```
+nmap -p 445 --script smb-enum-shares --script-args smbusername=Guest,smbpassword= <Hədəf-IP>
+smbclient -L //<Hədəf-IP> -U Guest%
+nexec smb <Hədəf-IP> -u 'Guest' -p ''
+nexec smb <Hədəf-IP> -u 'Guest' -p '' --shares
+
+use auxiliary/scanner/smb/smb_login
+set RHOSTS <Hədəf-IP>
+set SMBUser Guest
+set SMBPass ""
+run
+```
+
+# Permissions
+```
+nexec smb <Hədəf-IP> -u 'istifadəçi_adı' -p 'şifrə' --shares
+smbmap -H <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -R
+```
+
+# IPC$ Enumeration
+```
+enum4linux-ng -R <Hədəf-IP>
+nexec smb <Hədəf-IP> -u '' -p '' --rid-brute
+```
+
+# User Enumeration
+```
+lookupsid.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+nexec smb 192.168.1.0/24 -u '' -p '' --rid-brute
+nmap -p 445 --script smb-enum-users --script-args smbusername="",smbpassword="" <Hədəf-IP>
+```
+
+# Group Enumeration
+```
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --groups
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --group "Domain Admins"
+
+rpcclient -U "istifadəçi" <Hədəf-IP>
+enumdomgroups
+
+samrdump.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+```
+
+# Password Policy
+```
+rpcclient -U "istifadəçi" <Hədəf-IP>
+getdompwinfo
+getusrdominfo
+
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --pass-pol
+enum4linux-ng -P <Hədəf-IP>
+```
+
+# Hostname & Domain Name
+```
+nmap -sU -p 137 --script nbstat <Hədəf-IP>
+nmap -p 445 --script smb-os-discovery <Hədəf-IP>
+
+nexec smb <Hədəf-IP>
+nbtscan -r <Hədəf-IP_və_ya_Şəbəkə>
+
+enum4linux-ng -n <Hədəf-IP>
+```
+
+# File Finder
+```
+Snaffler.exe -d sirket.local -o snaffler_results.txt
+
+smbmap -H <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -R
+smbmap -H <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -R | grep -E "\.txt|\.xml|\.config|\.bak"
+
+smbmap -H <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --download "Paylasim\qovluq\secret.txt"
+
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -M spider_plus -o DOWNLOAD_PATH=/tmp/cme_spider
+```
+
+# SMB Signing
+```
+nexec smb 192.168.1.0/24
+nmap -p 445 --script smb-security-mode <Hədəf-IP>
+smbclient.py -no-pass <Hədəf-IP>
+netexec smb <Hədəf-IP>
+```
+
+# Named Pipes
+```
+pipelist.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --pipes
+
+use auxiliary/scanner/smb/pipe_auditor
+set RHOSTS <Hədəf-IP>
+set SMBUser <istifadəçi>
+set SMBPass <şifrə>
+run
+
+nmap -p 445 --script smb-enum-pipes <Hədəf-IP>
+```
+
+# Printer and Devices Check
+```
+rpcclient -U "istifadəçi" <Hədəf-IP> -c "enumprinters"
+rpcclient -U "istifadəçi" <Hədəf-IP> -c "enumdriver"
+
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -M spooler
+nmap -p 445 --script smb-enum-shares <Hədəf-IP>
+```
+
+# Symlink / Directory Traversal 
+```
+use auxiliary/admin/smb/samba_symlink_traversal
+set RHOSTS <Hədəf-IP>
+set SMBSHARE <Paylaşılan-Qovluq-Adı>
+run
+
+smbclient //<Hədəf-IP>/Paylasim -U 'istifadəçi'
+symlink / root_dir
+
+nmap -p 445 --script smb-enum-shares,smb-ls <Hədəf-IP>
+
+Ssenari,Təhlükə,Nəticə
+Wide Links = Yes,Kritik,Serverdəki bütün faylları (məs: /etc/shadow) oxumaq olar.
+Unix Extensions = On,Yüksək,"Symlink yaradılmasına imkan verir, lakin digər parametrlər mane ola bilər."
+SMBv1 Active,Yüksək,"Köhnə protokollar bu növ ""path normalization"" xətalarına daha meyillidir."
+```
+
+# LSA Querying
+```
+rpcclient -U "" -N <Hədəf-IP>
+lsaquery
+lookupnames Administrator
+
+lookupsids S-1-5-21-xxxx-xxxx-xxxx-500
+querydominfo
+
+lookupsid.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+nexec smb <Hədəf-IP> -u 'Admin' -p 'P@ss' --lsa
+
+nmap -p 445 --script smb-enum-users <Hədəf-IP>
+```
+
+# SID Brute-forcing
+```
+nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --rid-brute
+
+lookupsid.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+lookupsid.py -no-pass <Hədəf-IP>
+
+rpcclient $> lsaquery
+rpcclient $> lookupsids S-1-5-21-xxxx-xxxx-xxxx-500
+```
+
+# 
 
 # 1.1 Netexec
 
