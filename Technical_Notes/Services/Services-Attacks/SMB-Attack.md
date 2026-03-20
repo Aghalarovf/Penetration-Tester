@@ -58,7 +58,6 @@ run
 
 # Anonymous Access
 ```
-nmap -p 445 --script smb-enum-shares --script-args smbusername="",smbpassword="" <Hədəf-IP>
 enum4linux-ng -A <Hədəf-IP>
 nexec smb <Hədəf-IP> -u '' -p '' --shares
 rpcclient -U "" -N <Hədəf-IP>
@@ -67,10 +66,9 @@ smbclient -L //<Hədəf-IP> -N
 
 # Guest Access
 ```
-nmap -p 445 --script smb-enum-shares --script-args smbusername=Guest,smbpassword= <Hədəf-IP>
 smbclient -L //<Hədəf-IP> -U Guest%
-nexec smb <Hədəf-IP> -u 'Guest' -p ''
-nexec smb <Hədəf-IP> -u 'Guest' -p '' --shares
+nxc smb <Hədəf-IP> -u 'Guest' -p ''
+nxc smb <Hədəf-IP> -u 'Guest' -p '' --shares
 
 use auxiliary/scanner/smb/smb_login
 set RHOSTS <Hədəf-IP>
@@ -87,26 +85,28 @@ smbmap -H <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -R
 
 # IPC$ Enumeration
 ```
-enum4linux-ng -R <Hədəf-IP>
-nexec smb <Hədəf-IP> -u '' -p '' --rid-brute
+enum4linux-ng -R 192.168.0.239 -u jkimmich -p 'User.domain0001!'
+nxc smb <Hədəf-IP> -u '' -p '' --rid-brute
 ```
 
 # User Enumeration
 ```
-lookupsid.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+python3 Impacket/examples/lookupsid.py 'WARZONE.OXSIUM.LOCAL/jkimmich:User.domain0001!'@192.168.0.239
 nexec smb 192.168.1.0/24 -u '' -p '' --rid-brute
-nmap -p 445 --script smb-enum-users --script-args smbusername="",smbpassword="" <Hədəf-IP>
+enum4linux-ng -U 192.168.0.239 -u jkimmich -p 'User.domain0001!'
 ```
 
 # Group Enumeration
 ```
-nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --groups
-nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --group "Domain Admins"
+nxc ldap <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --groups
+nxc ldap <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --group "Domain Admins"
+
+enum4linux-ng -G 192.168.0.239 -u jkimmich -p 'User.domain0001!'
 
 rpcclient -U "istifadəçi" <Hədəf-IP>
 enumdomgroups
 
-samrdump.py <Domen>/<İstifadəçi>:<Şifrə>@<Hədəf-IP>
+python3 Impacket/examples/samrdump.py WARZONE/jkimmich:'User.domain0001!'@192.168.0.239
 ```
 
 # Password Policy
@@ -116,7 +116,7 @@ getdompwinfo
 getusrdominfo
 
 nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' --pass-pol
-enum4linux-ng -P <Hədəf-IP>
+enum4linux-ng -P 192.168.0.239 -u jkimmich -p 'User.domain0001!'
 ```
 
 # Hostname & Domain Name
@@ -127,7 +127,7 @@ nmap -p 445 --script smb-os-discovery <Hədəf-IP>
 nexec smb <Hədəf-IP>
 nbtscan -r <Hədəf-IP_və_ya_Şəbəkə>
 
-enum4linux-ng -n <Hədəf-IP>
+enum4linux-ng -A 192.168.0.239 -u jkimmich -p 'User.domain0001!'
 ```
 
 # File Finder
@@ -144,10 +144,8 @@ nexec smb <Hədəf-IP> -u 'istifadəçi' -p 'şifrə' -M spider_plus -o DOWNLOAD
 
 # SMB Signing
 ```
-nexec smb 192.168.1.0/24
-nmap -p 445 --script smb-security-mode <Hədəf-IP>
-smbclient.py -no-pass <Hədəf-IP>
-netexec smb <Hədəf-IP>
+nxc smb 192.168.1.0/24
+nmap -p 445 --script smb2-security-mode <Hədəf-IP>
 ```
 
 # Named Pipes
