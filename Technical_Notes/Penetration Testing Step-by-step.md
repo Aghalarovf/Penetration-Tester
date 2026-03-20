@@ -15,7 +15,7 @@ nmap -p[SPECIFIC PORTS] -A
 ```
 
 # LLMNR/mDNS/NB-NS Poisining
-[Bu mövzu üçün](AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
+[Bu mövzu üçün](Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 
 # Active Directory Enumeration
