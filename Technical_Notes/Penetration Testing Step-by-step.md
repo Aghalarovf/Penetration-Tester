@@ -6,19 +6,30 @@ https://wadcoms.github.io/
 ```
 ---
 
-# Host Reconnaissance
+# Host Reconnaissance and Network Enumeration
 
-```bash
-# Nmap
+```
+# Find Active Hosts
+sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24
+
+# Specific Host
 nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( Fast Scan )
-nmap -p[SPECIFIC PORTS] -A 
 ```
 
-# LLMNR/mDNS/NB-NS Poisining
-[LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
+# Service Enumeration
+[Service Enumeration üçün bu fayllara bax](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
+
+# Vulnerability Scanner
+[Servislərə özəl zəiflikləri axtarmaq üçün](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
+
+
+
 
 
 # Active Directory Enumeration
+
+## LLMNR/mDNS/NB-NS Poisining
+[LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 ## Password Policy
 ```
