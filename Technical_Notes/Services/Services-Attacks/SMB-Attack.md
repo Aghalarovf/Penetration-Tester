@@ -2,7 +2,43 @@
 
 ---
 
-# Enumeration
+# Smbclient
+
+```bash
+# Basic Syntaxis
+smbclient -L //10.10.10.10 -N
+smbclient -L //10.10.10.10 -U username
+smbclient -L //10.10.10.10 -U username%password
+smbclient -L //10.10.10.10 -U domain\\username%password
+smbclient -L //10.10.10.10 -W domain -U username
+smbclient //10.10.10.10/share -U username
+smbclient //10.10.10.10/share -N
+
+# Version Checker
+smbclient -L //10.10.10.10 -U user --option='client min protocol=SMB2'
+smbclient -L //10.10.10.10 -U user --option='client max protocol=SMB3'
+smbclient //10.10.10.10/share -U user --pw-nt-hash HASH
+
+# Kerberos Authentication
+kinit username
+smbclient -L //dc.domain.local -k
+
+# Commands
+| ----- | ------------------------------ |
+| `ls`  | List Files                     |
+| `dir` | List Files                     |
+| `cd`  | Change Directory               |
+| `get` | File Download                  |
+| `put` | Upload File                    |
+
+| `mget` | Multiple Download              |
+| `lcd`  | Change Local Directory         |
+
+# Recursive Download
+recurse ON
+prompt OFF
+mget *
+```
 
 
 # Basic SMB discovery (ports + services)
@@ -219,45 +255,6 @@ netexec smb 172.16.119.11 -u stom -H 21ea958524cfd9a7791737f8d2f764fa -M secrets
 netexec smb 172.16.119.11 -u stom -H 21ea958524cfd9a7791737f8d2f764fa -M dcsync
 ```
 
-
-
-# 2. Smbclient
-
-```bash
-# Basic Syntaxis
-smbclient -L //10.10.10.10 -N
-smbclient -L //10.10.10.10 -U username
-smbclient -L //10.10.10.10 -U username%password
-smbclient -L //10.10.10.10 -U domain\\username%password
-smbclient -L //10.10.10.10 -W domain -U username
-smbclient //10.10.10.10/share -U username
-smbclient //10.10.10.10/share -N
-
-# Version Checker
-smbclient -L //10.10.10.10 -U user --option='client min protocol=SMB2'
-smbclient -L //10.10.10.10 -U user --option='client max protocol=SMB3'
-smbclient //10.10.10.10/share -U user --pw-nt-hash HASH
-
-# Kerberos Authentication
-kinit username
-smbclient -L //dc.domain.local -k
-
-# Commands
-| ----- | ------------------------------ |
-| `ls`  | List Files                     |
-| `dir` | List Files                     |
-| `cd`  | Change Directory               |
-| `get` | File Download                  |
-| `put` | Upload File                    |
-
-| `mget` | Multiple Download              |
-| `lcd`  | Change Local Directory         |
-
-# Recursive Download
-recurse ON
-prompt OFF
-mget *
-```
 
 # 3. Crackmapexec
 
