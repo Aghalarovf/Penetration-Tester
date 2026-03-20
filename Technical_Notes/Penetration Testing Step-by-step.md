@@ -12,9 +12,11 @@ https://wadcoms.github.io/
 # Nmap
 nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( Fast Scan )
 nmap -p[SPECIFIC PORTS] -A 
+```
 
-
-
+# LLMNR/mDNS/NB-NS Poisining
+```
+[Bu mövzu üçün](AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 ```
 
 # Active Directory Enumeration
@@ -177,3 +179,4 @@ netsh advfirewall show allprofiles
 sc query windefend
 Get-MpComputerStatus
 qwinsta
+```
