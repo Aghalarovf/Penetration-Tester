@@ -15,7 +15,7 @@ nmap -p[SPECIFIC PORTS] -A
 ```
 
 # LLMNR/mDNS/NB-NS Poisining
-[LLMNR/mDNS/NB-NS Poisoning Faylına Get](Technical_Notes/Active%20Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
+[LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 
 # Active Directory Enumeration
