@@ -22,7 +22,8 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 # Vulnerability Scanner
 [Servislərə özəl zəiflikləri axtarmaq üçün](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
 
-
+# Credentials
+[Username və Password tapılması üçün](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 
 
 
