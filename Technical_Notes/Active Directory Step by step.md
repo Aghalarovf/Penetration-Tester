@@ -194,3 +194,6 @@ qwinsta
 
 ### AS-REP Roasting
 [Pre-Auth bağlı userləri tapıb hash çəkmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
+
+### LAPS Dumping
+[LAPS vasitəsilə istifadəçilərin şifrələrini ələ keçirmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
