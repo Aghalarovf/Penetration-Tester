@@ -264,7 +264,7 @@ Get-ADGroup -Filter * | select Name
 **T22 — Domain Admins üzvlərini tap**
 ```powershell
 # PowerView
-Get-NetGroupMember "Domain Admins" | select MemberName
+Get-NetGroupMember -Identity "Domain Admins" | select MemberName
 
 # ADModule
 Get-ADGroupMember "Domain Admins" | select Name
@@ -276,7 +276,7 @@ Get-ADGroupMember "Domain Admins" | select Name
 **T23 — Enterprise Admins üzvlərini tap**
 ```powershell
 # PowerView
-Get-NetGroupMember "Enterprise Admins" | select MemberName
+Get-NetGroupMember -Identity "Enterprise Admins" | select MemberName
 
 # ADModule
 Get-ADGroupMember "Enterprise Admins" | select Name
@@ -288,7 +288,7 @@ Get-ADGroupMember "Enterprise Admins" | select Name
 **T24 — Nested (iç-içə) qrup üzvlüyünü tap**
 ```powershell
 # PowerView
-Get-NetGroupMember "Domain Admins" -Recurse | select MemberName
+Get-NetGroupMember -Identity "Domain Admins" -Recurse | select MemberName
 
 # ADModule
 Get-ADGroupMember "Domain Admins" -Recursive | select Name
@@ -423,7 +423,7 @@ Get-ADComputer -Filter {OperatingSystem -like "*2003*"} -Properties OperatingSys
 **T35 — Bir kompüter haqqında tam məlumat al**
 ```powershell
 # PowerView
-Get-NetComputer -ComputerName WS01 -FullData
+Get-NetComputer -Identity WS01
 
 # ADModule
 Get-ADComputer WS01 -Properties *
@@ -471,7 +471,7 @@ Get-ADComputer -Filter * -Properties ms-Mcs-AdmPwd | ? {$_."ms-Mcs-AdmPwd" -ne $
 **T39 — Kompüterlərin SPN-lərini tap**
 ```powershell
 # PowerView
-Get-NetComputer -SPN | select name, serviceprincipalname
+Get-NetComputer | Select name,serviceprincipalname
 
 # ADModule
 Get-ADComputer -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName
@@ -498,6 +498,8 @@ Get-ADComputer -Filter * -Properties LastLogonDate | ? {$_.LastLogonDate -gt (Ge
 ```powershell
 # PowerView
 Get-ObjectAcl -SamAccountName jdoe -ResolveGUIDs
+Get-ObjectAcl -SamAccountName jkimmich -ResolveGUIDs | Select objectsid,activedirectoryrights
+Convert-SidToName S-1-5-21-3623811015-3361034348-30300820-1013
 
 # ADModule
 (Get-ACL "AD:$(Get-ADUser jdoe | select -ExpandProperty DistinguishedName)").Access
@@ -587,6 +589,7 @@ Get-ObjectAcl -DistinguishedName "DC=corp,DC=local" -ResolveGUIDs | ? {$_.Object
 (Get-ACL "AD:DC=corp,DC=local").Access | ? {$_.ActiveDirectoryRights -match "ExtendedRight"}
 ```
 > DS-Replication icazəsi — hashleri dump etmək mümkün.
+
 
 ---
 
