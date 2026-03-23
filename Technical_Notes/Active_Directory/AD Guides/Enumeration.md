@@ -142,7 +142,7 @@ Get-ADUser -Filter * | select Name, SamAccountName
 **T12 — Xüsusi bir user haqqında məlumat al**
 ```powershell
 # PowerView
-Get-NetUser -UserName jdoe
+Get-NetUser -Name jdoe
 
 # ADModule
 Get-ADUser -Identity jdoe -Properties *
