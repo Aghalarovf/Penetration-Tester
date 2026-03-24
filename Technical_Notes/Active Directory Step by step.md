@@ -192,6 +192,81 @@ Get-MpComputerStatus
 qwinsta
 ```
 
+### Enumeration with PowerView
+```
+1. Domain məlumatını al
+2. Domain Controller-ları tap
+3. Domain Password Policy-ni al
+4. Domain SID-i öyrən
+5. Forest məlumatını al
+6. Forest-dəki bütün domain-ları tap
+7. AD Subnet-lərini tap
+8. Bütün user-ları listələ
+9. Xüsusi bir user haqqında məlumat al
+10. AdminCount=1 olan hesabları tap
+11. SPN olan hesabları tap (Kerberoasting)
+12. Pre-Authentication tələb etməyən hesablar (ASREPRoast)
+13. Aktiv (enabled) user-ları tap
+14. Bütün qrupları listələ
+15. Qrup üzvləri
+16. Nested (iç-içə) qrup üzvlüyünü tap
+17. Bir user-in aid olduğu bütün qrupları tap
+18. Adında "admin" keçən qrupları tap
+19. Bir kompüterdəki lokal qrupları tap
+20. Protected Users qrupunu yoxla
+21. Bütün kompüterləri listələ
+22. Server-ləri filtrele
+23. Köhnə versiyalı komputerlər
+24. Aktiv (ping olan) kompüterləri tap
+25. Bir kompüter haqqında tam məlumat al
+26. Unconstrained Delegation olan kompüterləri tap
+27. Constrained Delegation olan kompüterləri tap
+27. Unconstrained Delegation olan User-lər
+27. Certificate Services (AD CS) Enumeration
+28. LAPS aktiv olan kompüterləri tap
+28. LAPS Şifrələrini Oxumaq
+29. Kompüterlərin SPN-lərini tap
+30. Bir user üzərindəki ACL-ləri al
+31. Müəyyən icazəsi olan userləri tap
+32. ForceChangePassword icazəsini tap
+33. Bütün domain üzərindəki maraqlı ACL-ləri tap
+34. Domain root üzərindəki ACL-lər
+35. DCSync icazəsini tap
+36. Bir qrup üzərindəki ACL-ləri al
+37. AddMember icazəsini tap
+38. Domain trust-larını tap
+39. Forest trust-larını tap
+40. External trust-ları tap
+41. SID Filtering statusunu yoxla
+42. Bidirectional trust-ları tap
+43. Trust xəritəsini çıxar
+44. Bütün forest-dəki user-ları say
+45. Child domain-ları tap
+46. Bütün GPO-ları listələ
+47. Bir kompüterə tətbiq edilən GPO-ları tap
+48. Bir user-ə tətbiq edilən GPO-ları tap
+49. GPO üzərindəki ACL-ləri tap
+50. OU-ya linklənmiş GPO-ları tap
+51. Resource-Based Constrained Delegation (RBCD)
+52. krbtgt hesabı haqqında məlumat al
+53. Yüksək dəyərli SPN-ləri tap
+54. Delegation üçün uyğun service-ləri tap
+55. Kerberos Policy-ni öyrən
+56. Aktiv şəbəkə session-larını tap
+57. Hazırda login olan user-ləri tap
+58. Lokal admin olduğun maşınları tap
+59. Domain Admins-in session-unu stealth şəkildə tap
+60. SMB share-lərini tap
+61. Accessible share-ləri tap
+62. Share-lərdə maraqlı faylları tap
+63. AdminSDHolder-in qoruduğu hesabları tap
+64. Schema Admins qrupunu tap
+65. ms-DS-MachineAccountQuota dəyərini yoxla
+66. Shadow Credentials atributunu yoxla
+67. BloodHound üçün data topla
+68. Bütün domain-ın ümumi statistikasını çıxar
+```
+
 ### AS-REP Roasting
 [Pre-Auth bağlı userləri tapıb hash çəkmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 
