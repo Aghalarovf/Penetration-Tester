@@ -432,6 +432,14 @@ Get-ADComputer WS01 -Properties *
 
 ---
 
+**Certification Authority (CA) obyektlərini tapmaq**
+```powershell
+Get-DomainObject -SearchBase "CN=Certification Authorities,CN=Public Key Services,CN=Services,CN=Configuration,DC=warzone,DC=oxsium,DC=local"
+```
+> AD CS Serverləri tapmaq
+
+---
+
 **T36 — Unconstrained Delegation olan kompüterləri tap**
 ```powershell
 # PowerView
