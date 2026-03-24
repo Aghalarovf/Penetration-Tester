@@ -142,7 +142,7 @@ Get-ADUser -Filter * | select Name, SamAccountName
 **T12 — Xüsusi bir user haqqında məlumat al**
 ```powershell
 # PowerView
-Get-NetUser -Name jdoe
+Get-NetUser -Identity jdoe
 
 # ADModule
 Get-ADUser -Identity jdoe -Properties *
@@ -300,7 +300,7 @@ Get-ADGroupMember "Domain Admins" -Recursive | select Name
 **T25 — Bir user-in aid olduğu bütün qrupları tap**
 ```powershell
 # PowerView
-Get-NetGroup -UserName jdoe
+Get-DomainGroup -MemberIdentity "mmorgan"
 
 # ADModule
 Get-ADPrincipalGroupMembership jdoe | select Name
