@@ -24,3 +24,13 @@ Static Key: 4e 99 06 e8 fc b6 6c c9 fa f4 93 10 62 0f fe e8 f4 96 e8 06 cc 05 79
 findstr /s /i "cpassword" \\<DomainController>\SYSVOL\*.xml
 Get-ChildItem -Path "\\$env:USERDNSDOMAIN\SYSVOL" -Recurse -Filter *.xml | Select-String "cpassword"
 ```
+
+# GPO ( Group Policy Object )
+```
+(objectClass=grouppolicyContainer)
+
+displayName          | "GPO-nun insan tərəfindən oxuna bilən adı (məs: ""Default Domain Policy"")."
+gPCFileSysPath       | GPO-nun fayl sistemindəki (SYSVOL) yolu.
+whenCreated          | Siyasətin yaradılma tarixi.
+versionNumber        | GPO-nun cari versiyası.
+```
