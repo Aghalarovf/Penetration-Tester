@@ -4,7 +4,6 @@
 ```
 https://wadcoms.github.io/
 ```
----
 
 ### Host Reconnaissance and Network Enumeration
 
@@ -15,15 +14,23 @@ sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24
 # Specific Host
 nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( Fast Scan )
 ```
+---
 
 ### Service Enumeration
 [Service Enumeration üçün bu fayllara bax](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
+---
 
 ### Vulnerability Scanner
 [Servislərə özəl zəiflikləri axtarmaq üçün](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
+---
+
+### LDAP Enumeration
+[LDAP Sorğuları ilə araşdırma](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Protocols/LDAP/LDAP-Architecture.md)
+---
 
 ### Credentials
 [Username və Password tapılması üçün](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
+---
 
 
 
