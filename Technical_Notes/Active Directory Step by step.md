@@ -28,6 +28,10 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 [LDAP Sorğuları ilə araşdırma](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Protocols/LDAP/LDAP-Architecture.md)
 ---
 
+### SMB Enumeration
+[SMB Protokolu ilə araşdırma](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Services/Services-Attacks/SMB-Attack.md)
+---
+
 ### LLMNR/mDNS/NB-NS Poisining
 [LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 ---
