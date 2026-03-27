@@ -266,3 +266,8 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 ### LAPS Dumping
 [LAPS vasitəsilə istifadəçilərin şifrələrini ələ keçirmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
 ---
+
+### Kerberoasting
+[SPN Userləri tapıb Kerberoating edərək KRB5 hash əldə etmək və offline sındırmaq](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
+---
+
