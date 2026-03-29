@@ -5,7 +5,7 @@
 https://wadcoms.github.io/
 ```
 
-### Host Reconnaissance and Network Enumeration
+### 1. Host Reconnaissance and Network Enumeration
 
 ```
 # Find Active Hosts
@@ -16,31 +16,31 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 ```
 ---
 
-### Service Enumeration
+### 2. Service Enumeration
 [Service Enumeration üçün bu fayllara bax](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
 ---
 
-### Vulnerability Scanner
+### 3. Vulnerability Scanner
 [Servislərə özəl zəiflikləri axtarmaq üçün](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
 ---
 
-### LDAP Enumeration
+### 4. LDAP Enumeration
 [LDAP Sorğuları ilə araşdırma](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Protocols/LDAP/LDAP-Architecture.md)
 ---
 
-### SMB Enumeration
+### 5. SMB Enumeration
 [SMB Protokolu ilə araşdırma](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Services/Services-Attacks/SMB-Attack.md)
 ---
 
-### LLMNR/mDNS/NB-NS Poisining
+### 6. LLMNR/mDNS/NB-NS Poisining
 [LLMNR/mDNS/NB-NS Poisoning Faylına Get](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 ---
 
-### Credentials
+### 7. Credentials
 [Username və Password tapılması üçün](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 ---
 
-### Password Policy
+### 8. Password Policy
 ```
 1) crackmapexec smb 172.16.5.5 -u avazquez -p Password123 --pass-pol
 
@@ -58,7 +58,7 @@ Get-DomainPolicy
 ```
 ---
 
-### Enumerate Username
+### 9. Enumerate Username
 ```
 https://github.com/insidetrust/statistically-likely-usernames
 https://github.com/initstring/linkedin2username
@@ -83,7 +83,7 @@ sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 ```
 ---
 
-### Password Spraying
+### 10. Password Spraying
 ```
 # Linux
 for u in $(cat wordlist.txt);do rpcclient -U "username%password" -c "getusername;quit" 172.16.5.5 | grep Authority; done
@@ -102,7 +102,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 ```
 ---
 
-## Credentialed Enumeration
+## 11. Credentialed Enumeration
 ```
 sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
 sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups
@@ -132,7 +132,7 @@ sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreigh
 ```
 ---
 
-### Credential Enumeration - From Windows
+### 12. Credential Enumeration - From Windows
 ```
 # Active Directory Module
 
@@ -179,11 +179,11 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 ```
 ---
 
-### Living off the Land
+### 13. Living off the Land
 [PowerShell və CMD vasitəsilə maksimum məlumat əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/Living%20Of%20The%20Land.md)
 ---
 
-### Enumeration with PowerView
+### 14. Enumeration with PowerView
 ```
 1. Domain məlumatını al
 2. Domain Controller-ları tap
@@ -259,30 +259,30 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 ```
 ---
 
-### AS-REP Roasting
+### 15. AS-REP Roasting
 [Pre-Auth bağlı userləri tapıb hash çəkmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 ---
 
-### LAPS Dumping
+### 16. LAPS Dumping
 [LAPS vasitəsilə istifadəçilərin şifrələrini ələ keçirmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
 ---
 
-### Kerberoasting
+### 17. Kerberoasting
 [SPN Userləri tapıb Kerberoating edərək KRB5 hash əldə etmək və offline sındırmaq](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 ---
 
-### DCSync Attacks
+### 18. DCSync Attacks
 [DCSync hücumu ilə Hashləri dump etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 ---
 
-### SAM/SECURITY/SYSTEM Dump
+### 19. SAM/SECURITY/SYSTEM Dump
 [SAM SECURITY SYSTEM Fayllarını dump edərək istifadəçi hash ləri əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 ---
 
-### LSASS Dump
+### 20. LSASS Dump
 [LSASS Dump Technique](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 ---
 
-### NTDS.dit Dump
+### 21. NTDS.dit Dump
 [NTDS.dit ilə Hash Dump](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 ---
