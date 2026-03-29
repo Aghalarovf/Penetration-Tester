@@ -271,6 +271,10 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 [SPN Userləri tapıb Kerberoating edərək KRB5 hash əldə etmək və offline sındırmaq](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 ---
 
+### DCSync Attacks
+[DCSync hücumu ilə Hashləri dump etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
+---
+
 ### SAM/SECURITY/SYSTEM Dump
 [SAM SECURITY SYSTEM Fayllarını dump edərək istifadəçi hash ləri əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Windows/Windows%20Credential%20Extraction%20&%20Protection%20Bypass.md)
 ---
