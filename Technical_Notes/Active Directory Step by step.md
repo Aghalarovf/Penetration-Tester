@@ -276,5 +276,13 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 ---
 
 ### SAM/SECURITY/SYSTEM Dump
-[SAM SECURITY SYSTEM Fayllarını dump edərək istifadəçi hash ləri əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Windows/Windows%20Credential%20Extraction%20&%20Protection%20Bypass.md)
+[SAM SECURITY SYSTEM Fayllarını dump edərək istifadəçi hash ləri əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
+---
+
+### LSASS Dump
+[LSASS Dump Technique](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
+---
+
+### NTDS.dit Dump
+[NTDS.dit ilə Hash Dump](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 ---
