@@ -275,17 +275,21 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 [DCSync hücumu ilə Hashləri dump etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 ---
 
-### 19. Windows Credential Manager
-[Credential Manager]()
 
-### 20. SAM/SECURITY/SYSTEM Dump
+### 19. SAM/SECURITY/SYSTEM Dump
 [SAM SECURITY SYSTEM Fayllarını dump edərək istifadəçi hash ləri əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 ---
 
-### 21. LSASS Dump
+### 20. LSASS Dump
 [LSASS Dump Technique](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 ---
 
-### 22. NTDS.dit Dump
+### 21. NTDS.dit Dump
 [NTDS.dit ilə Hash Dump](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 ---
+
+### 22. Credential Manager
+[Credential Vault](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
+---
+
+### 23.
