@@ -182,7 +182,7 @@
     → Silinmiş səhifələr, köhnə endpointlər, köhnə parametrlər
 
 35. **gau (GetAllUrls) — multi-source URL toplama**  
-   
+   [GAU ilə maksimum verimlilik](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Enumeration/GAU.md)
 
 36. **CommonCrawl indeks sorğusu**  
     ```bash
