@@ -1,17 +1,10 @@
 # noPAC CVE-2021-42278 (sAMAccountName Spoofing) CVE-2021-42287 (TGT Misinterpretation)
 ```
-# MachineAccountQuota (MAQ) Yoxlanılması
-Get-ADDomain | Select-Object -Property MachineAccountQuota
+nxc smb 192.168.0.239 -u nopac -p 'P@ssw0rd_OxsiuM_2026!' -M nopac
 
-Default olaraq bu dəyər 10-dur. Əgər 0-dırsa, yeni hesab yarada bilməyəcəyiniz üçün hücum çətinləşir.
-
-# Domain Controller-in Müəyyən Edilməsi
 Get-ADDomainController | Select-Object Name, IPv4Address
 
-# Cari İstifadəçi Hüquqları
-whoami /groups
-
-# Patch (Yeniləmə) Səviyyəsinin Yoxlanılması
+# Check Patch Version
 Get-HotFix | Where-Object {$_.HotFixID -match "KB5008380" -or $_.HotFixID -match "KB5008602"}
 Qeyd: Əgər bu komanda heç bir nəticə vermirsə, deməli sistem böyük ehtimalla zəifdir (vulnerable).
 
