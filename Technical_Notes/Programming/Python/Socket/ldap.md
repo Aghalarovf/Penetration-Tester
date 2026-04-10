@@ -110,17 +110,6 @@ Tag   Hex   Operation                 Direction
 24    78    ExtendedResponse          Server → Client
 25    79    IntermediateResponse      Server → Client
 
-### 2.2 Common Universal Tags
-
-| Tag Byte | Hex | ASN.1 Type |
-|----------|-----|-----------|
-| `0x01` | 01 | BOOLEAN |
-| `0x02` | 02 | INTEGER |
-| `0x04` | 04 | OCTET STRING (raw bytes / UTF-8 strings) |
-| `0x05` | 05 | NULL |
-| `0x0A` | 0A | ENUMERATED |
-| `0x30` | 30 | SEQUENCE (constructed) |
-| `0x31` | 31 | SET (constructed) |
 
 ### 2.3 LENGTH Encoding
 
