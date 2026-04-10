@@ -62,7 +62,7 @@ Bit:  7  6  5  4  3  2  1  0
 | `1` | Constructed (contains nested TLVs) |
 
 
-| Tag Number 4-0 | Hex (Primitive) | Binary (Bits 4–0) | Data Type | Notes |
+| Universal Tag Number 4-0 | Hex (Primitive) | Binary (Bits 4–0) | Data Type | Notes |
 |:---:|:---:|:---:|---|---|
 | 0 | `0x00` | `00000` | **End-of-Content (EOC)** | Marks the end of indefinite-length encodings |
 | 1 | `0x01` | `00001` | **BOOLEAN** | True = `0xFF`, False = `0x00` |
@@ -83,6 +83,32 @@ Bit:  7  6  5  4  3  2  1  0
 | 24 | `0x18` | `11000` | **GeneralizedTime** | Timestamp format: `YYYYMMDDHHMMSSZ` (higher precision) |
 | 30 | `0x1E` | `11110` | **BMPString** | Two-byte Unicode characters (UCS-2) |
 | 31 | — | `11111` | **Long Form Escape** | Tag number ≥ 31 — additional bytes carry the actual tag number |
+
+Application Tags — All LDAP Operations
+
+```
+Tag   Hex   Operation                 Direction
+ 0    60    BindRequest               Client → Server
+ 1    61    BindResponse              Server → Client
+ 2    62    UnbindRequest             Client → Server
+ 3    63    SearchRequest             Client → Server
+ 4    64    SearchResultEntry         Server → Client
+ 5    65    SearchResultDone          Server → Client
+ 6    66    ModifyRequest             Client → Server
+ 7    67    ModifyResponse            Server → Client
+ 8    68    AddRequest                Client → Server
+ 9    69    AddResponse               Server → Client
+10    6A    DelRequest                Client → Server
+11    6B    DelResponse               Server → Client
+12    6C    ModifyDNRequest           Client → Server
+13    6D    ModifyDNResponse          Server → Client
+14    6E    CompareRequest            Client → Server
+15    6F    CompareResponse           Server → Client
+16    70    AbandonRequest            Client → Server
+19    73    SearchResultReference     Server → Client
+23    77    ExtendedRequest           Client → Server
+24    78    ExtendedResponse          Server → Client
+25    79    IntermediateResponse      Server → Client
 
 ### 2.2 Common Universal Tags
 
@@ -158,32 +184,6 @@ Byte stream:  02  01  01
 
 ---
 
-## 4. Application Tags — All LDAP Operations
-
-```
-Tag   Hex   Operation                 Direction
- 0    60    BindRequest               Client → Server
- 1    61    BindResponse              Server → Client
- 2    62    UnbindRequest             Client → Server
- 3    63    SearchRequest             Client → Server
- 4    64    SearchResultEntry         Server → Client
- 5    65    SearchResultDone          Server → Client
- 6    66    ModifyRequest             Client → Server
- 7    67    ModifyResponse            Server → Client
- 8    68    AddRequest                Client → Server
- 9    69    AddResponse               Server → Client
-10    6A    DelRequest                Client → Server
-11    6B    DelResponse               Server → Client
-12    6C    ModifyDNRequest           Client → Server
-13    6D    ModifyDNResponse          Server → Client
-14    6E    CompareRequest            Client → Server
-15    6F    CompareResponse           Server → Client
-16    70    AbandonRequest            Client → Server
-19    73    SearchResultReference     Server → Client
-23    77    ExtendedRequest           Client → Server
-24    78    ExtendedResponse          Server → Client
-25    79    IntermediateResponse      Server → Client
-```
 
 > **How to read Application tags:**  
 > `0x60` = `0110_0000`  
