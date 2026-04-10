@@ -62,7 +62,7 @@ Bit:  7  6  5  4  3  2  1  0
 | `1` | Constructed (contains nested TLVs) |
 
 
-| Tag Number (Dec) | Hex (Primitive) | Binary (Bits 4–0) | Data Type | Notes |
+| Tag Number 4-0 | Hex (Primitive) | Binary (Bits 4–0) | Data Type | Notes |
 |:---:|:---:|:---:|---|---|
 | 0 | `0x00` | `00000` | **End-of-Content (EOC)** | Marks the end of indefinite-length encodings |
 | 1 | `0x01` | `00001` | **BOOLEAN** | True = `0xFF`, False = `0x00` |
