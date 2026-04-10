@@ -109,7 +109,7 @@ Tag   Hex   Operation                 Direction
 23    77    ExtendedRequest           Client → Server
 24    78    ExtendedResponse          Server → Client
 25    79    IntermediateResponse      Server → Client
-
+```
 
 ### 2.3 LENGTH Encoding
 
