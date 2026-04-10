@@ -292,4 +292,8 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 [Credential Vault](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
 ---
 
-### 23.
+### 23. noPAC + PrintNightmare + PetitPotam
+[This Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/BleedingEdge.md)
+---
+
+### 
