@@ -61,6 +61,29 @@ Bit:  7  6  5  4  3  2  1  0
 | `0` | Primitive (raw value) |
 | `1` | Constructed (contains nested TLVs) |
 
+
+| Tag Number (Dec) | Hex (Primitive) | Binary (Bits 4–0) | Data Type | Notes |
+|:---:|:---:|:---:|---|---|
+| 0 | `0x00` | `00000` | **End-of-Content (EOC)** | Marks the end of indefinite-length encodings |
+| 1 | `0x01` | `00001` | **BOOLEAN** | True = `0xFF`, False = `0x00` |
+| 2 | `0x02` | `00010` | **INTEGER** | Signed integers — e.g. `02 01 05` → Integer 5 |
+| 3 | `0x03` | `00011` | **BIT STRING** | Sequence of bits — e.g. flags, public keys |
+| 4 | `0x04` | `00100` | **OCTET STRING** | Arbitrary byte sequence — heavily used in LDAP |
+| 5 | `0x05` | `00101` | **NULL** | Empty value — used for operations with no parameters |
+| 6 | `0x06` | `00110` | **OBJECT IDENTIFIER** | OID — e.g. `1.2.840.113554...` |
+| 10 | `0x0A` | `01010` | **ENUMERATED** | A single value chosen from a predefined list |
+| 12 | `0x0C` | `01100` | **UTF8String** | UTF-8 encoded text |
+| 16 | `0x30`* | `10000` | **SEQUENCE** | Constructed — ordered list of elements |
+| 17 | `0x31`* | `10001` | **SET** | Constructed — unordered collection of elements |
+| 18 | `0x12` | `10010` | **NumericString** | Digits and space only (`0–9`, ` `) |
+| 19 | `0x13` | `10011` | **PrintableString** | Restricted ASCII subset (no `@`, `&`, etc.) |
+| 20 | `0x14` | `10100` | **TeletexString** | T.61 character set (legacy) |
+| 22 | `0x16` | `10110` | **IA5String** | Standard ASCII — International Alphabet No. 5 |
+| 23 | `0x17` | `10111` | **UTCTime** | Timestamp format: `YYMMDDHHMMSSZ` |
+| 24 | `0x18` | `11000` | **GeneralizedTime** | Timestamp format: `YYYYMMDDHHMMSSZ` (higher precision) |
+| 30 | `0x1E` | `11110` | **BMPString** | Two-byte Unicode characters (UCS-2) |
+| 31 | — | `11111` | **Long Form Escape** | Tag number ≥ 31 — additional bytes carry the actual tag number |
+
 ### 2.2 Common Universal Tags
 
 | Tag Byte | Hex | ASN.1 Type |
