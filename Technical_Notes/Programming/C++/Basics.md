@@ -1,4 +1,4 @@
-# CMake
+# MinGW Build System
 ```
 cd build
 cmake --version
