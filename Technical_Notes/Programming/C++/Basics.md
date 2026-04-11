@@ -1,5 +1,4 @@
 # CMake
----
 ```
 cd build
 cmake --version
@@ -8,15 +7,16 @@ cmake --build .
 g++ -Os first_program.cpp -o first_program.exe
 strip first_program.exe
 ```
+---
 
 # Ninja Build System
----
 ```
 pacman -S mingw-w64-ucrt-x86_64-ninja
 ninja --version
 cmake .. -G "Ninja"
 cmake --build .
 ```
+---
 
 # Data Types
 ---
@@ -32,6 +32,10 @@ BOOL      |   1 Byte
 STRING    |   Dynamic
 VOID      |   NULL
 ``` 
+---
 
 # Operators
+```
+
+```
 ---
