@@ -44,6 +44,7 @@
 | Web Page | `.htm / .html` | For web publishing |
 
 **Zoom Range:** 10% – 500%  
+
 **Max Font Size:** 1638 pt ( 72 pt )
 
 **Min Font Size:** 1 pt ( 8 pt )
