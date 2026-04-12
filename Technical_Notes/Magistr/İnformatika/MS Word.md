@@ -150,6 +150,7 @@
 | Clear All Formatting | Remove all formatting | `Ctrl + Space` |
 | Text Effects | Shadow, reflection, glow, etc. | |
 | Hide Textt | Hide attributes | `Ctrl+Shift+H` |
+| Show all hide attributes | | `Ctrl+Shift+8` |
 | Font Dialog Box | Full font options | `Ctrl + D` |
 
 **Font Dialog extras:** Character spacing, OpenType features, kerning, ligatures
