@@ -116,6 +116,7 @@
 
 ### Clipboard
 <img width="111" height="128" alt="image" src="https://github.com/user-attachments/assets/318bd21b-dda6-4a91-a3f1-3361386ecff9" />
+<img width="210" height="257" alt="image" src="https://github.com/user-attachments/assets/5d75f1ce-c7fd-43be-ada0-a094cd8ec790" />
 
 | Function | Description | Shortcut |
 |----------|-------------|----------|
