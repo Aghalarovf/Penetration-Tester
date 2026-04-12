@@ -45,7 +45,9 @@
 
 **Zoom Range:** 10% – 500%  
 **Max Font Size:** 1638 pt  
+**Default Max Font Size:** 72 pt
 **Min Font Size:** 1 pt  
+**Default Min Font Size:** 8 pt
 **Max Recent Files:** 50  
 
 ---
