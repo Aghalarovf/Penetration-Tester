@@ -149,6 +149,7 @@
 | Font Color | Text color | |
 | Clear All Formatting | Remove all formatting | `Ctrl + Space` |
 | Text Effects | Shadow, reflection, glow, etc. | |
+| Hide Textt | Hide attributes | `Ctrl+Shift+H` |
 | Font Dialog Box | Full font options | `Ctrl + D` |
 
 **Font Dialog extras:** Character spacing, OpenType features, kerning, ligatures
