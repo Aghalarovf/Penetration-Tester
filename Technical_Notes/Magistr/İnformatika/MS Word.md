@@ -134,15 +134,15 @@
 |----------|-------------|----------|
 | Font Name | Change typeface | |
 | Font Size | Change size | |
-| Increase Font Size | Grow text | `Ctrl + Shift + >` or `Ctrl + Shift + .` |
-| Decrease Font Size | Shrink text | `Ctrl + Shift + <` or `Ctrl + Shift + ,` |
+| Increase Font Size | Grow text | `Ctrl + Shift + .` |
+| Decrease Font Size | Shrink text | `Ctrl + Shift + ,` |
 | Bold | Bold text | `Ctrl + B` |
 | Italic | Italic text | `Ctrl + I` |
 | Underline | Underline text | `Ctrl + U` |
 | Underline Style | Single, double, dotted, dashed, wavy | `Ctrl + Shift + W` (word underline) |
 | Strikethrough | Strike through text | |
 | Double Strikethrough | Double line through text | |
-| Subscript | Text below baseline (X₂) | `Ctrl + =` |
+| Subscript | Text below baseline (X₂) | `Ctrl + Shift + _` |
 | Superscript | Text above baseline (X²) | `Ctrl + Shift + +` |
 | Change Case | UPPER, lower, Title, tOGGLE | `Shift + F3` |
 | Text Highlight Color | Color behind text | |
