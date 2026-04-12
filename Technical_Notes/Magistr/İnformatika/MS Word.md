@@ -115,14 +115,16 @@
 ## <a name="home-tab"></a>3. Home Tab
 
 ### Clipboard
+<img width="111" height="128" alt="image" src="https://github.com/user-attachments/assets/318bd21b-dda6-4a91-a3f1-3361386ecff9" />
+---
 | Function | Description | Shortcut |
 |----------|-------------|----------|
-| Paste | Paste clipboard content | `Ctrl + V` |
-| Paste Special | Paste with format options | `Ctrl + Alt + V` |
-| Cut | Cut selected text | `Ctrl + X` |
-| Copy | Copy selected text | `Ctrl + C` |
-| Format Painter | Copy formatting to another area | `Alt + Ctrl + C` / double-click to lock |
-| Clipboard Pane | Show all clipboard items (up to 24) | Click launcher arrow |
+| 1.Paste | Paste clipboard content | `Ctrl + V` |
+| 2.Paste Special | Paste with format options | `Ctrl + Alt + V` |
+| 3.Cut | Cut selected text | `Ctrl + X` |
+| 4.Copy | Copy selected text | `Ctrl + C` |
+| 5.Format Painter | Copy formatting to another area | `Alt + Ctrl + C` / double-click to lock |
+| 6.Clipboard Pane | Show all clipboard items (up to 24) | Click launcher arrow |
 
 > **Paste Options:** Keep Source Formatting, Merge Formatting, Keep Text Only, Use Destination Theme
 
