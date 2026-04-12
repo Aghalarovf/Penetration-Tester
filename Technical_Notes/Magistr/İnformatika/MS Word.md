@@ -116,7 +116,7 @@
 
 ### Clipboard
 <img width="111" height="128" alt="image" src="https://github.com/user-attachments/assets/318bd21b-dda6-4a91-a3f1-3361386ecff9" />
----
+
 | Function | Description | Shortcut |
 |----------|-------------|----------|
 | 1.Paste | Paste clipboard content | `Ctrl + V` |
