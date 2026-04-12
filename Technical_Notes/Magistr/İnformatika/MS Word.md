@@ -81,8 +81,8 @@
   - **Print All Pages** — Entire document
   - **Current Page** — Only active page
   - **Custom Range** — e.g., 1-3, 5, 7-9
-  - **Odd Pages** — For double-sided printing
-  - **Even Pages** — For double-sided printing
+  - **Odd Pages** — For double-sided printing ( Tək )
+  - **Even Pages** — For double-sided printing ( Cüt )
   - **Print Markup** — Include tracked changes
   - **Copies** — Number of copies
   - **Collated / Uncollated**
