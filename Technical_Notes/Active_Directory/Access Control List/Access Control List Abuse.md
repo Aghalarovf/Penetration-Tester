@@ -1,6 +1,7 @@
 # ForceChangePassword
 ```
 GUID: 00299570-246d-11d0-a768-00aa006e0529
+Event IDs 4723, 4724
 
 # Add ForceChangePassword ExtendedRights
 Add-DomainObjectAcl -TargetIdentity Administrator -PrincipalIdentity jkimmich -Rights ResetPassword
