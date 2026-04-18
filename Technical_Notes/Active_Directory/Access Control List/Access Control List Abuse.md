@@ -79,3 +79,18 @@ Add-DomainObjectAcl -TargetIdentity jkimmich -PrincipalIdentity User_B -Rights G
 .\Whisker.exe add /target:jkimmich /domain:warzone.oxsium.local /dc:WIN-WARZONE.warzone.oxsium.local
 ```
 ---
+
+# WriteDACL
+```
+Access Mask: 0x40000
+```
+
+#### All user
+```powershell
+Get-DomainObjectAcl | Where-Object {$_.ActiveDirectoryRights -eq "WriteDACL"} | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},@{Name="ObjectSid"; Expression={Convert-SidToName $_.ObjectSid}},ActiveDirectoryRights -Unique
+```
+
+### Specific user
+```powershell
+Get-DomainObjectAcl -Identity jkimmich | Where-Object {$_.ActiveDirectoryRights -eq "WriteDACL"} | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},ActiveDirectoryRights -Unique
+```
