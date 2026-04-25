@@ -1,6 +1,6 @@
 # Shadow Credentials
 ```
-msDS-KeyCredentialLink GUID: 068f1ad2-2434-4530-9b04-1b327b587d15
+msDS-KeyCredentialLink GUID: 5b47d60f-6051-40fb-99e0-ed3a78604e5d
 
 Windows Hello for Business (WHfB)
 ```
@@ -8,11 +8,10 @@ Windows Hello for Business (WHfB)
 # Search msDS-KeyCredentialLink attribute
 ```powershell 
 Get-DomainObjectAcl | Where-Object {
-    ($_.ActiveDirectoryRights -match "WriteProperty|GenericWrite|GenericAll") -and 
-    ($_.ObjectType -eq "068f1ad2-2434-4530-9b04-1b327b587d15") # msDS-KeyCredentialLink-in GUID-i
-} | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},
-                  @{Name="TargetObject"; Expression={Convert-SidToName $_.ObjectDN}},
-                  ActiveDirectoryRights -Unique
+     $_.ObjectAceType -eq "5b47d60f-6051-40fb-99e0-ed3a78604e5d" # msDS-KeyCredentialLink-in GUID-i
+ } | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},
+                   @{Name="TargetObject"; Expression={Convert-SidToName $_.ObjectSID}},
+                   ActiveDirectoryRights -Unique
 
 
 Get-DomainObjectAcl  | Where-Object { $_.ObjectAceType -eq "5b47d60f-6051-40fb-99e0-ed3a78604e5d" }
