@@ -13,6 +13,9 @@ Get-DomainObjectAcl | Where-Object {
 } | Select-Object @{Name="PrincipalName"; Expression={Convert-SidToName $_.SecurityIdentifier}},
                   @{Name="TargetObject"; Expression={Convert-SidToName $_.ObjectDN}},
                   ActiveDirectoryRights -Unique
+
+
+Get-DomainObjectAcl  | Where-Object { $_.ObjectAceType -eq "5b47d60f-6051-40fb-99e0-ed3a78604e5d" }
 ```
 
 # Whisker
