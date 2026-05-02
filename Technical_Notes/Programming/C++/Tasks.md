@@ -1237,3 +1237,376 @@ Tam test suite.
 ### Tapşırıq 200
 **Kriptografi Kitabxanası: Final v3.0**
 `oxsium_crypto_v3.hpp` yazın. Hər şeyi birləşdirin. Tam API sənədləşdirməsi, 500+ test vektoru, cross-platform support, FIPS compliance mode, misuse-resistant API, performance benchmarks. `README.md` yazın: "Bu kitabxana niyə mövcuddur?" sualını cavablandırın.
+
+# 🛡️ C++ & KİBERTƏHLÜKƏSİZLİK — Praktiki Tapşırıqlar (201–500)
+
+> **Tapşırıqlar 201–500** | Növbəti 300 Praktiki Məşğələ  
+> Şəbəkə Proqramlaşdırması • Kriptoqrafiya • Sistem Proqramlaşdırması • Protokol İmplementasiyası • Kibertəhlükəsizlik • Production Sistemlər
+
+---
+
+
+## MƏRHƏLƏ 5: Şəbəkə Proqramlaşdırması (201–240)
+> Socket API, TCP/UDP, Asinxron I/O
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 201 | BSD Socket Yaratmaq | `socket()` sistemi çağırışı ilə TCP socket yarat, nəticəni ekrana çap et | ⚙️ ORTA |
+| 202 | Bind və Listen | Socket-ı porta bind et, `listen()` ilə bağlantı gözlə | ⚙️ ORTA |
+| 203 | Echo Server | Bağlanan clientdən mətn al, eyni mətni geri göndər | ⚙️ ORTA |
+| 204 | Multi-Client Server (fork) | Hər client üçün `fork()` ilə ayrı proses yarat | ⚙️ ORTA |
+| 205 | UDP Datagram Göndər | `sendto()`/`recvfrom()` istifadə edərək UDP mesaj göndər/al | ⚙️ ORTA |
+| 206 | Getaddrinfo() İstifadəsi | DNS adını IP-yə çevir, IPv4/IPv6 dəstəyi əlavə et | ⚙️ ORTA |
+| 207 | Non-blocking Socket | `fcntl()` ilə socket-ı non-blocking rejiminə keçir | ⚙️ ORTA |
+| 208 | select() Multiplexing | `select()` ilə eyni anda çoxlu socket-ı izlə | ⚙️ ORTA |
+| 209 | poll() Multiplexing | `poll()` API ilə fərqi göstər, `select()` ilə müqayisə et | ⚙️ ORTA |
+| 210 | epoll Edge-Triggered | `epoll()` EPOLLET rejimini istifadə et, yüksək performans göstər | ⚙️ ORTA |
+| 211 | HTTP GET Sorğusu | Raw socket ilə HTTP/1.1 GET sorğusu göndər, cavabı parse et | 🔥 ÇƏTİN |
+| 212 | Çoxlu Client Thread Pool | Thread pool server yarat, hər bağlantıya thread ver | 🔥 ÇƏTİN |
+| 213 | SO_REUSEADDR/PORT | Socket seçənəklərini tənzimlə, TIME_WAIT problemini həll et | 🔥 ÇƏTİN |
+| 214 | TCP Keepalive | `SO_KEEPALIVE`, `TCP_KEEPIDLE`, `TCP_KEEPINTVL` ayarla | 🔥 ÇƏTİN |
+| 215 | Scatter-Gather I/O | `readv()`/`writev()` ilə çoxlu buffer istifadə et | 🔥 ÇƏTİN |
+| 216 | sendfile() Optimizasiyası | Fayl göndərmək üçün `sendfile()` zero-copy texnikası | 🔥 ÇƏTİN |
+| 217 | Unix Domain Socket | `AF_UNIX` socket ilə eyni maşında proses arası rabitə | 🔥 ÇƏTİN |
+| 218 | Multicast UDP | `IP_ADD_MEMBERSHIP` ilə UDP multicast qrupu yarat | 🔥 ÇƏTİN |
+| 219 | Raw Socket (ICMP) | `SOCK_RAW` ilə ICMP echo (ping) paketi hazırla və göndər | 🔥 ÇƏTİN |
+| 220 | TCP Nagle Alqoritmi | `TCP_NODELAY` ilə Nagle-ı söndür, gecikməni ölç | 🔥 ÇƏTİN |
+| 221 | Async I/O (io_uring) | Linux `io_uring` API ilə asinxron fayl/socket əməliyyatları | 🔥 ÇƏTİN |
+| 222 | QUIC Emülyasiyası | UDP üzərindən QUIC-bənzər çoxlu axın idarəsi simul et | 🔥 ÇƏTİN |
+| 223 | TCP State Machine | SYN, SYN-ACK, ACK, FIN state-lərini əl ilə izlə | 🔥 ÇƏTİN |
+| 224 | Bandwidth Throttling | Token bucket alqoritmi ilə göndərmə sürətini məhdudlaşdır | 🔥 ÇƏTİN |
+| 225 | Socket Timeout İdarəsi | `SO_RCVTIMEO`/`SO_SNDTIMEO`, retry mexanizmi qur | 🔥 ÇƏTİN |
+| 226 | TLS Handshake Simulasiyası | OpenSSL ilə TLS1.3 el-shake addımlarını idarə et | 💀 EKSPERT |
+| 227 | HTTP/2 Frame Parse | HTTP/2 binary frame-lərini decode et, HEADERS/DATA ayır | 💀 EKSPERT |
+| 228 | SOCKS5 Proxy Server | SOCKS5 protokolunu sıfırdan implement et (RFC 1928) | 💀 EKSPERT |
+| 229 | TCP Congestion Control | CUBIC/BBR alqoritmini simul et, cwnd dinamikasını göstər | 💀 EKSPERT |
+| 230 | Reliable UDP Kitabxanası | Paket itkisi, sıra, yenidən göndərmə olan UDP kitabxanası yaz | 💀 EKSPERT |
+| 231 | DNS Resolver Sıfırdan | DNS sorğu paketi qur, UDP/TCP üzərindən göndər, cavabı parse et | 💀 EKSPERT |
+| 232 | DHCP Client Simulasiyası | DISCOVER, OFFER, REQUEST, ACK addımlarını DHCP protokolunda keç | 💀 EKSPERT |
+| 233 | WebSocket Handshake | HTTP Upgrade sorğusu + Sec-WebSocket-Accept hesabla, frame göndər | 💀 EKSPERT |
+| 234 | SCTP Socket İstifadəsi | Multi-stream SCTP bağlantısı qur, TCP ilə fərqini göstər | 💀 EKSPERT |
+| 235 | Network Namespace | Linux network namespace-ləri yarat, virtual şəbəkə qur | 💀 EKSPERT |
+| 236 | DPDK Konsepti İmplementasiyası | Kernel bypass ilə yüksək performanslı paket prosesləmə sim. | 💀 EKSPERT |
+| 237 | BGP Mesaj Parser | BGP OPEN/UPDATE/KEEPALIVE mesajlarını parse et (RFC 4271) | 💀 EKSPERT |
+| 238 | OSPF Hello Packet | OSPFv2 Hello paketi hazırla, multicast adresə göndər | 💀 EKSPERT |
+| 239 | NetFlow v9 Kollektoru | NetFlow v9 paketlərini dinlə, flow-ları parse et | 💀 EKSPERT |
+| 240 | Şəbəkə Protokol Fuzzer | Şəbəkə protokollarına mutasiya edilmiş paketlər göndər | 💀 EKSPERT |
+
+---
+
+## MƏRHƏLƏ 6: Kriptoqrafiya Əsasları (241–275)
+> Şifrələmə, Hash, PKI, Protokol Kriptoqrafiyası
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 241 | XOR Şifrələmə | Sadə XOR şifrəsi yaz, açar uzunluğu ilə şifrəni sındır | ⚙️ ORTA |
+| 242 | Caesar Cipher | Caesar şifrəsi + brute force deşifrə + frequency analysis | ⚙️ ORTA |
+| 243 | Vigenere Cipher | Vigenere şifrəsi yaz, Kasiski testi ilə açar uzunluğunu tap | 🔥 ÇƏTİN |
+| 244 | MD5 Sıfırdan | MD5 alqoritmini standartdan oxuyaraq C++ ilə implement et | 🔥 ÇƏTİN |
+| 245 | SHA-256 Sıfırdan | SHA-256 bütün addımları (padding, round, digest) implement et | 🔥 ÇƏTİN |
+| 246 | HMAC-SHA256 | HMAC konstruksiyasını SHA-256 üzərindən sıfırdan yaz | 🔥 ÇƏTİN |
+| 247 | AES-128 ECB Modu | AES SubBytes, ShiftRows, MixColumns, AddRoundKey sıfırdan | 🔥 ÇƏTİN |
+| 248 | AES CBC Modu | AES-CBC şifrələmə/deşifrə + PKCS#7 padding implement et | 🔥 ÇƏTİN |
+| 249 | AES-GCM AEAD | Authenticated encryption: AES-CTR + GHASH birləşdir | 🔥 ÇƏTİN |
+| 250 | RSA Açar Generasiyası | Miller-Rabin ilə böyük prime tap, e,d hesabla, N qur | 🔥 ÇƏTİN |
+| 251 | RSA Şifrələmə/Deşifrə | RSA OAEP padding ilə şifrələ, side-channel qarşısı al | 🔥 ÇƏTİN |
+| 252 | Diffie-Hellman | DH açar mübadiləsini sıfırdan implement et, MITM göstər | 🔥 ÇƏTİN |
+| 253 | Elliptic Curve Basics | secp256k1 üzərindən nöqtə toplama/skalyar vurmə implement et | 💀 EKSPERT |
+| 254 | ECDH Açar Mübadiləsi | ECDH protokolunu P-256 əyrisi üzərindən sıfırdan yaz | 💀 EKSPERT |
+| 255 | Ed25519 İmza | Ed25519 imzalama/doğrulama (RFC 8032) implement et | 💀 EKSPERT |
+| 256 | ChaCha20 Axın Şifrəsi | ChaCha20 quarter-round funksiyası sıfırdan (RFC 8439) | 💀 EKSPERT |
+| 257 | Poly1305 MAC | Poly1305 mesaj autentifikasiya kodu implement et | 💀 EKSPERT |
+| 258 | ChaCha20-Poly1305 AEAD | ChaCha20 + Poly1305 birləşdirərək tam AEAD hazırla | 💀 EKSPERT |
+| 259 | Merkle Tree | Kriptoqrafik Merkle ağacı qur, proof-of-inclusion yoxla | 💀 EKSPERT |
+| 260 | Blind Signature Protokolu | RSA əsaslı kor imza protokolu implement et | 💀 EKSPERT |
+| 261 | Zero-Knowledge Proof (Schnorr) | Schnorr protokolunu sıfırdan implement et | 💀 EKSPERT |
+| 262 | Shamir Sirrini Bölmə | SSS (k,n) threshold şemasını Galois sahəsi üzərindən yaz | 💀 EKSPERT |
+| 263 | Homomorphic Encryption Sim. | Paillier şifrələməsini implement et, şifrəli toplama göstər | 💀 EKSPERT |
+| 264 | Salted Password Hashing | bcrypt/Argon2 parametrlərini manual həyata keçir | 💀 EKSPERT |
+| 265 | Timing Attack Demo | HMAC müqayisəsindəki vaxt sızmasını göstər, sabit vaxt düzəlt | 💀 EKSPERT |
+| 266 | Padding Oracle Attack | CBC padding oracle hücumunu implement et, plaintext çıxar | 👑 MASTER |
+| 267 | RC4 Bias Hücumu | RC4 statistik zəifliyini göstər, real paket şifrəsi qır | 👑 MASTER |
+| 268 | Meet-in-the-Middle | 2DES-ə qarşı MITM hücumu implement et | 👑 MASTER |
+| 269 | Pohlig-Hellman Alqoritmi | Aşağı mürəkkəblikli DL problemi üçün alqoritmi implement et | 👑 MASTER |
+| 270 | Lattice-Based Kriptoqrafiya | LWE problemini implement et, kvant-rezistant şemayı göstər | 👑 MASTER |
+| 271 | Kriptoqrafik RNG Testi | NIST SP 800-22 statistik testlərini implement et | 👑 MASTER |
+| 272 | X.509 Sertifikat Parse | DER/PEM sertifikatı ASN.1 ilə parse et, sahələri çıxar | 👑 MASTER |
+| 273 | Sertifikat Zənciri Doğrulama | Root CA-dan leaf-ə imza zəncirini doğrula | 👑 MASTER |
+| 274 | OCSP Responderi | Online Certificate Status Protocol cavabvericiyi yaz | 👑 MASTER |
+| 275 | TLS 1.3 Rekord Layer | TLS 1.3 record layer protokolunu sıfırdan implement et | 👑 MASTER |
+
+---
+
+## MƏRHƏLƏ 7: Sistem Proqramlaşdırması və OS Daxilişləri (276–310)
+> Proses, Thread, Kernel, Sistem Çağırışları
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 276 | ptrace ilə Debugger | `ptrace()` API ilə sadə debugger yaz, breakpoint qur | 🔥 ÇƏTİN |
+| 277 | Shared Memory IPC | `shmget`/`shmat` ilə paylaşılan yaddaş idarəsi + semafor sync | 🔥 ÇƏTİN |
+| 278 | Signal Handler Zənciri | Çoxlu signal handler yaz, `sigaction()` ilə alt-üst etmə et | 🔥 ÇƏTİN |
+| 279 | Proses Prioritet İdarəsi | `nice()`/`setpriority()`/`sched_setscheduler()` istifadə et | 🔥 ÇƏTİN |
+| 280 | Cgroup v2 İdarəsi | cgroup v2 ilə CPU/Yaddaş limitini proqramla tənzimlə | 🔥 ÇƏTİN |
+| 281 | Seccomp Filter | BPF proqramı ilə sistem çağırışı filtri yaz | 🔥 ÇƏTİN |
+| 282 | eBPF Xüsusi Proqram | Kernel space-də işləyən eBPF proqramı yaz + userspace kommunikasiyası | 💀 EKSPERT |
+| 283 | Kernel Modul Yazı | Sadə Linux kernel modulu yaz, `/proc` faylı yarat | 💀 EKSPERT |
+| 284 | Xüsusi Sistem Çağırışı | Kernel-ə xüsusi syscall əlavə et, userspace-dən test et | 💀 EKSPERT |
+| 285 | Memory-mapped I/O | `mmap()` ilə fayl I/O + xüsusi yaddaş bölgəsi idarəsi | 🔥 ÇƏTİN |
+| 286 | Huge Pages İstifadəsi | HugeTLB sayfalarını allok et, TLB miss azalmasını ölç | 💀 EKSPERT |
+| 287 | NUMA Yaddaş İdarəsi | `numa_alloc_onnode()` ilə NUMA-aware yaddaş allokasiyası | 💀 EKSPERT |
+| 288 | Proses Sandbox | Namespace+seccomp+cgroup ilə tam sandboxlanmış proses yarat | 💀 EKSPERT |
+| 289 | Xüsusi Yükləyici (Loader) | ELF binary-ni disk-dən oxu, yaddaşa map et, execute et | 👑 MASTER |
+| 290 | Dynamic Linker Emülasiyası | Shared library-ləri tapıb yükləyən mini `ld.so` yaz | 👑 MASTER |
+| 291 | Yaddaş Ayrılma (malloc) Sıfırdan | `sbrk`/`mmap` istifadə edərək `malloc`/`free` implement et | 💀 EKSPERT |
+| 292 | Lock-free Queue | CAS (compare-and-swap) ilə lock-free MPMC queue yaz | 💀 EKSPERT |
+| 293 | Wait-free Stack | Wait-free push/pop olan stack implement et | 👑 MASTER |
+| 294 | Hazard Pointer GC | Lock-free strukturlar üçün hazard pointer GC yaz | 👑 MASTER |
+| 295 | Coroutine Kitabxanası | `setjmp`/`ucontext` ilə C++ coroutine kitabxanası yaz | 💀 EKSPERT |
+| 296 | Fiber Zamanlayıcısı | Kooperativ fiber zamanlayıcısı implement et | 💀 EKSPERT |
+| 297 | Kernel Thread Zamanlayıcısı | CFS bənzəri proses zamanlayıcısını userspace-də simul et | 👑 MASTER |
+| 298 | Virtual Yaddaş İdarəsi | Öz page table-ını idarə edən virtual yaddaş sistemi yaz | 👑 MASTER |
+| 299 | Fayl Sistemi FUSE | FUSE ilə xüsusi fayl sistemi implement et (şifrəli FS) | 👑 MASTER |
+| 300 | Mini Hypervisor | KVM API istifadə edərək sadə VM çalışdıran hypervisor yaz | 👑 MASTER |
+| 301 | Inter-VM Kommunikasiya | virtio-net bənzəri virtual şəbəkə interfeysi impl et | 👑 MASTER |
+| 302 | CPU Emülatoru | Sadə RISC ISA üçün bytecode interpreter/JIT yaz | 👑 MASTER |
+| 303 | ELF Injector | Mövcud ELF binary-yə yeni kod section əlavə et | 👑 MASTER |
+| 304 | GOT/PLT Hook | Runtime-da PLT table-ı dəyişdirərək funksiya yönləndir | 👑 MASTER |
+| 305 | Inline Hook Engine | x86-64 üçün inline trampoline hook mexanizmi yaz | 👑 MASTER |
+| 306 | Kernel Stack Overflow | Stack canary bypass + ret2libc chain (CTF kontekstdə) | 👑 MASTER |
+| 307 | ROP Chain Qurma | libc gadget-lər ilə ROP zənciri, ASLR-i bypass et | 👑 MASTER |
+| 308 | Format String Exploit | Format string açığından istifadə edərək GOT yaz | 👑 MASTER |
+| 309 | Heap Grooming | Tcache/fastbin zəifliyi ilə heap exploit (CTF) | 👑 MASTER |
+| 310 | Kernel Exploit (ret2kernel) | Kernel module-dakı bof ilə root privilege escalation | 👑 MASTER |
+
+---
+
+## MƏRHƏLƏ 8: Protokolları Sıfırdan Qurmaq (311–375)
+> Layer 2–7 Protokollar — Tam Implementation
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 311 | Ethernet Frame Qurucu | Ethernet II frame-ini bit-bit qur, CRC32 hesabla, raw socket-a göndər | 👑 MASTER |
+| 312 | ARP Protokolu | ARP request/reply paketlərini sıfırdan qur, ARP cədvəlini idarə et | 👑 MASTER |
+| 313 | IPv4 Paket Qurucu | IPv4 başlığı, IP checksum, TTL azaldma sıfırdan implement et | 👑 MASTER |
+| 314 | IPv4 Fragmentasiya | Böyük paketləri MTU-ya görə parça, fragment ID/offset hesabla | 👑 MASTER |
+| 315 | IPv6 Paket Qurucu | IPv6 başlığı, uzantı başlıqları, Flow Label sıfırdan qur | 👑 MASTER |
+| 316 | ICMPv4 Sıfırdan | ICMP echo/reply + time-exceeded + port-unreachable impl et | 👑 MASTER |
+| 317 | ICMPv6 + NDP | Neighbor Discovery Protocol, Router Solicitation/Advertisement | 👑 MASTER |
+| 318 | TCP Sıfırdan (3-Way Handshake) | SYN/SYN-ACK/ACK state machine raw socket-la impl et | 👑 MASTER |
+| 319 | TCP Axın İdarəsi | Sliding window, cumulative ACK, retransmission timer impl et | 👑 MASTER |
+| 320 | TCP Tıxanma İdarəsi | Slow start, congestion avoidance, fast retransmit implement et | 👑 MASTER |
+| 321 | UDP Sıfırdan + Checksum | UDP datagram qurucu, pseudo-header checksum impl et | 👑 MASTER |
+| 322 | DNS Query/Response | DNS sorğu paketi qur (RFC 1035), cavabı parse et, cache et | 👑 MASTER |
+| 323 | DNS Recursive Resolver | Root-dan authority-yə iterativ/rekursiv DNS resolver yaz | 👑 MASTER |
+| 324 | DHCP Server Sıfırdan | DHCP DISCOVER→OFFER→REQUEST→ACK dövrünü tam impl et | 👑 MASTER |
+| 325 | HTTP/1.1 Server Sıfırdan | GET/POST/HEAD dəstəyi, Keep-Alive, chunked transfer impl | 👑 MASTER |
+| 326 | HTTP Parser Sıfırdan | State machine ilə HTTP başlıq + gövdə parser yaz (RFC 7230) | 👑 MASTER |
+| 327 | HTTP/2 Multiplexing | HTTP/2 stream multiplexing, HPACK başlıq sıxışdırması impl | 👑 MASTER |
+| 328 | WebSocket Protokolu | Handshake, frame encoding/decoding, masking sıfırdan impl | 👑 MASTER |
+| 329 | SMTP Müştəri Sıfırdan | EHLO, AUTH LOGIN, MAIL FROM, DATA, QUIT impl et | 👑 MASTER |
+| 330 | IMAP4 Parser | IMAP4 literal string, response parser, UID FETCH impl et | 👑 MASTER |
+| 331 | FTP Server Sıfırdan | Active/passive mode, PORT/PASV, LIST/RETR/STOR impl et | 👑 MASTER |
+| 332 | SSH Transport Layer | SSH-2 transport: version exchange, kex_init, DH KEX impl et | 👑 MASTER |
+| 333 | SSH Userauth Protokolu | SSH password + publickey auth protokolunu impl et | 👑 MASTER |
+| 334 | SSH Kanal Protokolu | SSH channel open/data/eof/close, exec subsystem impl et | 👑 MASTER |
+| 335 | TLS 1.3 Handshake Sıfırdan | ClientHello, ServerHello, Certificate, Finished impl et | 👑 MASTER |
+| 336 | TLS 1.3 Record Layer | TLS AEAD encryption, sequence number, alert impl et | 👑 MASTER |
+| 337 | DTLS 1.3 (UDP üzərindən TLS) | Datagram TLS, fragment, retransmission, epoch impl et | 👑 MASTER |
+| 338 | QUIC Transport Sıfırdan | QUIC initial packet, connection ID, stream impl et (RFC 9000) | 👑 MASTER |
+| 339 | WireGuard Protokolu | Noise_IK handshake + ChaCha20-Poly1305 tunnel impl et | 👑 MASTER |
+| 340 | OpenVPN Protokolu Emülasiyası | TLS kontrol kanal + data kanal sıfırdan impl et | 👑 MASTER |
+| 341 | BGP-4 Tam Implementasiyası | FSM, OPEN, UPDATE, path attribute, prefix filter impl et | 👑 MASTER |
+| 342 | OSPF Tam Implementasiyası | Hello, DBD, LSR, LSU, LSAck, SPF hesablaması impl et | 👑 MASTER |
+| 343 | IS-IS Protokolu | IS-IS PDU-ları, adjacency, LSP flooding impl et | 👑 MASTER |
+| 344 | MPLS Paket Yönləndirmə | MPLS label push/pop/swap, LDP protokolunu impl et | 👑 MASTER |
+| 345 | VXLAN Overlay Şəbəkəsi | VXLAN encapsulation/decapsulation, VTEP impl et | 👑 MASTER |
+| 346 | RADIUS Server Sıfırdan | Access-Request, Access-Accept, AVP encode/decode impl et | 👑 MASTER |
+| 347 | Diameter Protokolu | Diameter base protocol (RFC 6733) state machine impl et | 👑 MASTER |
+| 348 | SNMP v3 Agent | USM autentifikasiya, priv şifrələmə, MIB walk impl et | 👑 MASTER |
+| 349 | NTP Server Sıfırdan | NTP v4 paket qurucu, Stratum idarəsi, offset hesabla | 👑 MASTER |
+| 350 | LDAP Server Sıfırdan | ASN.1 BER encode/decode, Bind, Search, Add impl et | 👑 MASTER |
+| 351 | SIP Proxy Server | SIP INVITE, 100 Trying, 180 Ringing, 200 OK impl et | 👑 MASTER |
+| 352 | RTP/RTCP Protokolu | Real-time Transport Protocol, SSRC, seqnum, jitter buffer | 👑 MASTER |
+| 353 | STUN/TURN Server | NAT traversal üçün STUN/TURN protokolunu impl et | 👑 MASTER |
+| 354 | ICE Alqoritmi | Interactive Connectivity Establishment sıfırdan impl et | 👑 MASTER |
+| 355 | DTLS-SRTP Tunnel | WebRTC media encryption üçün DTLS-SRTP impl et | 👑 MASTER |
+| 356 | Modbus TCP/RTU | Sənaye SCADA protokolu Modbus-u sıfırdan impl et | 👑 MASTER |
+| 357 | DNP3 Protokolu | DNP3 frame layer, transport layer, app layer impl et | 👑 MASTER |
+| 358 | IEC 61850 GOOSE | Enerji sistemi protokolu GOOSE mesaj impl et | 👑 MASTER |
+| 359 | CAN Bus Protokolu | CAN frame qurucu, arbitrasiya, error frame impl et | 👑 MASTER |
+| 360 | OPC-UA Xüsusi Stack | OPC-UA binary encoding, session, subscription impl et | 👑 MASTER |
+| 361 | MQTT Broker Sıfırdan | MQTT 5.0: CONNECT, SUBSCRIBE, PUBLISH, QoS 0/1/2 impl et | 👑 MASTER |
+| 362 | CoAP Server Sıfırdan | RFC 7252: CON/NON/ACK/RST, observe, block-wise impl et | 👑 MASTER |
+| 363 | Tor Circuit Protokolu | Tor OR protokolu: cell qurucu, CREATE/EXTEND impl et | 👑 MASTER |
+| 364 | I2P Tunnel Protokolu | I2P garlic routing, ElGamal + AES256 tunnel impl et | 👑 MASTER |
+| 365 | Custom Mesh Routing | Öz mesh şəbəkə routing protokolunu sıfırdan yaz | 👑 MASTER |
+| 366 | Custom P2P Protokolu | DHT əsaslı peer-to-peer file sharing protokolu yaz | 👑 MASTER |
+| 367 | Custom RPC Framework | Öz Remote Procedure Call framework-ünü binary serialization ilə yaz | 👑 MASTER |
+| 368 | Xüsusi Multiplexing Protokolu | Tək TCP bağlantısı üzərindən N virtual kanal impl et | 👑 MASTER |
+| 369 | Xüsusi Şifrəli Tunnel | ECDH key exchange + ChaCha20-Poly1305 xüsusi VPN impl et | 👑 MASTER |
+| 370 | Adaptive Bitrate Protokolu | DASH/HLS bənzəri ABR media streaming protokolu yaz | 👑 MASTER |
+| 371 | Xüsusi Gossip Protokolu | Epidemic information spreading protokolu impl et | 👑 MASTER |
+| 372 | Raft Konsensus Protokolu | Distributed consensus: leader election, log replication impl | 👑 MASTER |
+| 373 | Paxos Protokolu | Multi-Paxos phase 1/2, leader, promise, accept impl et | 👑 MASTER |
+| 374 | Xüsusi Blockchain Protokolu | Öz blockchain: block qurucu, PoW, peer sync impl et | 👑 MASTER |
+| 375 | Kvant-Rezistant Protokol | Kyber KEM + Dilithium imza ilə post-kvant protokol impl et | 👑 MASTER |
+
+---
+
+## MƏRHƏLƏ 9: İleri Kibertəhlükəsizlik (376–425)
+> Hücum, Müdafiə, Forensika, Red Team
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 376 | Port Scanner Sıfırdan | SYN scan, version detection, service fingerprint yaz | 🔥 ÇƏTİN |
+| 377 | Vulnerability Scanner | CVE bazası ilə xidmətlərə qarşı avtomatik zəiflik testi | 💀 EKSPERT |
+| 378 | Exploit Framework Mini | Metasploit-bənzər modul sistemi: payload + exploit + post | 💀 EKSPERT |
+| 379 | Shellcode Encoder | x86-64 shellcode-u null-byte-siz encode et | 💀 EKSPERT |
+| 380 | Polymorphic Shellcode | Hər çalışdırmada fərqli görünən shellcode generatoru | 👑 MASTER |
+| 381 | Staged Payload Delivery | Stager → stage → meterpreter-bənzər payload zənciri | 👑 MASTER |
+| 382 | C2 Framework Sıfırdan | HTTP/DNS üzərindən komanda-nəzarət çərçivəsi yaz | 👑 MASTER |
+| 383 | DNS Covert Channel | DNS TXT/CNAME sorğularında məlumat gizlət/çıxar | 👑 MASTER |
+| 384 | ICMP Tunnel | ICMP echo payload-ında TCP tuneli impl et | 👑 MASTER |
+| 385 | HTTP Covert Channel | HTTP başlıqlarında gizli məlumat kanalı qur | 👑 MASTER |
+| 386 | Şifrəli C2 Protokolu | mTLS + certificate pinning ilə C2 rabitəsi | 👑 MASTER |
+| 387 | Anti-forensic Texnikalar | Yaddaşda iz silmə, timestamp tamper, slack space gizlətmə | 👑 MASTER |
+| 388 | Kernel Rootkit | Syscall hook ilə proses/fayl gizlədən kernel rootkit | 👑 MASTER |
+| 389 | Userspace Rootkit | `LD_PRELOAD` ilə libc funksiyalarını hook et | 💀 EKSPERT |
+| 390 | Memory Forensik Tool | `/proc/pid/mem`-dən canlı yaddaş dump + artifact çıxar | 💀 EKSPERT |
+| 391 | Volatility Plugin Yaz | Volatility3 üçün xüsusi yaddaş analiz plugin yaz | 💀 EKSPERT |
+| 392 | Network Forensik | PCAP-ı oxu, session reconstruct, artefakt çıxar | 💀 EKSPERT |
+| 393 | Malware Analiz Sandbox | Syscall log + şəbəkə davranışı + fayl dəyişiklik sandbox | 👑 MASTER |
+| 394 | Fuzzer Sıfırdan (Coverage) | AFL bənzəri coverage-guided fuzzer yaz | 👑 MASTER |
+| 395 | libFuzzer İstifadəsi | libFuzzer target + corpus + sanitizer ilə bug tap | 💀 EKSPERT |
+| 396 | Symbolic Execution | Z3 solver ilə sadə proqram analizi (KLEE konsepti) | 👑 MASTER |
+| 397 | Taint Analysis | Dataflow taint tracking ilə input-a bağlı hər yolu izlə | 👑 MASTER |
+| 398 | Binary Diffing | İki binary-nin fərqini tap, patch analizi et | 💀 EKSPERT |
+| 399 | IDA/Ghidra Plugin | RE tool üçün xüsusi analiz plugin yaz | 💀 EKSPERT |
+| 400 | Heap Spray Texnikası | ASLR bypass üçün heap spray + use-after-free impl et | 👑 MASTER |
+| 401 | Browser Exploit Konsepti | V8/SpiderMonkey JIT heap grooming konsseptini impl et | 👑 MASTER |
+| 402 | SMB Exploit Sıfırdan | SMBv1 protokolu ilə EternalBlue-bənzər exploit yaz | 👑 MASTER |
+| 403 | Active Directory Attack | Kerberoasting, Pass-the-Hash, DCSync impl et | 👑 MASTER |
+| 404 | OAuth Token Hijacking | Authorization code flow-da açıq redirect istismarı | 💀 EKSPERT |
+| 405 | JWT Algorithm Confusion | RS256→HS256 keçid ilə JWT imzasını saxtalaşdır | 💀 EKSPERT |
+| 406 | GraphQL Introspection Attack | Schema extraction + batch query + injection impl et | 💀 EKSPERT |
+| 407 | gRPC Security Test | Protobuf fuzzing + authentication bypass test | 💀 EKSPERT |
+| 408 | Supply Chain Attack Sim. | Paket registry-yə trojanized paket inject sim et | 👑 MASTER |
+| 409 | Firmware Analysis | IoT firmware-ini unpack, hardcoded cred tap, CVE scan | 💀 EKSPERT |
+| 410 | Hardware Debug Interface | JTAG/UART ilə embedded cihazdan debug məlumatı çıxar | 👑 MASTER |
+| 411 | Side-Channel (Cache) | Flush+Reload cache timing hücumunu implement et | 👑 MASTER |
+| 412 | Spectre v1 Demo | Spectre variant 1 PoC C++ kodu yaz, izolasiya test et | 👑 MASTER |
+| 413 | Rowhammer Demo | DRAM bit-flip hücumunu sənədləşdir, PoC yaz | 👑 MASTER |
+| 414 | Power Analysis Sim. | Simulated power trace ilə AES açar recover et | 👑 MASTER |
+| 415 | DMA Attack Sim. | Thunderbolt/PCIe DMA üzərindən yaddaş oxuma sim | 👑 MASTER |
+| 416 | RF Signal Capture | RTL-SDR ilə 433MHz remote signal capture + decode | 💀 EKSPERT |
+| 417 | Bluetooth LE Sniffer | BTLE paket sniffer yaz, pairing process analiz et | 💀 EKSPERT |
+| 418 | Wi-Fi Deauth Sim. | 802.11 management frame injection PoC (test mühiti) | 💀 EKSPERT |
+| 419 | Cellular SS7 Attack Sim. | SS7 MAP protocol açıq: SMS intercept konsepti | 👑 MASTER |
+| 420 | RFID Clone Simulasiyası | MIFARE Classic sektoru oxu + klon simulasiyası | 💀 EKSPERT |
+| 421 | PKI Sertifikat Saxtalaması | Zəif CA imzası ilə sertifikat zəncirini klon et | 👑 MASTER |
+| 422 | BGP Hijack Simulasiyası | Exabgp ilə BGP prefix hijack demo (izolə mühit) | 👑 MASTER |
+| 423 | ARP Spoofing Framework | ARP spoof + MITM + SSL stripping aracı yaz | 💀 EKSPERT |
+| 424 | DNS Rebinding Attack | DNS TTL manipulyasiyası ilə same-origin bypass impl et | 👑 MASTER |
+| 425 | Xüsusi Exploit Mitigation | CFI, CET, Shadow Stack, PIE+ASLR mitigation testi | 👑 MASTER |
+
+---
+
+## MƏRHƏLƏ 10: Tam Protokol + Sistem Arxitekturası (426–500)
+> 🛡️ Production Səviyyəli Tam Sistemlər
+
+| # | Tapşırıq Adı | Təsvir / Məqsəd | Səviyyə |
+|---|---|---|---|
+| 426 | Tam TLS Stack Sıfırdan | TLS 1.3 + TLS 1.2 fallback, session resumption, 0-RTT impl et | 🛡️ PROTOKOL |
+| 427 | HTTPS Server Sıfırdan | TLS stack + HTTP/2 multiplex + gzip + HTTP/3 üzərindən | 🛡️ PROTOKOL |
+| 428 | VPN Server+Müştəri | WireGuard bənzəri tam VPN: tun/tap, routing, NAT impl et | 🛡️ PROTOKOL |
+| 429 | Tam SSH Server Sıfırdan | Autentifikasiya, kanal multiplex, port forwarding impl et | 🛡️ PROTOKOL |
+| 430 | Tam SMTP/IMAP/POP3 | Mail server: TLS, SPF/DKIM/DMARC doğrulama impl et | 🛡️ PROTOKOL |
+| 431 | DNS Authoritative Server | DNSSEC imzalama, zone transfer, dynamic DNS impl et | 🛡️ PROTOKOL |
+| 432 | HTTP Proxy Sıfırdan | CONNECT, cache, SSL inspection, transparent proxy impl et | 🛡️ PROTOKOL |
+| 433 | Reverse Proxy + LB | L7 load balancer, health check, sticky session impl et | 🛡️ PROTOKOL |
+| 434 | API Gateway Sıfırdan | Rate limiting, auth, routing, mTLS, plugin sistem impl et | 🛡️ PROTOKOL |
+| 435 | Service Mesh Protokolu | Envoy-bənzər sidecar: mTLS, telemetri, circuit breaker | 🛡️ PROTOKOL |
+| 436 | Custom Message Broker | Kafka-bənzər: topic, partition, consumer group, replication | 🛡️ PROTOKOL |
+| 437 | Distributed Cache Protokolu | Redis-bənzər: RESP protokolu, cluster, sentinel impl et | 🛡️ PROTOKOL |
+| 438 | Tam Raft Implementasiyası | Leader seçim + log replication + snapshotting + cluster join | 🛡️ PROTOKOL |
+| 439 | Distributed Lock Manager | ETCD-bənzər: lease, watch, distributed lock impl et | 🛡️ PROTOKOL |
+| 440 | Container Network Plugin | CNI plugin yaz: veth pair, bridge, iptables rules impl et | 🛡️ PROTOKOL |
+| 441 | Kubernetes Şəbəkə Modeli | kube-proxy-bənzər: iptables/ipvs service routing impl et | 🛡️ PROTOKOL |
+| 442 | eBPF Network Accelerator | XDP/TC eBPF proqramı ilə paket prosesləmə bypass kernel | 🛡️ PROTOKOL |
+| 443 | Tam IDS/IPS Sistemi | Snort-bənzər: rule engine, protocol decode, alert impl et | 🛡️ PROTOKOL |
+| 444 | Network Anomaly Detector | ML əsaslı şəbəkə anomaly detection sistemi yaz | 🛡️ PROTOKOL |
+| 445 | SIEM Toplama Motoru | Log toplama, correlation, alert, normalization impl et | 🛡️ PROTOKOL |
+| 446 | Zero Trust Şəbəkə | SPIFFE/SPIRE bənzəri ID + mTLS + policy engine impl et | 🛡️ PROTOKOL |
+| 447 | HSM Emülatoru | Hardware Security Module-u yumşaq implement et | 🛡️ PROTOKOL |
+| 448 | PKI CA Sistemi | Root CA, intermediate CA, CRL, OCSP tam impl et | 🛡️ PROTOKOL |
+| 449 | PKCS#11 Provider | Kriptoqrafik token interfeysi standartını impl et | 🛡️ PROTOKOL |
+| 450 | Tam Firewall Yazı | Stateful firewall: conntrack, NAT, L7 inspection impl et | 🛡️ PROTOKOL |
+| 451 | DPI (Deep Packet Inspection) | Hyperscan əsaslı pattern matching + protocol decode | 🛡️ PROTOKOL |
+| 452 | Honeynet Sistemi | Birdən çox fake xidmət + attacker davranış analizi | 🛡️ PROTOKOL |
+| 453 | Threat Intelligence Platform | IOC toplama, STIX/TAXII, feed korrelyasiyası impl et | 🛡️ PROTOKOL |
+| 454 | Tam SOC Avtomatlaşdırması | Alert triage, playbook icra, ticket yaratma impl et | 🛡️ PROTOKOL |
+| 455 | Xüsusi Antivirus Motoru | Signature + heuristic + sandbox + ML detect engine | 🛡️ PROTOKOL |
+| 456 | EDR Agent Sıfırdan | Syscall hook + file/proc/net telemetri + C2 comm impl et | 🛡️ PROTOKOL |
+| 457 | Custom Hypervisor İntrospection | VMI ilə guest OS yaddaş analizi impl et | 🛡️ PROTOKOL |
+| 458 | Firmware Güvənlik Çərçivəsi | Secure boot + attestation + update signing impl et | 🛡️ PROTOKOL |
+| 459 | HSM Protocol Bridge | PKCS#11 ↔ TPM 2.0 ↔ custom protocol bridge yaz | 🛡️ PROTOKOL |
+| 460 | Kvant Kriptoqrafiya Keçişi | Hybrid klasik+post-kvant TLS extension impl et | 🛡️ PROTOKOL |
+| 461 | MPC Protokolu | Secure multi-party computation protokolu impl et | 🛡️ PROTOKOL |
+| 462 | Oblivious RAM (ORAM) | Path ORAM protokolunu sıfırdan implement et | 🛡️ PROTOKOL |
+| 463 | Private Information Retrieval | PIR protokolunu implement et, query gizliliyini göstər | 🛡️ PROTOKOL |
+| 464 | Fully Homomorphic Encryption | BFV/CKKS şeması üzərindən FHE hesablamaları impl et | 🛡️ PROTOKOL |
+| 465 | Tam Blockchain Node | P2P, transaction pool, block mine, fork resolution impl et | 🛡️ PROTOKOL |
+| 466 | Smart Contract VM | Öz bytecode VM-ni yaz, smart contract execute et | 🛡️ PROTOKOL |
+| 467 | Lightning Network Kanali | Payment channel: HTLC, revocation, routing impl et | 🛡️ PROTOKOL |
+| 468 | FIDO2/WebAuthn Server | Authenticator registration + assertion protokolu impl et | 🛡️ PROTOKOL |
+| 469 | OAuth 2.1 Server | Authorization server: PKCE, refresh, token introspection | 🛡️ PROTOKOL |
+| 470 | OpenID Connect Provider | OIDC discovery, userinfo, JWKS, ID token impl et | 🛡️ PROTOKOL |
+| 471 | SAML 2.0 IdP Sıfırdan | XML imzalama, assertion, artifact binding impl et | 🛡️ PROTOKOL |
+| 472 | Kerberos v5 Tam Impl. | KDC, TGT, TGS, ST, PKINIT impl et (RFC 4120) | 🛡️ PROTOKOL |
+| 473 | NTLM Challenge-Response | NTLMv2 protokolunu sıfırdan implement et | 🛡️ PROTOKOL |
+| 474 | S/MIME Tam Implementasiyası | CMS imzalama + şifrələmə + sertifikat doğrulama impl et | 🛡️ PROTOKOL |
+| 475 | PGP/OpenPGP Protokolu | OpenPGP packet format, keyring, WoT impl et (RFC 4880) | 🛡️ PROTOKOL |
+| 476 | Secure Messaging (Signal) | X3DH + Double Ratchet protokolunu sıfırdan impl et | 🛡️ PROTOKOL |
+| 477 | Onion Routing Sistemi | Tor-bənzər: directory server + circuit + cell routing impl | 🛡️ PROTOKOL |
+| 478 | Mixnet Protokolu | Loopix/Sphinx packet format ilə mixnet impl et | 🛡️ PROTOKOL |
+| 479 | Anonim Kimlik Doğrulama | DAA (Direct Anonymous Attestation) protokolu impl et | 🛡️ PROTOKOL |
+| 480 | Group Signature Sxemi | BBS+ group signature protokolunu sıfırdan implement et | 🛡️ PROTOKOL |
+| 481 | Tam IKEv2/IPsec Stack | IKEv2 SA negotiation + ESP/AH transform impl et | 🛡️ PROTOKOL |
+| 482 | SCEP Sertifikat Enrolment | Simple Certificate Enrollment Protocol impl et | 🛡️ PROTOKOL |
+| 483 | EST (RFC 7030) Protokolu | Enrollment over Secure Transport protokolu impl et | 🛡️ PROTOKOL |
+| 484 | CMP Protokolu | Certificate Management Protocol (RFC 4210) impl et | 🛡️ PROTOKOL |
+| 485 | ACME Protokolu Sıfırdan | Let's Encrypt ACME (RFC 8555): challenge, order, cert impl | 🛡️ PROTOKOL |
+| 486 | Xüsusi HSM Protokolu | Öz HSM protokolunu yaz: əmr seti, session, audit impl et | 🛡️ PROTOKOL |
+| 487 | Xüsusi Audit Protokolu | Tamper-evident, verifiable audit log protokolu impl et | 🛡️ PROTOKOL |
+| 488 | Xüsusi Attestation Protokolu | Remote attestation: nonce, quote, verify impl et | 🛡️ PROTOKOL |
+| 489 | Tam QUIC Tətbiqi | QUIC + HTTP/3 + 0-RTT + connection migration impl et | 🛡️ PROTOKOL |
+| 490 | Custom SDN Protokolu | OpenFlow-bənzər SDN kontrol protokolu impl et | 🛡️ PROTOKOL |
+| 491 | Xüsusi P4 Pipeline | P4 proqramlanabilir data plane impl et (P4Runtime) | 🛡️ PROTOKOL |
+| 492 | Tam Network Emülatoru | Mininet-bənzər: virtual topo, link delay, packet loss | 🛡️ PROTOKOL |
+| 493 | Xüsusi Fuzzing Framework | Coverage+mutation+grammar-based fuzzer impl et | 🛡️ PROTOKOL |
+| 494 | Xüsusi Binary Analysis | angr-bənzər: CFG, taint, constraint solving impl et | 🛡️ PROTOKOL |
+| 495 | Production C2 Framework | Malleable C2, domain fronting, modullar implant impl et | 🛡️ PROTOKOL |
+| 496 | Tam EDR + XDR Sistemi | Agent + Server + analitika + MITRE ATT&CK mapping | 🛡️ PROTOKOL |
+| 497 | Sıfır Günlük Araşdırma Aləti | Fuzzing + taint + SMT solver birləşdirən 0-day finder | 🛡️ PROTOKOL |
+| 498 | Tam Kibertəhlükəsizlik Platforması | SIEM + SOAR + TI + EDR birləşdirən inteqrasiya qatı yaz | 🛡️ PROTOKOL |
+| 499 | Öz Kriptoqrafik Protokol Standarti | RFC formatında xüsusi kriptoqrafik protokol dizayn et + impl | 🛡️ PROTOKOL |
+| 500 | Tam Şifrəli Şəbəkə OS | Miniature güvənli OS: bootloader, network stack, crypto impl | 🛡️ PROTOKOL |
+
+---
+
+## 📊 Xülasə Statistikası
+
+| Mərhələ | Tapşırıqlar | Mövzu | Min Səviyyə |
+|---|---|---|---|
+| 5 | 201–240 | Şəbəkə Proqramlaşdırması | ⚙️ ORTA |
+| 6 | 241–275 | Kriptoqrafiya | ⚙️ ORTA → 👑 MASTER |
+| 7 | 276–310 | Sistem Proqramlaşdırması | 🔥 ÇƏTİN → 👑 MASTER |
+| 8 | 311–375 | Protokolları Sıfırdan | 👑 MASTER |
+| 9 | 376–425 | İleri Kibertəhlükəsizlik | 🔥 ÇƏTİN → 👑 MASTER |
+| 10 | 426–500 | Production Sistemlər | 🛡️ PROTOKOL |
+
+> **💡 Tövsiyə:** Hər tapşırığı tamamladıqdan sonra kodu GitHub-a yükləyin və README-yə texniki qeydlər əlavə edin. Bu, portfelunuzu gücləndirir.
+
+---
+
+*C++ & Kibertəhlükəsizlik Roadmap — Tapşırıqlar 201–500*
