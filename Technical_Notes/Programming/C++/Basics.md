@@ -19,6 +19,7 @@ cmake --build .
 ---
 
 # C++ compilation process diagram
+---
 <img width="436" height="471" alt="image" src="https://github.com/user-attachments/assets/7a1bf545-e07f-4dbf-82c4-355d24c91857" />
 ```
 1. Pre-Processor: Kodundakı #include və #define kimi sətirləri emal edir. Məsələn, #include <iostream> yazmısansa, həmin kitabxananın içindəki minlərlə sətir kodu sənin faylına "yapışdırır".
@@ -29,7 +30,6 @@ cmake --build .
 
 4. Linker: Ən vacib son mərhələdir. Sənin yaratdığın obyekt fayllarını və istifadə etdiyin xarici kitabxanaları (Libraries) bir araya gətirib vahid bir Executable (.exe) faylı yaradır.
 ```
----
 
 # Data Types
 ---
