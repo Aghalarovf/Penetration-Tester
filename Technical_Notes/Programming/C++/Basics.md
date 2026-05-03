@@ -20,6 +20,15 @@ cmake --build .
 
 # C++ compilation process diagram
 <img width="436" height="471" alt="image" src="https://github.com/user-attachments/assets/7a1bf545-e07f-4dbf-82c4-355d24c91857" />
+```
+1. Pre-Processor: Kodundakı #include və #define kimi sətirləri emal edir. Məsələn, #include <iostream> yazmısansa, həmin kitabxananın içindəki minlərlə sətir kodu sənin faylına "yapışdırır".
+
+2. Compiler (məsələn, GCC və ya MSVC): Sənin yazdığın yüksək səviyyəli C++ kodunu Assembly koduna (prosessorun başa düşdüyü aşağı səviyyəli təlimatlar) çevirir.
+
+3. Assembler: Assembly kodunu maşın dilinə, yəni Object file (.o və ya .obj) şəklində olan sıfırlara və birlərə çevirir. Amma bu fayl hələ təkbaşına işləyə bilmir.
+
+4. Linker: Ən vacib son mərhələdir. Sənin yaratdığın obyekt fayllarını və istifadə etdiyin xarici kitabxanaları (Libraries) bir araya gətirib vahid bir Executable (.exe) faylı yaradır.
+```
 ---
 
 # Data Types
