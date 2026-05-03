@@ -18,6 +18,10 @@ cmake --build .
 ```
 ---
 
+# C++ compilation process diagram
+<img width="436" height="471" alt="image" src="https://github.com/user-attachments/assets/7a1bf545-e07f-4dbf-82c4-355d24c91857" />
+---
+
 # Data Types
 ---
 ![C-data-types](https://github.com/user-attachments/assets/ae8201f6-63d8-49f1-9ba8-162cb789dc77)
