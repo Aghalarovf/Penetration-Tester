@@ -26,9 +26,9 @@ Certificate Templates
 ```powershell
 certutil -v -template
 
-cn
-displayName
-msPKI-Cert-Template-OID
+cn                                         Common Name
+displayName                                Display name
+msPKI-Cert-Template-OID                    Template Object Identifier    
 msPKI-Certificate-Application-Policy
 msPKI-Certificate-Name-Flag
 msPKI-Enrollment-Flag
@@ -38,10 +38,10 @@ msPKI-RA-Application-Policies
 msPKI-RA-Signature
 msPKI-Supersede-Templates
 msPKI-Template-Minor-Revision
-msPKI-Template-Schema-Version
-nTSecurityDescriptor
-objectGUID
-pKIExtendedKeyUsage
+msPKI-Template-Schema-Version              Version
+nTSecurityDescriptor                       Access Control List (ACL)
+objectGUID                                 Unical İdentifier
+pKIExtendedKeyUsage                        1.3.6.1.5.5.7.3.2 - Client Authentication,   1.3.6.1.5.5.7.3.1 - Server Authentication
 pKICriticalExtensions
 pKIDefaultKeySpec
 pKIMaxIssuingDepth
@@ -49,6 +49,6 @@ flags
 revision
 CT_FLAG_SUBJECT_ALT_REQUIRE_UPN
 CT_FLAG_SUBJECT_REQUIRE_DIRECTORY_PATH
-CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT
+CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT         ESC1
 CTPRIVATEKEY_FLAG_EXPORTABLE_KEY
 ```
