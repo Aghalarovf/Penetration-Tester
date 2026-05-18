@@ -19,6 +19,10 @@ smbclient -L //10.10.10.10 -U user --option='client min protocol=SMB2'
 smbclient -L //10.10.10.10 -U user --option='client max protocol=SMB3'
 smbclient //10.10.10.10/share -U user --pw-nt-hash HASH
 
+# Netuse
+net use \\MS01\C$\ /user:inlanefreight.local\svc_sql <PASSWORD>
+type \\ms01\c$\Users\Administrator\Desktop\flag.txt
+
 # Kerberos Authentication
 kinit username
 smbclient -L //dc.domain.local -k
