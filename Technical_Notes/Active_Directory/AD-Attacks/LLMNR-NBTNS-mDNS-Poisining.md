@@ -9,6 +9,8 @@ RESPONDER
 sudo responder -I eth0 -A ( Analyze Mode )
 sudo responder -I eth0 -dwv
 
+/usr/share/responder/logs/
+
 WIRESHARK
 llmnr || nbns
 udp.port == 5355 (LLMNR)
