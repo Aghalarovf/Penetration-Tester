@@ -1,3 +1,10 @@
+# Main Connect
+```powershell
+xfreerdp /u:Fiona /p:'48Ns72!bns74@S84NNNSl' /d:inlanefreight.htb /v:10.129.203.10 /cert:ignore \
+/dynamic-resolution "/drive:Labaratory,/home/sako/Labaratory"
+```
+
+```
 ==============================
 RDP (Remote Desktop Protocol)
 Cheat Sheet – Professional
@@ -168,6 +175,6 @@ RESULTS_FILE="rdp_enum_$(date +%Y%m%d_%H%M%S).txt"
 echo -e "\n${GREEN}[+] Results saved: $RESULTS_FILE${NC}"
 
 echo -e "${BLUE}[*] RDP Enumeration Complete!${NC}"
-
+```
 
 
