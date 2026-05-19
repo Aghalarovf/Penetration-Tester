@@ -10,6 +10,7 @@ https://wadcoms.github.io/
 ```
 # Find Active Hosts
 sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24
+fping -asgq 172.16.7.0/23
 
 # Specific Host
 nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( Fast Scan )
