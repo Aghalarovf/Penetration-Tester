@@ -74,6 +74,12 @@ cat all_combined_uniq.txt combined_2.txt combined_3.txt base_word.txt mut1.txt m
 cat mut_password.list | awk 'length($0) >= 8 && length($0) <= 20' > final.list
 ```
 
+# Username Enumeration With CME
+```powershell
+sudo crackmapexec smb 172.16.7.3 -u 'ab920' -p 'weasal' --users | tee  usernames.txt
+cat usernames.txt | cut -d'\' -f2 | awk -F " " '{print $1}' | tee valid_users.txt
+```
+
 # Kerbrute
 ```
 # Valid Usernames
