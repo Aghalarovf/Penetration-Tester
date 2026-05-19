@@ -7,6 +7,7 @@ nmap -sU --script nbstat.nse -p137 <target-ip-range>
 
 RESPONDER
 sudo responder -I eth0 -A ( Analyze Mode )
+sudo responder -I eth0 -dwv
 
 WIRESHARK
 llmnr || nbns
