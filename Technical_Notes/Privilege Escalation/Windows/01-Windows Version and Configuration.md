@@ -26,6 +26,11 @@ wmic product get name
 Get-WmiObject -Class Win32_Product |  select Name, Version
 ```
 
+# Services
+```powershell
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess | Select-Object Id, ProcessName, Description, Path
+```
+
 # Drives
 ```powershell
 wmic logicaldisk get caption || fsutil fsinfo drives
