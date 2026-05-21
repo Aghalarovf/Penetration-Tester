@@ -6,6 +6,7 @@ systeminfo | findstr /B /C:"OS Name" /C:"OS Version"
 # Kernel Update
 ```powershell
 wmic qfe
+Get-HotFix | ft -AutoSize
 ```
 
 # OS Information
@@ -17,6 +18,12 @@ wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE%
 ```powershell
 set
 Get-ChildItem Env: | ft Key,Value
+```
+
+# Installed Programs
+```powershell
+wmic product get name
+Get-WmiObject -Class Win32_Product |  select Name, Version
 ```
 
 # Drives
