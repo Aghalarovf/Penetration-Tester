@@ -184,6 +184,10 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 [PowerShell və CMD vasitəsilə maksimum məlumat əldə etmək](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/Living%20Of%20The%20Land.md)
 ---
 
+### Local Privilege Escalation
+[Windows Privilege Escalation](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Privilege%20Escalation/Windows)
+---
+
 ### 14. Enumeration with PowerView
 ```
 1. Domain məlumatını al
