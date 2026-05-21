@@ -33,6 +33,11 @@ net user %USERNAME%
 
 # Entry Types
 ```powershell
+takeown /f C:\Windows\System32\Winevt\Logs\Security.evtx
+
+icacls C:\Windows\System32\Winevt\Logs\Security.evtx /grant htb-student:F
+
+
 Get-WinEvent -LogName Security -FilterXPath "*[System[EventID=4624]]" -MaxEvents 50 | ForEach-Object {
     $xml = [xml]$_.ToXml()
     $TargetUserName = ($xml.Event.EventData.Data | Where-Object {$_.Name -eq "TargetUserName"})."#text"
