@@ -52,6 +52,7 @@ pipelist.exe /accepteula
 
 # With Powershell
 gci \\.\pipe\
+[System.IO.Directory]::GetFiles("\\.\\pipe\\") | Select-String "SQL"
 
 # Konkret pipe
 accesschk.exe /accepteula \\.\Pipe\lsass -v
