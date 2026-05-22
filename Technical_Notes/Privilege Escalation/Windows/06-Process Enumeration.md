@@ -1,5 +1,8 @@
 # Process
 ```powershell
+netstat -ano
+tasklist /FI "PID eq <PID_NUMBER>"
+
 tasklist /v
 net start
 sc query
