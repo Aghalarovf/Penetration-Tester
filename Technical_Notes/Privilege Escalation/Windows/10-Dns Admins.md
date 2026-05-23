@@ -93,3 +93,8 @@ Start-Service -Name "DNS"
 ```powershell
 net group "Domain Admins" /dom
 ```
+
+# Start new Session
+```powershell
+Start-Process powershell -Credential (Get-Credential)
+```
