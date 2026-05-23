@@ -85,12 +85,8 @@ Write-Host "`n===========================================================" -Fore
 
 # Stopping the DNS Service
 ```powershell
-sc stop dns
-```
-
-# Starting the DNS Service
-```powershell
-sc start dns
+Stop-Service -Name "DNS" -Force
+Start-Service -Name "DNS"
 ```
 
 # Confirming Group Membership
