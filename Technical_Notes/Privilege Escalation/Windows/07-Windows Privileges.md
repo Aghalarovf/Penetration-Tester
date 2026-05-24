@@ -86,3 +86,9 @@ Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,D
 # Secretsdump
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
+
+# SeLoadDriverPrivilege
+[Print Operators](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/11-Print%20Operators.md)
+
+# SeRestorePrivilege
+[Server Operators]()
