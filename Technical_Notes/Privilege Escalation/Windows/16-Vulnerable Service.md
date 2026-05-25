@@ -34,7 +34,7 @@ Get-NetTCPConnection | ForEach-Object {
         "PID"           = $_.OwningProcess
         "Process Name"    = $procName
     }
-} | Format-Table -AutoSize
+} | Out-GridView
 ```
 
 # Proof of Concept
