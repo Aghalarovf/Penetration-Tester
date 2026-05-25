@@ -12,6 +12,8 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
 -------  ------    -----      -----     ------     --  -- -----------
     149      10     1512       6748              3324   0 inSyncCPHwnet64
 
+
+
 $ServiceName = (Get-Service | Where-Object {$_.DisplayName -like "*inSync*"}).ServiceName
 if ($ServiceName) {
     $RegPath = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$ServiceName").ImagePath
