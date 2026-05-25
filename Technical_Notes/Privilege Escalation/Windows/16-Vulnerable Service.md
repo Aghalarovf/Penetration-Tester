@@ -11,9 +11,11 @@ get-process -Id 3324
 Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
 -------  ------    -----      -----     ------     --  -- -----------
     149      10     1512       6748              3324   0 inSyncCPHwnet64
+
+get-service | ? {$_.DisplayName -like '*inSync*'}
 ```
 
-# Automate
+# Automate Services
 ```powershell
 Get-NetTCPConnection | ForEach-Object {
     $procName = $null
@@ -33,8 +35,10 @@ Get-NetTCPConnection | ForEach-Object {
         "Process Name"    = $procName
     }
 } | Out-GridView
+```
 
-
+# Enumerate Service
+```powershell
 $ServiceName = (Get-Service | Where-Object {$_.DisplayName -like "*inSync*"}).ServiceName
 if ($ServiceName) {
     $RegPath = (Get-ItemProperty -Path "HKLM:\SYSTEM\CurrentControlSet\Services\$ServiceName").ImagePath
