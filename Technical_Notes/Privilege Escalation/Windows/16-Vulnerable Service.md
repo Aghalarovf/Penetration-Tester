@@ -51,6 +51,13 @@ if ($ServiceName) {
 }
 ```
 
+# Search Service Vulnerabilities 
+```powershell
+Google Dorking:
+Druva inSync 6.6.3 exploit
+Druva inSync 6.6.3 vulnerability
+```
+
 # Proof of Concept
 ```powershell
 $ErrorActionPreference = "Stop"
