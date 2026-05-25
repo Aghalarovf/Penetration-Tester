@@ -15,6 +15,28 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
 get-service | ? {$_.DisplayName -like '*inSync*'}
 ```
 
+# Automate
+```powershell
+Get-NetTCPConnection | ForEach-Object {
+    $procName = $null
+    # PID vasitəsilə prosesin adını təhlükəsiz şəkildə öyrənirik (bağlanmış proseslərdə xəta verməməsi üçün)
+    if ($_.OwningProcess -and (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue)) {
+        $procName = (Get-Process -Id $_.OwningProcess).ProcessName
+    } else {
+        $procName = "Bilinməyən / Bağlanmış"
+    }
+
+    # Çıxış formatını nizamlayırıq
+    [PSCustomObject]@{
+        "Local Address"   = "$($_.LocalAddress):$($_.LocalPort)"
+        "External Address"  = "$($_.RemoteAddress):$($_.RemotePort)"
+        "Status"        = $_.State
+        "PID"           = $_.OwningProcess
+        "Process Name"    = $procName
+    }
+} | Format-Table -AutoSize
+```
+
 # Proof of Concept
 ```powershell
 $ErrorActionPreference = "Stop"
