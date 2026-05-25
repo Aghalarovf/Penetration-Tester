@@ -15,7 +15,7 @@ Handles  NPM(K)    PM(K)      WS(K)     CPU(s)     Id  SI ProcessName
 get-service | ? {$_.DisplayName -like '*inSync*'}
 ```
 
-# Automate Services
+# Automate Services Enumerate
 ```powershell
 Get-NetTCPConnection | ForEach-Object {
     $procName = $null
