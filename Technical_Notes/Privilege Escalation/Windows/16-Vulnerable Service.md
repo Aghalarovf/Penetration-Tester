@@ -23,7 +23,7 @@ Get-NetTCPConnection | ForEach-Object {
     if ($_.OwningProcess -and (Get-Process -Id $_.OwningProcess -ErrorAction SilentlyContinue)) {
         $procName = (Get-Process -Id $_.OwningProcess).ProcessName
     } else {
-        $procName = "Bilinməyən / Bağlanmış"
+        $procName = "Unknown / Closed"
     }
 
     # Çıxış formatını nizamlayırıq
