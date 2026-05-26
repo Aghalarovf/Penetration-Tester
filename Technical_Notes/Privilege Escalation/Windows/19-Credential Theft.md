@@ -41,7 +41,7 @@ Invoke-SessionGopher -Target WINLPE-SRV01
 
 # Windows AutoLogon
 ```powershell
-query "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon"
+Get-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon" | Select-Object AutoAdminLogon, DefaultUserName, DefaultPassword
 
     AutoAdminLogon    REG_SZ    1
     DefaultUserName    REG_SZ    htb-student
