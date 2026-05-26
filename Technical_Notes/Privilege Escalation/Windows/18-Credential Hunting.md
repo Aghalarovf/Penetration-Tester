@@ -38,10 +38,14 @@ $credential.GetNetworkCredential().password
 
 # Sticky Notes
 ```powershell
+Set-ExecutionPolicy Bypass -Scope Process
+
 C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite
 
 $db = 'C:\Users\htb-student\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
-PS C:\htb> Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
+
+Import-Module .\PSSQLite.psd1
+Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
 
 strings plum.sqlite-wal
 ```
