@@ -35,3 +35,13 @@ $credential = Import-Clixml -Path 'C:\scripts\pass.xml'
 $credential.GetNetworkCredential().username
 $credential.GetNetworkCredential().password
 ```
+
+# Sticky Notes
+```powershell
+C:\Users\<user>\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite
+
+$db = 'C:\Users\htb-student\AppData\Local\Packages\Microsoft.MicrosoftStickyNotes_8wekyb3d8bbwe\LocalState\plum.sqlite'
+PS C:\htb> Invoke-SqliteQuery -Database $db -Query "SELECT Text FROM Note" | ft -wrap
+
+strings plum.sqlite-wal
+```
