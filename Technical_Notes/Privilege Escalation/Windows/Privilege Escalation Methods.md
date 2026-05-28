@@ -1,4 +1,4 @@
-# 1. System Information
+# System Information
 ```powershell
 systeminfo
 
@@ -9,18 +9,7 @@ wmic os get osarchitecture || echo %PROCESSOR_ARCHITECTURE%
 Get-ChildItem Env: | ft Key,Value
 ```
 
-# 2. Programs and Services
-```powershell
-Get-WmiObject -Class Win32_Product |  select Name, Version
-
-Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess | Select-Object Id, ProcessName, Description, Path
-
-Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
-```
-[Programs and Services Privilege Escalation](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/06-Process%20Enumeration.md)
-[Vulnerable Services](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/16-Vulnerable%20Service.md)
-
-# 3. User and Group Enumeration
+# User and Group Enumeration
 ```powershell
 whoami /all
 SeDebugPrivilege
@@ -39,14 +28,14 @@ nltest /DCNAME:DomainName
 nltest /DSGETDC:DomainName
 ```
 
-# 4. Always Install Elevated
+# Always Install Elevated
 ```powershell
 reg query HKEY_CURRENT_USER\Software\Policies\Microsoft\Windows\Installer
 reg query HKLM\SOFTWARE\Policies\Microsoft\Windows\Installer
 ```
 [Always Install Elevated](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/23-Miscellanous%20Technique.md)
 
-# 5. Network Enumeration
+# Network Enumeration
 ```powershell
 net share
 powershell Find-DomainShare -ComputerDomain domain.local
@@ -68,6 +57,17 @@ accesschk.exe /accepteula "<CURRENT_USERNAME>" -kvuqsw hklm\System\CurrentContro
 Get-CimInstance Win32_StartupCommand | Select-Object Name, Command, Location, User | Format-List
 ```
 [Weak Permissions](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/14-Weak%20Permissions.md)
+
+# Programs and Services
+```powershell
+Get-WmiObject -Class Win32_Product |  select Name, Version
+
+Get-Process -Id (Get-NetTCPConnection -LocalPort 8080).OwningProcess | Select-Object Id, ProcessName, Description, Path
+
+Get-PSDrive | where {$_.Provider -like "Microsoft.PowerShell.Core\FileSystem"}| ft Name,Root
+```
+[Programs and Services Privilege Escalation](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/06-Process%20Enumeration.md)
+[Vulnerable Services](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/16-Vulnerable%20Service.md)
 
 # Kernel Exploits
 ```powershell
