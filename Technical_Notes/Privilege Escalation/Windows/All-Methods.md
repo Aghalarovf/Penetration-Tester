@@ -263,6 +263,7 @@ dir /s *sysprep.inf *sysprep.xml *unattended.xml *unattend.xml *unattend.txt 2>n
 ```powershell
 # General search for password strings
 findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml
+
 Get-ChildItem -Recurse -Include *.txt,*.ini,*.cfg,*.config,*.xml -ErrorAction SilentlyContinue | `
   Select-String -Pattern "password" | Select-Object Path, LineNumber, Line | Out-GridView
 
