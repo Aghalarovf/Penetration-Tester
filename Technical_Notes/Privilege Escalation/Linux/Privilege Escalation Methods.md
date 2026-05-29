@@ -113,9 +113,9 @@ ssh htb-user@10.129.16.44 -t "bash --noprofile"
 
 # Special Permissions
 ```powershell
-find / -user root -perm -2000 -exec ls -ldb {} \; 2>/dev/null    SGID
-find / -user root -perm -4000 -exec ls -ldb {} \; 2>/dev/null    SUID
-find / -user root -perm -6000 -exec ls -ldb {} \; 2>/dev/null    SUID + SGID
+find / -user root -perm -2000  2>/dev/null    SGID
+find / -user root -perm -4000  2>/dev/null    SUID
+find / -user root -perm -6000  2>/dev/null    SUID + SGID
 
 find / -perm -4000 -type f 2>/dev/null | awk -F'/' '{print $NF}' | sort -u > suid_binaries.list
 for i in $(curl -s https://gtfobins.org/api.json | jq -r '.executables | keys[]'); do 
