@@ -138,4 +138,7 @@ for i in $(curl -s https://gtfobins.org/api.json | jq -r '.executables | keys[]'
     fi; 
 done
 
+bash.sh
+#!/bin/bash
+id
 ```
