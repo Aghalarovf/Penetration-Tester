@@ -113,7 +113,7 @@ ssh htb-user@10.129.16.44 -t "bash --noprofile"
 
 # Special Permissions
 ```powershell
-find / -perm -2000 -type d -writable 2>/dev/null    SGID
+find / -user root -perm -2000 -writable 2>/dev/null    SGID
 find / -user root -perm -4000  2>/dev/null          SUID
 find / -user root -perm -6000  2>/dev/null          SUID + SGID
 
