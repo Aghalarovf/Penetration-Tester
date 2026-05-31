@@ -245,3 +245,12 @@ echo "[+] Triggering..."
 screen -ls # screen itself is setuid, so...
 /tmp/rootshell
 ```
+
+# Logrotate
+```powershell
+logrotate --help
+
+cat /etc/logrotate.conf
+sudo cat /var/lib/logrotate.status
+ls /etc/logrotate.d/
+```
