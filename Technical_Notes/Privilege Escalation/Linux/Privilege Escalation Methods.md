@@ -376,6 +376,7 @@ cat script.py | grep "import"
 grep -r "def virtual_memory" /usr/local/lib/python3.8/dist-packages/psutil/*
 
 ls -l /usr/local/lib/python3.8/dist-packages/psutil/__init__.py
+# Əgər -rw-r--rw- görürsənsə - YAZMA İCAZƏSİ VAR!
 
 cat /usr/local/lib/python3.8/dist-packages/psutil/__init__.py | grep -A 20 "def virtual_memory"
 nano /usr/local/lib/python3.8/dist-packages/psutil/__init__.py
