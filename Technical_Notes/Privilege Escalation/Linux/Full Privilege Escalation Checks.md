@@ -4,15 +4,15 @@ sudo -l
 sudo -V | head -n1
 ```
 
-(SUDO Abuse 1)[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md]
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/15-SUDO.md](SUDO Abuse 2)
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md](Shared Libraries)
+[SUDO Abuse 1](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md)
+[SUDO Abuse 2](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/15-SUDO.md)
+(Shared Libraries)(https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md)
 ---
 
 ```powershell
 id
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/06-Privileged%20Groups.md](Group Abuse)
+(https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/06-Privileged%20Groups.md)[Group Abuse]
 ---
 
 ```powershell
@@ -24,14 +24,14 @@ history
 ```powershell
 echo $PATH
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/02-Path%20Abuse.md](Path Abuse)
+[Path Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/02-Path%20Abuse.md)
 ---
 
 ```powershell
 echo $SHELL
 echo $0
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/03-Restricted%20Shell.md](Restricted Environment)
+[Restricted Environment](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/03-Restricted%20Shell.md)
 ---
 
 ```powershell
@@ -39,7 +39,7 @@ find / -user root -perm -2000 -writable 2>/dev/null
 find / -user root -perm -4000  2>/dev/null
 find / -user root -perm -6000  2>/dev/null
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/04-Special%20Permissions.md](SUID/SGID)
+[SUID/SGID](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/04-Special%20Permissions.md)
 ---
 
 
