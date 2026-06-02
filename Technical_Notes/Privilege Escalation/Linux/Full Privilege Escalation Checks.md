@@ -3,7 +3,8 @@
 sudo -l
 sudo -V | head -n1
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md](SUDO Abuse 1)
+---
+(SUDO Abuse 1)[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md]
 [https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/15-SUDO.md](SUDO Abuse 2)
 [https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md](Shared Libraries)
 
@@ -11,6 +12,7 @@ sudo -V | head -n1
 ```powershell
 id
 ```
+---
 [https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/06-Privileged%20Groups.md](Group Abuse)
 
 ```powershell
