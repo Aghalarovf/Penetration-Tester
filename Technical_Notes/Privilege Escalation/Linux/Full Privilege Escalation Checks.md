@@ -6,13 +6,13 @@ sudo -V | head -n1
 
 [SUDO Abuse 1](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md)
 [SUDO Abuse 2](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/15-SUDO.md)
-(Shared Libraries)(https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md)
+[Shared Libraries](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md)
 ---
 
 ```powershell
 id
 ```
-(https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/06-Privileged%20Groups.md)[Group Abuse]
+[Group Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/06-Privileged%20Groups.md)
 ---
 
 ```powershell
@@ -63,13 +63,13 @@ find / -path /proc -prune -o -type f -perm -o+w 2>/dev/null
 
 grep -rn "Password" / 2>/dev/null
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/01-Critical%20Files.md](Critical Files and Configures)
+[Critical Files and Configures](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/01-Critical%20Files.md)
 ---
 
 ```powershell
 screen -v
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/08-Vulnerability%20Services.md](Screen Abuse)
+[Screen Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/08-Vulnerability%20Services.md)
 ---
 
 ```powershell
@@ -82,27 +82,27 @@ lsblk
 logrotate --help
 find /var/log -type f -writable 2>/dev/null
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/09-Logrotate.md](Logrotate Abuse)
+[Logrotate Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/09-Logrotate.md)
 ---
 
 ```powershell
 cat /etc/exports
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/10-Network%20Shares.md](NFS Abuse)
+[NFS Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/10-Network%20Shares.md)
 ---
 
 ```powershell
 ./linux-exploit-suggester.sh
 msf exploit(multi/handler) > use post/multi/recon/local_exploit_suggester
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/11-Kernel%20Exploit.md](Kernel Exploit)
+[Kernel Exploit](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/11-Kernel%20Exploit.md)
 ---
 
 ```powershell
 ./linpeas.sh | grep -A5 "Shared Library"
 ```
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md](Shared Library Abuse)
-[https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/13-Shared%20Object%20Hijacking.md](Shared Object Hijacking)
+[Shared Library Abuse](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md)
+[Shared Object Hijacking](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/13-Shared%20Object%20Hijacking.md)
 ---
 
 ```powershell
