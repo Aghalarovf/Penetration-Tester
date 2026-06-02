@@ -5,7 +5,9 @@ sudo -V | head -n1
 ```
 
 [SUDO Abuse 1](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/05-Sudo%20Rights.md)
+
 [SUDO Abuse 2](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/15-SUDO.md)
+
 [Shared Libraries](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Linux/12-Shared%20Libraries.md)
 ---
 
