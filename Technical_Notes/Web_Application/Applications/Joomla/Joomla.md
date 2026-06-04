@@ -47,7 +47,7 @@ python2 -m pip install bs4
 
 python2 joomlascan.py -u http://dev.inlanefreight.local
 
-sudo python3 joomla-brute.py -u http://dev.inlanefreight.local -w /usr/share/metasploit-framework/data/wordlists/http_default_pass.txt -usr admin
+sudo python3 joomla_brute.py -u http://app.inlanefreight.local -PL /usr/share/metasploit-framework/data/wordlists/http_default_pass.txt -U admin
 ```
 
 # JoomlaScan
