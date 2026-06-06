@@ -65,3 +65,8 @@ gitleaks detect --source=<REPO_PATH>
 # truffleHog ilə
 trufflehog git http://<TARGET>/<user>/<repo>
 ```
+
+# Remote Code Execution
+```powershell
+multi/http/gitlab_exif_rce
+```
