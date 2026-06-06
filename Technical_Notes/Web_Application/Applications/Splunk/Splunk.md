@@ -166,7 +166,11 @@ sourcetype = shell
 ```powershell
 // Step 3 - Package the app
 tar -cvzf updater.tar.gz splunk_shell/
+
+https://10.129.201.50:8000/en-US/manager/appinstall/_upload?breadcrumbs=Settings%7C%2Fmanager%2Fsearch%2F%09Apps%7C%2Fmanager%2Fsearch%2Fapps%2Flocal
 ```
+<img width="918" height="410" alt="image" src="https://github.com/user-attachments/assets/51971189-8af3-4067-94b0-ab456ad02e1b" />
+
 
 # Method 3: REST API — Direct Script Trigger
 ```powershell
