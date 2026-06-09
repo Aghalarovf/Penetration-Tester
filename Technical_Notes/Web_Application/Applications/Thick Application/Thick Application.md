@@ -67,7 +67,7 @@ DnSpy → hardcoded credentials tapıldı ✅
 # Credential Axtarışı üçün Komandalar
 ```powershell
 # Strings ilə axtarış
-strings64.exe app.exe | findstr /i "password pass user admin"
+strings.exe" .\Restart-OracleService.exe | Select-String -Pattern "pass|user|admin|web|login|secret|key" -CaseSensitive:$false
 
 # PowerShell ilə
 Select-String -Path .\*.exe -Pattern "password|username|secret" -Encoding Byte
