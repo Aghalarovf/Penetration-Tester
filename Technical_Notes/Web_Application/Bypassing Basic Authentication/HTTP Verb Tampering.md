@@ -50,3 +50,4 @@ curl -i -X POST http://TARGET/admin/reset.php \
 curl -i -X POST http://TARGET/admin/reset.php \
   -H "X-HTTP-Method: HEAD"
 ```
+
