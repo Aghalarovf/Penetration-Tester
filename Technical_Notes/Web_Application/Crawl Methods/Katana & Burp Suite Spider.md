@@ -104,10 +104,14 @@ katana -u https://www.inlanefreight.com/ \
   -xhr \
   -known-files all \
   -proxy http://127.0.0.1:8080 \
-  -field url,method,body,header \
-  -json \
-  -o inlanefreight_full.jsonl \
+  -o inlanefreight_full.txt \
   -silent \
   -c 15 \
   -rl 30
+```
+
+# Burp Suite Spider
+<img width="592" height="262" alt="image" src="https://github.com/user-attachments/assets/4e4b125e-3d0a-43cf-ad54-f452af9a128a" />
+```powershell
+Target --> Sitemap --> www.inlanefreight.com --> Scan --> 
 ```
