@@ -1,6 +1,6 @@
 # Hydra
 
-```
+```powershell
 -t ( Thread )
 -w ( Wait )
 -s ( Port )
