@@ -24,6 +24,11 @@ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.
      -t 50 -fs 985
 
 archive, faculty, test
+
+subdomains-top1million-5000.txt
+subdomains-top1million-20000.txt
+subdomains-top1million-110000.txt
+combined_subdomains.txt
 ```
 
 # VHOST FUZZING
@@ -34,6 +39,11 @@ ffuf -w /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-5000.
      -H "Host: FUZZ.academy.htb" -t 50 -fs 985
 
 archive, faculty, test
+
+subdomains-top1million-5000.txt
+subdomains-top1million-20000.txt
+subdomains-top1million-110000.txt
+combined_subdomains.txt
 ```
 
 # Directory Discovery
