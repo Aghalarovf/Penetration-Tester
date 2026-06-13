@@ -17,6 +17,9 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 ```
 ---
 
+### DNS Enumeration
+[DNS Attacks and Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Services/Services-Attacks/DNS-Attack.md)
+---
 
 ### Pivoting and Internal Network Discovery
 ```powershell
