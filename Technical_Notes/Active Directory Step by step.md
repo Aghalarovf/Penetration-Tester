@@ -17,6 +17,17 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 ```
 ---
 
+
+### Pivoting and Internal Network Discovery
+```powershell
+Ligolo-ng
+
+msf6 > use post(multi/gather/ping_sweep
+msf6 post(multi/gather/ping_sweep > set RHOSTS 172.16.5.0/24
+msf6 post(multi/gather/ping_sweep > set SESSION 1
+msf6 post(multi/gather/ping_sweep > run
+```
+
 ### 2. Service Enumeration
 [Service Enumeration üçün bu fayllara bax](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
 ---
