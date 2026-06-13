@@ -22,6 +22,36 @@ nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 ( 
 ```powershell
 Ligolo-ng
 
+Windows:
+$path = "$env:USERPROFILE\Desktop\live_hosts.txt"
+$subnet = "172.16.6"
+1..254 | ForEach-Object {
+    $ip = "$subnet.$_"
+    if (Test-Connection -ComputerName $ip -Count 1 -Quiet -BufferSize 16 -Delay 1) {
+        Write-Host "$ip Reply" -ForegroundColor Green
+        $ip | Out-File -FilePath $path -Append
+    }
+}
+
+Linux:
+#!/bin/bash
+output_file="$HOME/Desktop/live_hosts.txt"
+subnet="172.16.6"
+trap "echo -e '\nScan interrupted by user. Exiting...'; exit" SIGINT
+> "$output_file"
+echo "Scanning subnet $subnet.0/24... Press Ctrl+C to stop."
+for i in {1..254}
+do
+    ip="$subnet.$i"
+    # -c 1: send 1 packet
+    # -W 1: wait 1 second
+    if ping -c 1 -W 1 "$ip" &> /dev/null; then
+        echo "$ip Reply"
+        echo "$ip" >> "$output_file"
+    fi
+done
+echo "Scan complete."
+
 msf6 > use post(multi/gather/ping_sweep
 msf6 post(multi/gather/ping_sweep > set RHOSTS 172.16.5.0/24
 msf6 post(multi/gather/ping_sweep > set SESSION 1
