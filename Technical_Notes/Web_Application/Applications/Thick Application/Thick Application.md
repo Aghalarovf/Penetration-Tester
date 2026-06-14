@@ -90,6 +90,7 @@ C:\Users\cybervaca\AppData\Local\Temp
 Properties -> Security -> Advanced -> cybervaca -> Disable inheritance -> Convert inherited permissions into explicit permissions on this object -> Edit -> Show advanced permissions, we deselect the Delete subfolders and files, and Delete checkboxes.
 ```
 
+# With Powershell
 ```powershell
 $sourcePath = "C:\Users\cybervaca\AppData\Local\Temp"
 $destinationPath = "C:\TempKopyalar"
