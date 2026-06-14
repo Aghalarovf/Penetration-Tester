@@ -84,6 +84,9 @@ reg query HKCU /f "password" /t REG_SZ /s
 Procmon --> Filter --> Process Name (Restart-OracleService.exe) --> Operation (CreateFile)
 ```
 <img width="932" height="41" alt="image" src="https://github.com/user-attachments/assets/c2f83141-363e-4004-8ef1-7d0c9321e8df" />
+---
+
+# With GUI
 ```powershell
 C:\Users\cybervaca\AppData\Local\Temp
 
