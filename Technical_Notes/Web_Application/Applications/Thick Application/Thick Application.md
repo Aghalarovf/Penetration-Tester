@@ -122,3 +122,5 @@ while ($true) { Start-Sleep -Seconds 5 }
 ```
 <img width="935" height="422" alt="image" src="https://github.com/user-attachments/assets/6034a9fa-7151-4de9-91f0-d5934ff94deb" />
 
+https://forum.hackthebox.com/t/exploiting-web-vulnerabilities-in-thick-client-applications/276823/85
+
