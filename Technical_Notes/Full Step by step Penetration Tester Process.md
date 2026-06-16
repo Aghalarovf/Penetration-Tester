@@ -77,7 +77,7 @@ Reference: [API Enumeration](https://github.com/Aghalarovf/Penetration-Tester/tr
 ---
 
 ## 11. Web Initial Access
-Reference: —
+Reference: [Web Exploitation](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Web_Application/Exploitation)
 
 ---
 
