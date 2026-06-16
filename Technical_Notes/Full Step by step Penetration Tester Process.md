@@ -41,11 +41,12 @@ Reference: [File Enumeration](https://github.com/Aghalarovf/Penetration-Tester/b
 
 ---
 
-## 5. Email and Comment Collector with ReconSpider
+## 6. Email and Comment Collector with ReconSpider
 Reference: [ReconSpider](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Crawl%20Methods/ReconSpider.md)
 
 ---
-## 6. Technology Enumeration
+
+## 7. Technology Enumeration
 ```powershell
 Retire.js
 Wappalyzer
@@ -60,7 +61,7 @@ HackTools
 
 ---
 
-## 7. Nikto and Nuclei
+## 8. Nikto and Nuclei
 Reference: [Automation Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Nikto%20and%20Nuclei.md)
 
 ---
@@ -76,11 +77,11 @@ Reference: [API Enumeration](https://github.com/Aghalarovf/Penetration-Tester/tr
 ---
 
 ## 11. Web Initial Access
-Reference:
+Reference: —
 
 ---
 
-## 3. Pivoting and Internal Network Discovery
+## 12. Pivoting and Internal Network Discovery
 
 **Ligolo-ng** is used for tunneling/pivoting into internal segments once an initial foothold is established.
 
@@ -125,43 +126,43 @@ msf6 post(multi/gather/ping_sweep) > run
 
 ---
 
-## 4. Service Enumeration
+## 13. Service Enumeration
 
 Reference: [Service Enumeration notes](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
 
 ---
 
-## 5. Vulnerability Scanning
+## 14. Vulnerability Scanning
 
 Reference: [Service-specific attack notes](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
 
 ---
 
-## 6. LDAP Enumeration
+## 15. LDAP Enumeration
 
 Reference: [LDAP Architecture & Queries](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Protocols/LDAP/LDAP-Architecture.md)
 
 ---
 
-## 7. SMB Enumeration
+## 16. SMB Enumeration
 
 Reference: [SMB Protocol Attacks](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Services/Services-Attacks/SMB-Attack.md)
 
 ---
 
-## 8. LLMNR / mDNS / NBT-NS Poisoning
+## 17. LLMNR / mDNS / NBT-NS Poisoning
 
 Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 ---
 
-## 9. Credential Discovery (OSINT)
+## 18. Credential Discovery (OSINT)
 
 Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 
 ---
 
-## 10. Password Policy Enumeration
+## 19. Password Policy Enumeration
 
 ```bash
 # CrackMapExec
@@ -191,7 +192,7 @@ Get-DomainPolicy
 
 ---
 
-## 11. Username Enumeration
+## 20. Username Enumeration
 
 ```bash
 # OSINT wordlists
@@ -223,7 +224,7 @@ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 
 ---
 
-## 12. Password Spraying
+## 21. Password Spraying
 
 **Linux**
 ```bash
@@ -246,7 +247,7 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 
 ---
 
-## 13. Credentialed Enumeration
+## 22. Credentialed Enumeration
 
 ```bash
 sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
@@ -291,7 +292,7 @@ sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreigh
 
 ---
 
-## 14. Credentialed Enumeration — From Windows
+## 23. Credentialed Enumeration — From Windows
 
 **Active Directory Module**
 ```powershell
@@ -344,19 +345,19 @@ Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
 
 ---
 
-## 15. Living off the Land
+## 24. Living off the Land
 
 Reference: [Maximizing information via PowerShell & CMD](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/Living%20Of%20The%20Land.md)
 
 ---
 
-## 16. Local Privilege Escalation
+## 25. Local Privilege Escalation
 
 Reference: [Windows Privilege Escalation](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Privilege%20Escalation/Windows)
 
 ---
 
-## 17. PowerView Enumeration Checklist
+## 26. PowerView Enumeration Checklist
 
 A structured reference of enumeration goals achievable with PowerView, useful as a methodology checklist during an engagement:
 
@@ -434,54 +435,54 @@ A structured reference of enumeration goals achievable with PowerView, useful as
 
 ---
 
-## 18. AS-REP Roasting
+## 27. AS-REP Roasting
 
 Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 
 ---
 
-## 19. LAPS Dumping
+## 28. LAPS Dumping
 
 Reference: [Retrieve LAPS-managed local admin passwords](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
 
 ---
 
-## 20. Kerberoasting
+## 29. Kerberoasting
 
 Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 
 ---
 
-## 21. DCSync Attacks
+## 30. DCSync Attacks
 
 Reference: [Dump password hashes via DCSync](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 
 ---
 
-## 22. SAM / SECURITY / SYSTEM Hive Dumping
+## 31. SAM / SECURITY / SYSTEM Hive Dumping
 
 Reference: [Dump SAM, SECURITY, and SYSTEM hives for local hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 
 ---
 
-## 23. LSASS Dumping
+## 32. LSASS Dumping
 
 Reference: [LSASS memory dump techniques](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 
 ---
 
-## 24. NTDS.dit Dumping
+## 33. NTDS.dit Dumping
 
 Reference: [Dump domain-wide hashes from NTDS.dit](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 
 ---
 
-## 25. Credential Manager / Windows Vault
+## 34. Credential Manager / Windows Vault
 
 Reference: [Extract stored credentials from Windows Credential Manager](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
 
 ---
 
-## 26. noPAC + PrintNightmare + PetitPotam
+## 35. noPAC + PrintNightmare + PetitPotam
 
 Reference: [Combined exploitation chain](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/BleedingEdge.md)
