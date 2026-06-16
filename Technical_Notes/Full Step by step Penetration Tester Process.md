@@ -26,6 +26,60 @@ Reference: [DNS Attacks and Enumeration](https://github.com/Aghalarovf/Penetrati
 
 ---
 
+## 3. Subdomain Enumeration
+Reference: [Subdomain Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Ffuf.md)
+
+---
+
+## 4. VHOST Enumeration
+Reference: [VHOST Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Ffuf.md)
+
+---
+
+## 5. File Discovery
+Reference: [File Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Ffuf.md)
+
+---
+
+## 5. Email and Comment Collector with ReconSpider
+Reference: [ReconSpider](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Crawl%20Methods/ReconSpider.md)
+
+---
+## 6. Technology Enumeration
+```powershell
+Retire.js
+Wappalyzer
+BuiltWith
+Shodan
+JWT Debugger
+ModHeader
+SSL Certificate Viewer
+HackBar
+HackTools
+```
+
+---
+
+## 7. Nikto and Nuclei
+Reference: [Automation Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Nikto%20and%20Nuclei.md)
+
+---
+
+## 9. Web Application Enumeration
+Reference: [CMS Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Applications/Web%20Applications.md)
+
+---
+
+## 10. API Endpoint Enumeration
+Reference: [API Enumeration](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Web_Application/Exploitation/API-Abuse)
+
+---
+
+## 11. Web Initial Access
+Reference:
+
+---
+
 ## 3. Pivoting and Internal Network Discovery
 
 **Ligolo-ng** is used for tunneling/pivoting into internal segments once an initial foothold is established.
