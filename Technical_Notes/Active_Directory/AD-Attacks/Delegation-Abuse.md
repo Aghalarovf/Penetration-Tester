@@ -30,7 +30,7 @@ Use any authentication protocol
 Resource-Based Constrained Delegation (RBCD)
 ```
 
-### 2.2 Unconstrained Delegation
+# 2.2 Unconstrained Delegation
 ```powershell
 Import-Module ActiveDirectory
 
@@ -59,7 +59,7 @@ Import-Module PowerView.ps1
 ```
 
 ---
-### 2.3 Constrained Delegation with Protocol Transition (S4U2Self + S4U2Proxy)
+# 2.3 Constrained Delegation with Protocol Transition (S4U2Self + S4U2Proxy)
 ```powershell
 Import-Module ActiveDirectory
 
@@ -106,7 +106,7 @@ hashcat -m 13100 hashes.txt rockyou.txt
     /ptt
 ```
 
-### 2.4 Constrained Delegation without Protocol Transition ( Use Kerberos only )
+# 2.4 Constrained Delegation without Protocol Transition ( Use Kerberos only )
 ```powershell
 Import-Module ActiveDirectory
 
@@ -128,7 +128,7 @@ Set-ADUser -Identity "constrained-svc" -Add @{
 Get-ADUser -Identity "constrained-svc" -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo, ServicePrincipalName
 ```
 
-### 2.5 Resource-Based Constrained Delegation (RBCD)
+# 2.5 Resource-Based Constrained Delegation (RBCD)
 ```powershell
 Import-Module ActiveDirectory
 
