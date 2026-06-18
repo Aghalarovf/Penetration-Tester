@@ -453,36 +453,42 @@ Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https
 
 ---
 
-## 30. DCSync Attacks
+## 30. Delegation Attacks
+
+Reference: [RBCD, Unconstrained and Constrained Delegation Attacks](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Delegation-Abuse.md)
+
+---
+
+## 31. DCSync Attacks
 
 Reference: [Dump password hashes via DCSync](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 
 ---
 
-## 31. SAM / SECURITY / SYSTEM Hive Dumping
+## 32. SAM / SECURITY / SYSTEM Hive Dumping
 
 Reference: [Dump SAM, SECURITY, and SYSTEM hives for local hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 
 ---
 
-## 32. LSASS Dumping
+## 33. LSASS Dumping
 
 Reference: [LSASS memory dump techniques](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 
 ---
 
-## 33. NTDS.dit Dumping
+## 34. NTDS.dit Dumping
 
 Reference: [Dump domain-wide hashes from NTDS.dit](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 
 ---
 
-## 34. Credential Manager / Windows Vault
+## 35. Credential Manager / Windows Vault
 
 Reference: [Extract stored credentials from Windows Credential Manager](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
 
 ---
 
-## 35. noPAC + PrintNightmare + PetitPotam
+## 36. noPAC + PrintNightmare + PetitPotam
 
 Reference: [Combined exploitation chain](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/BleedingEdge.md)
