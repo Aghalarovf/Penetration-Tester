@@ -17,6 +17,7 @@ Get-DomainUser -Unconstrained
 ### 2.1 Laboratory setup
 
 <img width="577" height="671" alt="image" src="https://github.com/user-attachments/assets/e7beee5c-0142-4f88-8b8d-dd7ae806a78d" />
+
 ---
 
 ```powershell
@@ -43,6 +44,7 @@ Set-ADAccountControl -Identity "UNCON-PC$" -TrustedForDelegation $true
 Get-ADComputer -Identity "UNCON-PC" -Properties TrustedForDelegation, userAccountControl
 ```
 <img width="642" height="215" alt="image" src="https://github.com/user-attachments/assets/fff47efd-260f-4739-b802-b2551249bbbe" />
+
 ---
 
 ### 2.3 
