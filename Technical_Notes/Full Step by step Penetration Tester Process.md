@@ -363,6 +363,12 @@ Reference: [Full Enumeration with PowerView](https://github.com/Aghalarovf/Penet
 
 ---
 
+## 27. Data Visualization with BloodHound
+
+Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
+
+---
+
 ## 27. AS-REP Roasting
 
 Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
