@@ -441,54 +441,58 @@ Reference: [Identify pre-auth-disabled users and capture hashes](https://github.
 
 ---
 
-## 28. LAPS Dumping
-
-Reference: [Retrieve LAPS-managed local admin passwords](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
-
----
-
-## 29. Kerberoasting
+## 28. Kerberoasting
 
 Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 
 ---
 
-## 30. Delegation Attacks
+## 29. Delegation Attacks
 
 Reference: [RBCD, Unconstrained and Constrained Delegation Attacks](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Delegation-Abuse.md)
 
 ---
 
-## 31. DCSync Attacks
+## 30. Active Directory Certificate Service Vulnerabilities
+
+Reference: [ESC Vulnerabilities and Server Misconfiguration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Certificate%20Services/Vuln%20Enumerate.md)
+
+## 31. LAPS Dumping
+
+Reference: [Retrieve LAPS-managed local admin passwords](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
+
+---
+
+## 32. DCSync Attacks
 
 Reference: [Dump password hashes via DCSync](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 
 ---
 
-## 32. SAM / SECURITY / SYSTEM Hive Dumping
+## 33. SAM / SECURITY / SYSTEM Hive Dumping
 
 Reference: [Dump SAM, SECURITY, and SYSTEM hives for local hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 
 ---
 
-## 33. LSASS Dumping
+## 34. LSASS Dumping
 
 Reference: [LSASS memory dump techniques](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 
 ---
 
-## 34. NTDS.dit Dumping
+## 35. NTDS.dit Dumping
 
 Reference: [Dump domain-wide hashes from NTDS.dit](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 
 ---
 
-## 35. Credential Manager / Windows Vault
+## 36. Credential Manager / Windows Vault
 
 Reference: [Extract stored credentials from Windows Credential Manager](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
 
 ---
 
-## 36. noPAC + PrintNightmare + PetitPotam
+## 37. noPAC + PrintNightmare + PetitPotam
 
 Reference: [Combined exploitation chain](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/BleedingEdge.md)
