@@ -156,7 +156,7 @@ Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetrati
 
 ---
 
-## 18. Credential Discovery (OSINT)
+## 18. Credential Discovery 
 
 Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 
