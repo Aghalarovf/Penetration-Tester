@@ -116,3 +116,7 @@ dir \\UNCON-PC.warzone.oxsium.local\c$
 .\Rubeus.exe ptt /ticket:BASE64_TICKET_HERE
 ```
 
+# Configuration Naming Context Attacks
+```powershell
+
+```
