@@ -200,8 +200,6 @@ function Get-RBCDAudit {
             return "CONFIRMED (attacker has SPN — S4U2Self/S4U2Proxy directly usable)"
         }
         if ($ObjClass -eq "computer") {
-            # Computers normally carry an SPN by default; absence here is unusual but the
-            # object class itself supports self-SPN registration (validated write).
             return "LIKELY (computer object, no SPN listed — confirm SPN/dNSHostName)"
         }
         if ($ObjClass -eq "user") {
