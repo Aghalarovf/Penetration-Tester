@@ -84,9 +84,306 @@ Get-DomainUser -SPN | Select SamAccountName, ServicePrincipalName
 Get-DomainUser -PreauthNotRequired | Select SamAccountName, UserAccountControl
 ```
 
-### 13. Find active (enabled) users
+### 13. All users enumeration
 ```powershell
-Get-DomainUser -UACFilter NOT_ACCOUNTDISABLE | Select SamAccountName
+Write-Host "[*] Fetching users and applying updated risk matrix (Roastable > Unconstrained)..." -ForegroundColor Cyan
+Write-Host "[*] Resolving DCSync rights from domain ACL (this may take a moment)..." -ForegroundColor Cyan
+$DCSyncGUIDs = @(
+    "1131f6aa-9c07-11d1-f79f-00c04fc2dcd2",
+    "1131f6ad-9c07-11d1-f79f-00c04fc2dcd2"
+)
+$DCSyncSIDs = @{}
+try {
+    $DomainDN = (Get-Domain).DistinguishedName
+    $AclEntries = Get-DomainObjectAcl -SearchBase $DomainDN -ResolveGUIDs -ErrorAction Stop
+    foreach ($Entry in $AclEntries) {
+        $IsExtendedRight = $Entry.ActiveDirectoryRights -match "ExtendedRight"
+        $IsDCSyncGuid    = $Entry.ObjectAceType -in $DCSyncGUIDs
+        $IsAllowAce      = $Entry.AceType -match "Allow"
+        if ($IsExtendedRight -and $IsDCSyncGuid -and $IsAllowAce) {
+            $SidValue = $Entry.SecurityIdentifier.Value
+            if ($SidValue -and -not $DCSyncSIDs.ContainsKey($SidValue)) {
+                $DCSyncSIDs[$SidValue] = $true
+            }
+        }
+    }
+    Write-Host "[+] Found $($DCSyncSIDs.Count) principal(s) holding DCSync ExtendedRights." -ForegroundColor Green
+} catch {
+    Write-Host "[!] Could not resolve domain ACL ($($_.Exception.Message)). Falling back to group-membership check only." -ForegroundColor Yellow
+}
+$Level1Rids = [ordered]@{
+    "512" = "Domain Admins"
+    "519" = "Enterprise Admins"
+    "518" = "Schema Admins"
+    "544" = "Administrators"
+    "516" = "Domain Controllers"
+    "498" = "Enterprise Read-Only Domain Controllers"
+    "521" = "Read-Only Domain Controllers"
+}
+$Level2Rids = [ordered]@{
+    "548" = "Account Operators"
+    "549" = "Server Operators"
+    "551" = "Backup Operators"
+    "520" = "Group Policy Creator Owners"
+    "550" = "Print Operators"
+    "569" = "Cryptographic Operators"
+    "578" = "Hyper-V Administrators"
+    "582" = "Storage Replica Administrators"
+    "526" = "Key Admins"
+    "527" = "Enterprise Key Admins"
+    "553" = "RAS and IAS Servers"
+    "557" = "Cert Publishers"
+    "580" = "Remote Management Users"
+}
+Write-Host "[*] Resolving privileged group membership (Level 1 / Level 2 RIDs)..." -ForegroundColor Cyan
+$PrivGroupMemberMap = @{}
+$PrivGroupLevelMap   = @{}
+function Add-PrivGroupHit {
+    param($Sid, $GroupName, $Level)
+    if (-not $Sid) { return }
+    if (-not $PrivGroupMemberMap.ContainsKey($Sid)) {
+        $PrivGroupMemberMap[$Sid] = New-Object System.Collections.ArrayList
+    }
+    [void]$PrivGroupMemberMap[$Sid].Add($GroupName)
+    if (-not $PrivGroupLevelMap.ContainsKey($Sid)) {
+        $PrivGroupLevelMap[$Sid] = $Level
+    } elseif ($PrivGroupLevelMap[$Sid] -ne $Level) {
+        $PrivGroupLevelMap[$Sid] = "Level1+2"
+    }
+}
+try {
+    $DomainSidObj = Get-DomainSID -ErrorAction Stop
+}
+catch {
+    Write-Host "[!] Could not resolve Domain SID ($($_.Exception.Message)). Privileged-group RID lookups may be incomplete." -ForegroundColor Yellow
+    $DomainSidObj = $null
+}
+$BuiltinRids = @("544", "548", "549", "551", "550", "569", "553")
+foreach ($RidTable in @(@{Level = "Level1"; Table = $Level1Rids}, @{Level = "Level2"; Table = $Level2Rids})) {
+    foreach ($Rid in $RidTable.Table.Keys) {
+        $GroupName = $RidTable.Table[$Rid]
+        $CandidateSid = if ($BuiltinRids -contains $Rid) {
+            "S-1-5-32-$Rid"
+        } elseif ($DomainSidObj) {
+            "$DomainSidObj-$Rid"
+        } else {
+            $null
+        }
+        if (-not $CandidateSid) { continue }
+        try {
+            $GroupMembers = Get-DomainGroupMember -Identity $CandidateSid -Recurse -ErrorAction Stop
+        } catch {
+            continue
+        }
+        foreach ($Member in $GroupMembers) {
+            $MemberSid = $Member.MemberSID
+            if ($MemberSid) {
+                Add-PrivGroupHit -Sid $MemberSid -GroupName $GroupName -Level $RidTable.Level
+            }
+        }
+    }
+}
+Write-Host "[+] Resolved privileged membership for $($PrivGroupMemberMap.Count) unique principal(s)." -ForegroundColor Green
+
+# --- DNSAdmins check ---
+# DNSAdmins is NOT a well-known RID like the groups above - its RID is
+# assigned dynamically when the DNS server role is installed, so it
+# cannot be looked up via "$DomainSidObj-$Rid". It must be resolved by
+# name instead. Membership here is a well-known privilege-escalation
+# path (dnscmd /config serverlevelplugindll -> SYSTEM on a DC), so it is
+# treated as Level1.
+try {
+    $DnsAdminsMembers = Get-DomainGroupMember -Identity "DNSAdmins" -Recurse -ErrorAction Stop
+    if ($DnsAdminsMembers) {
+        foreach ($Member in $DnsAdminsMembers) {
+            $MemberSid = $Member.MemberSID
+            if ($MemberSid) {
+                Add-PrivGroupHit -Sid $MemberSid -GroupName "DNSAdmins" -Level "Level1"
+            }
+        }
+        Write-Host "[+] Resolved DNSAdmins membership ($(@($DnsAdminsMembers).Count) member(s))." -ForegroundColor Green
+    }
+} catch {
+    Write-Host "[!] Could not resolve DNSAdmins group ($($_.Exception.Message)). It may not exist in this domain." -ForegroundColor Yellow
+}
+
+# --- Primary Group ID (primaryGroupID) check ---
+# memberof does NOT include a user's primary group, so a principal whose
+# primaryGroupID has been pointed at a privileged RID (e.g. 512) can hold
+# that privilege while staying invisible to memberof-based enumeration.
+# Build a single RID -> {Name, Level} lookup covering both tables; each
+# user's primaryGroupID is resolved against it below, in the same loop
+# that builds $AuditResults.
+$AllPrivRids = @{}
+foreach ($Rid in $Level1Rids.Keys) { $AllPrivRids[$Rid] = @{ Name = $Level1Rids[$Rid]; Level = "Level1" } }
+foreach ($Rid in $Level2Rids.Keys) { $AllPrivRids[$Rid] = @{ Name = $Level2Rids[$Rid]; Level = "Level2" } }
+
+$RawUsers = Get-DomainObject -LDAPFilter "(objectCategory=person)" -Properties samaccountname, useraccountcontrol, serviceprincipalname, memberof, objectsid, msds-allowedtodelegateto, primarygroupid
+$GroupSidCache = @{}
+$AuditResults = foreach ($User in $RawUsers) {
+    # Get-DomainObject (unlike Get-DomainUser) returns objectsid as a raw
+    # byte[], not a SID string. Every lookup below keys off PrivGroupMemberMap /
+    # PrivGroupLevelMap / DCSyncSIDs, which are all keyed by SID *string*
+    # (from Get-DomainGroupMember's MemberSID, which IS a string). Without
+    # this conversion, $User.objectsid never matches those hashtable keys -
+    # ContainsKey() silently returns $false for every user, every time -
+    # which is exactly why DNSAdmins (and DCSync) membership wasn't showing
+    # up despite the underlying group-member resolution working correctly.
+    $UserObjectSid = $User.objectsid
+    if ($UserObjectSid -is [byte[]]) {
+        try {
+            $UserObjectSid = (New-Object System.Security.Principal.SecurityIdentifier($UserObjectSid, 0)).Value
+        } catch {
+            $UserObjectSid = $null
+        }
+    } elseif ($UserObjectSid) {
+        $UserObjectSid = [string]$UserObjectSid
+    }
+    $UAC = [int]$User.useraccountcontrol
+    $SPN = $User.serviceprincipalname
+    $Disabled = [bool]($UAC -band 2)
+    $HasSPN = ($null -ne $SPN) -and (@($SPN).Count -gt 0) -and (-not [string]::IsNullOrWhiteSpace(@($SPN)[0]))
+    $Kerberoastable = $HasSPN -and (-not $Disabled)
+    $ASREP          = [bool]($UAC -band 4194304)
+    $Unconstrained  = [bool]($UAC -band 524288)
+    $PasswdNotReqd  = [bool]($UAC -band 32)
+    $Constrained    = [bool]($User."msds-allowedtodelegateto")
+    $Groups = if ($User.memberof) {
+        @($User.memberof) | ForEach-Object {
+            ($_ -split ",*CN=")[1] -split "," | Select-Object -First 1
+        }
+    } else {
+        @()
+    }
+    $UserSid = $UserObjectSid
+    $DCSync = $false
+    if ($UserSid -and $DCSyncSIDs.ContainsKey($UserSid)) {
+        $DCSync = $true
+    }
+    elseif ($Groups.Count -gt 0) {
+        foreach ($GroupName in $Groups) {
+            if (-not $GroupSidCache.ContainsKey($GroupName)) {
+                try {
+                    $GroupObj = Get-DomainGroup -Identity $GroupName -Properties objectsid -ErrorAction Stop
+                    $GroupObjSid = $GroupObj.objectsid
+                    if ($GroupObjSid -is [byte[]]) {
+                        $GroupObjSid = (New-Object System.Security.Principal.SecurityIdentifier($GroupObjSid, 0)).Value
+                    } elseif ($GroupObjSid) {
+                        $GroupObjSid = [string]$GroupObjSid
+                    }
+                    $GroupSidCache[$GroupName] = $GroupObjSid
+                } catch {
+                    $GroupSidCache[$GroupName] = $null
+                }
+            }
+            $GroupSid = $GroupSidCache[$GroupName]
+            if ($GroupSid -and $DCSyncSIDs.ContainsKey($GroupSid)) {
+                $DCSync = $true
+                break
+            }
+        }
+    }
+    if (-not $DCSync -and $DCSyncSIDs.Count -eq 0) {
+        $DCSync = [bool]($Groups -contains "Domain Admins" -or $Groups -contains "Enterprise Admins")
+    }
+    $UserSidForPriv = $UserObjectSid
+    $PrivLevel  = $null
+    $PrivGroups = @()
+    if ($UserSidForPriv -and $PrivGroupLevelMap.ContainsKey($UserSidForPriv)) {
+        $PrivLevel  = $PrivGroupLevelMap[$UserSidForPriv]
+        $PrivGroups = $PrivGroupMemberMap[$UserSidForPriv] | Select-Object -Unique
+    }
+
+    # --- Primary Group ID check (merged into this user's Priv result) ---
+    $PrimaryGroupID = $User.primarygroupid
+    if ($PrimaryGroupID -and $AllPrivRids.ContainsKey([string]$PrimaryGroupID)) {
+        $PgInfo  = $AllPrivRids[[string]$PrimaryGroupID]
+        $PgName  = $PgInfo.Name
+        $PgLevel = $PgInfo.Level
+        if ($PrivGroups -notcontains $PgName) {
+            $PrivGroups += $PgName
+        }
+        if (-not $PrivLevel) {
+            $PrivLevel = $PgLevel
+        } elseif ($PrivLevel -ne $PgLevel -and $PrivLevel -ne "Level1+2") {
+            $PrivLevel = "Level1+2"
+        }
+    }
+
+    $IsLevel1Admin = ($PrivLevel -eq "Level1" -or $PrivLevel -eq "Level1+2")
+    $IsLevel2Admin = ($PrivLevel -eq "Level2" -or $PrivLevel -eq "Level1+2")
+    $IsPrivileged  = [bool]($PrivLevel)
+    $PrivGroupsDisplay = if ($PrivGroups.Count -gt 0) { ($PrivGroups -join ", ") } else { "-" }
+    $SortWeight = 0
+    if ($IsLevel1Admin) { $SortWeight += 20000 }
+    if ($DCSync) { $SortWeight += 10000 }
+    if ($IsLevel2Admin) { $SortWeight += 7000 }
+    if ($ASREP) { $SortWeight += 5000 }
+    if ($Kerberoastable) { $SortWeight += 4000 }
+    if ($Unconstrained) { $SortWeight += 3000 }
+    if ($Constrained) { $SortWeight += 1000 }
+    if ($PasswdNotReqd) { $SortWeight += 500 }
+    if ($Disabled) { $SortWeight = -100 }
+    [PSCustomObject]@{
+        "Username"      = $User.samaccountname
+        "Disabled"      = $Disabled
+        "IsAdmin"       = $IsPrivileged
+        "DCSync"        = $DCSync
+        "ASREP"         = $ASREP
+        "Roastable"     = $Kerberoastable
+        "Unconstrained" = $Unconstrained
+        "Constrained"   = $Constrained
+        "PasswdNotReqd" = $PasswdNotReqd
+        "PrivGroups"    = $PrivGroupsDisplay
+        "Weight"        = $SortWeight
+    }
+}
+if ($AuditResults) {
+    Write-Host "`n[+] Advanced Attribute Audit Complete. Colorized Results:" -ForegroundColor Green
+    $Header = "{0,-20} {1,-10} {2,-9} {3,-10} {4,-10} {5,-12} {6,-15} {7,-13} {8,-14}" -f "Username", "Disabled", "IsAdmin", "DCSync", "ASREP", "Roastable", "Unconstrained", "Constrained", "PasswdNotReqd"
+    Write-Host $Header -ForegroundColor White
+    Write-Host ("-" * $Header.Length) -ForegroundColor Gray
+    $SortedResults = $AuditResults | Sort-Object "Weight" -Descending
+    foreach ($Row in $SortedResults) {
+        if ($Row.Disabled -eq $true) {
+            $Line = "{0,-20} {1,-10} {2,-9} {3,-10} {4,-10} {5,-12} {6,-15} {7,-13} {8,-14}" -f $Row.Username, $Row.Disabled, $Row.IsAdmin, $Row.DCSync, $Row.ASREP, $Row.Roastable, $Row.Unconstrained, $Row.Constrained, $Row.PasswdNotReqd
+            Write-Host $Line -ForegroundColor Red
+            continue
+        }
+        Write-Host ("{0,-20} " -f $Row.Username) -NoNewline -ForegroundColor White
+        Write-Host ("{0,-10} " -f $Row.Disabled) -NoNewline -ForegroundColor Gray
+        if ($Row.IsAdmin) { Write-Host ("{0,-9} " -f $Row.IsAdmin) -NoNewline -ForegroundColor Red }
+        else { Write-Host ("{0,-9} " -f $Row.IsAdmin) -NoNewline -ForegroundColor Gray }
+        if ($Row.DCSync) { Write-Host ("{0,-10} " -f $Row.DCSync) -NoNewline -ForegroundColor Magenta }
+        else { Write-Host ("{0,-10} " -f $Row.DCSync) -NoNewline -ForegroundColor Gray }
+        if ($Row.ASREP) { Write-Host ("{0,-10} " -f $Row.ASREP) -NoNewline -ForegroundColor Yellow }
+        else { Write-Host ("{0,-10} " -f $Row.ASREP) -NoNewline -ForegroundColor Gray }
+        if ($Row.Roastable) { Write-Host ("{0,-12} " -f $Row.Roastable) -NoNewline -ForegroundColor Cyan }
+        else { Write-Host ("{0,-12} " -f $Row.Roastable) -NoNewline -ForegroundColor Gray }
+        if ($Row.Unconstrained) { Write-Host ("{0,-15} " -f $Row.Unconstrained) -NoNewline -ForegroundColor DarkYellow }
+        else { Write-Host ("{0,-15} " -f $Row.Unconstrained) -NoNewline -ForegroundColor Gray }
+        if ($Row.Constrained) { Write-Host ("{0,-13} " -f $Row.Constrained) -NoNewline -ForegroundColor Green }
+        else { Write-Host ("{0,-13} " -f $Row.Constrained) -NoNewline -ForegroundColor Gray }
+        if ($Row.PasswdNotReqd) { Write-Host ("{0,-14}" -f $Row.PasswdNotReqd) -ForegroundColor DarkRed }
+        else { Write-Host ("{0,-14}" -f $Row.PasswdNotReqd) -ForegroundColor Gray }
+    }
+    $PrivUsers = $SortedResults | Where-Object { $_.IsAdmin -eq $true }
+    if ($PrivUsers) {
+        Write-Host "`n[+] Privileged Group Membership Details:" -ForegroundColor Green
+        $DetailHeader = "{0,-20} {1,-10} {2,-50}" -f "Username", "Disabled", "Member Of (Privileged Groups)"
+        Write-Host $DetailHeader -ForegroundColor White
+        Write-Host ("-" * $DetailHeader.Length) -ForegroundColor Gray
+        foreach ($PRow in $PrivUsers) {
+            $LineColor = if ($PRow.Disabled) { "Red" } else { "White" }
+            $DetailLine = "{0,-20} {1,-10} {2,-50}" -f $PRow.Username, $PRow.Disabled, $PRow.PrivGroups
+            Write-Host $DetailLine -ForegroundColor $LineColor
+        }
+    } else {
+        Write-Host "`n[i] No users found in privileged (Level 1 / Level 2) groups." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "[-] No users found or execution failed." -ForegroundColor Red
+}
 ```
 
 ---
