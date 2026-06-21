@@ -9,7 +9,7 @@
 
 ---
 
-## Domain Information
+# Domain Information
 
 ### 1. Retrieve domain information
 ```powershell
@@ -55,7 +55,7 @@ Get-DomainSubnet | Select Name, SiteObject
 
 ---
 
-## User Enumeration
+# User Enumeration
 
 ### 8. List all domain users
 ```powershell
@@ -91,7 +91,7 @@ Get-DomainUser -UACFilter NOT_ACCOUNTDISABLE | Select SamAccountName
 
 ---
 
-## Group Enumeration
+# Group Enumeration
 
 ### 14. List all groups
 ```powershell
@@ -133,7 +133,7 @@ Get-DomainGroupMember -Identity "Protected Users" -Recurse | Select MemberName
 
 ---
 
-## Computer Enumeration
+# Computer Enumeration
 
 ### 21. List all computers in the domain
 ```powershell
@@ -163,7 +163,7 @@ Get-DomainComputer -Identity DC01 | Select *
 
 ---
 
-## Delegation
+# Delegation
 
 ### 26. Find computers with Unconstrained Delegation
 ```powershell
@@ -183,7 +183,7 @@ Get-DomainUser -Unconstrained | Select SamAccountName
 
 ---
 
-## AD CS, LAPS & SPNs
+# AD CS, LAPS & SPNs
 
 ### 29. Enumerate Certificate Services (AD CS)
 ```powershell
@@ -210,7 +210,7 @@ Get-DomainComputer -SPN | Select Name, ServicePrincipalName
 
 ---
 
-## ACL Enumeration
+# ACL Enumeration
 
 ### 33. Retrieve ACLs on a specific user
 ```powershell
@@ -258,7 +258,7 @@ Get-DomainObjectAcl -ResolveGUIDs | Where-Object { $_.ObjectAceType -eq "Self-Me
 
 ---
 
-## Trust Enumeration
+# Trust Enumeration
 
 ### 41. Enumerate domain trusts
 ```powershell
@@ -304,7 +304,7 @@ Get-ForestDomain | Where-Object { $_.Parent -ne $null } | Select Name, Parent
 
 ---
 
-## GPO Enumeration
+# GPO Enumeration
 
 ### 49. List all GPOs
 ```powershell
@@ -334,7 +334,7 @@ Get-DomainGPOLocalGroup | Select GPODisplayName, GroupName, GroupMemberOf
 
 ---
 
-## Advanced Enumeration
+# Advanced Enumeration
 
 ### 54. Enumerate Resource-Based Constrained Delegation (RBCD)
 ```powershell
@@ -364,7 +364,7 @@ Get-DomainComputer -TrustedToAuth | Select Name, msds-AllowedToDelegateTo
 
 ---
 
-## Session & Login Enumeration
+# Session & Login Enumeration
 
 ### 59. Enumerate active network sessions
 ```powershell
@@ -392,7 +392,7 @@ Find-DomainUserLocation -UserGroupIdentity "Domain Admins" | Select UserName, Se
 
 ---
 
-## Share Enumeration
+# Share Enumeration
 
 ### 63. Enumerate SMB shares
 ```powershell
@@ -415,7 +415,7 @@ Find-InterestingDomainShareFile -SharePath "\\DC01\SYSVOL"
 
 ---
 
-## Miscellaneous
+# Miscellaneous
 
 ### 66. Find accounts protected by AdminSDHolder
 ```powershell
@@ -441,7 +441,7 @@ Get-DomainComputer | Where-Object { $_.'msDS-KeyCredentialLink' } | Select Name,
 
 ---
 
-## BloodHound & Statistics
+# BloodHound & Statistics
 
 ### 70. Collect data for BloodHound
 ```powershell
