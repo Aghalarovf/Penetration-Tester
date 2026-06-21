@@ -165,20 +165,119 @@ Get-DomainComputer -Identity DC01 | Select *
 
 # Delegation
 
-### 26. Find computers with Unconstrained Delegation
+### 26. Find computers and users with Unconstrained Delegation
 ```powershell
 Get-DomainComputer -Unconstrained | Select Name, DNSHostName
+Get-DomainUser -Unconstrained | Select-Object SamAccountName, ServicePrincipalName
 ```
 
-### 27. Find computers with Constrained Delegation
+### 27. Find computers and users with Constrained Delegation
 ```powershell
-Get-DomainComputer -TrustedToAuth | Select Name, msds-AllowedToDelegateTo
+Get-DomainComputer -LDAPFilter "(msDS-AllowedToDelegateTo=*)" | Select-Object Name, msDS-AllowedToDelegateTo
+Get-DomainUser -LDAPFilter "(msDS-AllowedToDelegateTo=*)" | Select-Object SamAccountName, msDS-AllowedToDelegateTo
 ```
 
-### 28. Find users with Unconstrained Delegation
+### 28. Find RBCD
 ```powershell
-Get-DomainUser -AllowDelegation -AdminCount | Select SamAccountName
-Get-DomainUser -Unconstrained | Select SamAccountName
+function Get-RBCDAudit {
+    [CmdletBinding()]
+    param(
+        [switch]$ExpandGroups,
+        [switch]$IncludeDisabled
+    )
+    function Get-RBCDVerdict {
+        param($TargetEnabled, $AttackerEnabled, $HasSPN, $Resolved, $ObjClass)
+        if (-not $Resolved) {
+            return "UNKNOWN (unresolved/cross-forest SID — verify manually)"
+        }
+        if (-not $TargetEnabled) {
+            return "UNLIKELY (target computer is disabled)"
+        }
+        if ($AttackerEnabled -eq $false) {
+            return "UNLIKELY (attacker account is disabled)"
+        }
+        if ($HasSPN) {
+            return "CONFIRMED (attacker has SPN — S4U2Self/S4U2Proxy directly usable)"
+        }
+        if ($ObjClass -eq "computer") {
+            # Computers normally carry an SPN by default; absence here is unusual but the
+            # object class itself supports self-SPN registration (validated write).
+            return "LIKELY (computer object, no SPN listed — confirm SPN/dNSHostName)"
+        }
+        if ($ObjClass -eq "user") {
+            return "LIKELY (conditional — user has no SPN; exploitable only if attacker can self-add an SPN, e.g. via owned machine account or write rights on self)"
+        }
+        return "LIKELY (conditional — verify SPN-add capability)"
+    }
+    $Targets = Get-DomainObject -LDAPFilter "(msDS-AllowedToActOnBehalfOfOtherIdentity=*)" `
+        -Properties samaccountname,distinguishedname,objectclass,useraccountcontrol,msds-allowedtoactonbehalfofotheridentity
+    foreach ($Target in $Targets) {
+        $TargetEnabled = -not ([int]$Target.useraccountcontrol -band 2)  # ACCOUNTDISABLE bit
+        if (-not $IncludeDisabled -and -not $TargetEnabled) { continue }
+        $RawData = $Target."msds-allowedtoactonbehalfofotheridentity"
+        if (-not $RawData) { continue }
+        $SD = New-Object System.Security.AccessControl.RawSecurityDescriptor($RawData, 0)
+        foreach ($ACE in $SD.DiscretionaryAcl) {
+            if ($ACE.AceType -ne "AccessAllowed") { continue }
+            $SID = $ACE.SecurityIdentifier.Value
+            $ResolvedObj = $null
+            try {
+                $ResolvedObj = Get-DomainObject -Identity $SID -Properties samaccountname,objectclass,useraccountcontrol,serviceprincipalname -ErrorAction Stop
+            } catch {}
+            $Resolved        = [bool]$ResolvedObj
+            $IdentityName    = if ($ResolvedObj) { $ResolvedObj.samaccountname } else { "UNRESOLVED ($SID)" }
+            $ObjClass        = if ($ResolvedObj) { $ResolvedObj.objectclass[-1] } else { "unknown" }
+            $HasSPN          = if ($ResolvedObj) { [bool]$ResolvedObj.serviceprincipalname } else { $false }
+            $AttackerEnabled = if ($ResolvedObj) { -not ([int]$ResolvedObj.useraccountcontrol -band 2) } else { $null }
+
+            $Verdict = Get-RBCDVerdict -TargetEnabled $TargetEnabled -AttackerEnabled $AttackerEnabled `
+                                        -HasSPN $HasSPN -Resolved $Resolved -ObjClass $ObjClass
+            [PSCustomObject]@{
+                "Target Computer (Victim)"      = $Target.samaccountname
+                "Target Enabled"                = $TargetEnabled
+                "Allowed Identity (Attacker)"   = $IdentityName
+                "Attacker SID"                  = $SID
+                "Attacker Object Type"          = $ObjClass
+                "Attacker Enabled"              = $AttackerEnabled
+                "Attacker Has SPN (S4U-ready)"  = $HasSPN
+                "RBCD Exploitability"           = $Verdict
+                "Direct or Group?"               = "Direct"
+            }
+            if ($ExpandGroups -and $ResolvedObj -and $ResolvedObj.objectclass -contains "group") {
+                $Members = Get-DomainGroupMember -Identity $SID -Recurse -ErrorAction SilentlyContinue
+                foreach ($Member in $Members) {
+                    $MemberObj = $null
+                    try {
+                        $MemberObj = Get-DomainObject -Identity $Member.MemberSID -Properties objectclass,useraccountcontrol,serviceprincipalname -ErrorAction Stop
+                    } catch {}
+                    $MemberResolved = [bool]$MemberObj
+                    $MemberClass    = if ($MemberObj) { $MemberObj.objectclass[-1] } else { "unknown" }
+                    $MemberHasSPN   = if ($MemberObj) { [bool]$MemberObj.serviceprincipalname } else { $false }
+                    $MemberEnabled  = if ($MemberObj) { -not ([int]$MemberObj.useraccountcontrol -band 2) } else { $null }
+                    $MemberVerdict = Get-RBCDVerdict -TargetEnabled $TargetEnabled -AttackerEnabled $MemberEnabled `
+                                                      -HasSPN $MemberHasSPN -Resolved $MemberResolved -ObjClass $MemberClass
+                    [PSCustomObject]@{
+                        "Target Computer (Victim)"      = $Target.samaccountname
+                        "Target Enabled"                = $TargetEnabled
+                        "Allowed Identity (Attacker)"   = $Member.MemberName
+                        "Attacker SID"                  = $Member.MemberSID
+                        "Attacker Object Type"          = $MemberClass
+                        "Attacker Enabled"              = $MemberEnabled
+                        "Attacker Has SPN (S4U-ready)"  = $MemberHasSPN
+                        "RBCD Exploitability"           = $MemberVerdict
+                        "Direct or Group?"               = "Via group: $IdentityName"
+                    }
+                }
+            }
+        }
+    }
+    Write-Host "`n[*] Note: This function only audits RBCD." -ForegroundColor Yellow
+    Write-Host "[*] For unconstrained delegation, run: Get-DomainComputer -Unconstrained" -ForegroundColor Yellow
+    Write-Host "[*] For classic constrained delegation, run: Get-DomainComputer -TrustedToAuth" -ForegroundColor Yellow
+}
+Get-RBCDAudit -ExpandGroups -IncludeDisabled |
+    Sort-Object "RBCD Exploitability" |
+    Out-GridView
 ```
 
 ---
