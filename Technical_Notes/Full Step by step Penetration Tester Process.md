@@ -369,6 +369,12 @@ Reference: [Full Enumeration with PowerView](https://github.com/Aghalarovf/Penet
 
 ---
 
+## 26. GPO Abuse
+
+Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/GPO%20Attacks.md)
+
+---
+
 ## 27. Data Visualization with BloodHound
 
 Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
@@ -396,6 +402,8 @@ Reference: [RBCD, Unconstrained and Constrained Delegation Attacks](https://gith
 ## 30. Active Directory Certificate Service Vulnerabilities
 
 Reference: [ESC Vulnerabilities and Server Misconfiguration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Certificate%20Services/Vuln%20Enumerate.md)
+
+---
 
 ## 31. LAPS Dumping
 
