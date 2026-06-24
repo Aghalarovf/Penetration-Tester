@@ -217,7 +217,7 @@ crackmapexec smb 172.16.5.5 --users
 sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
 
 # LDAP search
-ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "(&(objectclass=user))" | grep sAMAccountName: | cut -f2 -d" "
+ldapsearch -H ldap://192.168.0.200 -x -b "DC=OXSIUM,DC=LOCAL" -s sub "(&(objectclass=user))" | grep sAMAccountName: | cut -f2 -d" "
 
 # windapsearch
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
