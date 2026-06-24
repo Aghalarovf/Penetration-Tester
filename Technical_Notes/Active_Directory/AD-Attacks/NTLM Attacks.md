@@ -3,6 +3,10 @@
 // Check SMB Signing
 crackmapexec smb 192.168.1.0/24 --gen-relay-list targets.txt
 
+// Check LDAP Signing
+python3 examples/ldap_signing_check.py -dc-ip 192.168.0.199 oxsium.local/username:password
+python3 examples/ldap_signing_check.py -dc-ip 192.168.0.200 oxsium.local/username:password
+
 // Run Responder
 responder -I eth0 -dwv
 OR
