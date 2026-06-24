@@ -156,6 +156,12 @@ Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetrati
 
 ---
 
+## 17.5. NTLM Relaying
+
+Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
+
+---
+
 ## 18. Credential Discovery 
 
 Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
