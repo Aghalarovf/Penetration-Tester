@@ -9,13 +9,13 @@
 
 **Find active hosts**
 ```bash
-sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24
+sudo nmap -sn -n --max-retries 1 --max-rate 10 --data-length 24 192.168.1.0/24 -oN hosts
 fping -asgq 172.16.7.0/23
 ```
 
 **Fast scan of a specific host**
 ```bash
-nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10
+nmap -p- -Pn -T4 --min-rate 2000 --stats-every 50 --max-retries 2 10.10.10.10 -oN open_ports
 ```
 
 ---
