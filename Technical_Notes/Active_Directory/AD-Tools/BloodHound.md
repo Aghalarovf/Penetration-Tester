@@ -31,6 +31,11 @@ SharpHound.exe -c All
 
 ## Data Collection
 
+### RustHound-CE
+```powershell
+rusthound-ce --domain fluffy.htb -u user -p password
+```
+
 ### SharpHound (Windows)
 ```powershell
 # Collect everything
