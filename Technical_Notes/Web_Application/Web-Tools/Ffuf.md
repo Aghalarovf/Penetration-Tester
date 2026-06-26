@@ -75,6 +75,8 @@ ffuf -w common.txt:PATH,/usr/share/wordlists/SecLists/Discovery/Web-Content/raft
 -H Custom Header
 -mc Status Code
 -e Extensions
+
+/usr/share/dirbuster/wordlists/directory-list-2.3-medium.txt
 ```
 
 # RECURSIVE FUZZING (Deep Scan)
