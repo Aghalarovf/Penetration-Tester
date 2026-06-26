@@ -16,7 +16,7 @@ nmap -n --script "(default and *dns*) or fcrdns or dns-srv-enum" 192.168.0.1
 host -t ns hədəf.com
 
 # Dig ilə Zone Transfer cəhdi (hər bir NS üçün yoxlanılmalıdır)
-dig @10.129.18.236 -x 10.129.18.236
+dig @10.129.18.236 FLUFFY.HTB
 dig axfr @ns1.hədəf.com hədəf.com
 dig ANY hədəf.com +noall +answer
 
