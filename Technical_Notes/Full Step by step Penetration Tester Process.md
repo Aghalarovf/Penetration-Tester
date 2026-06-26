@@ -150,6 +150,12 @@ Reference: [SMB Protocol Attacks](https://github.com/Aghalarovf/Penetration-Test
 
 ---
 
+## 17. Windows Explorer Spoofing
+
+Reference: [Capture NTLM Hash Methods]()
+
+---
+
 ## 17. LLMNR / mDNS / NBT-NS Poisoning
 
 Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
@@ -378,6 +384,8 @@ Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/
 ## 27. AD CS Enumeration
 
 Reference: [Certificate Services Abuse]()
+
+---
 
 ## 27. Data Visualization with BloodHound
 
