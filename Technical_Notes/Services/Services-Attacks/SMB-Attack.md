@@ -5,6 +5,8 @@
 # Smbclient
 
 ```bash
+crackmapexec smb 10.10.11.69 -u 'j.fleischman' -p 'J0elTHEM4n1990!' --shares
+
 # Basic Syntaxis
 smbclient -L //10.10.10.10 -N
 smbclient -L //10.10.10.10 -U username
