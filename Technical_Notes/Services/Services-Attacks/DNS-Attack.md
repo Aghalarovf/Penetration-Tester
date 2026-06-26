@@ -19,7 +19,7 @@ host -t ns hədəf.com
 dig @10.129.18.236 FLUFFY.HTB
 dig axfr @ns1.hədəf.com hədəf.com
 dig ANY hədəf.com +noall +answer
-
+dig @10.129.18.236 -x 10.129.18.236
 ```
 
 ## Subdomain
