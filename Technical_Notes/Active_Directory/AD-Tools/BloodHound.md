@@ -36,6 +36,11 @@ SharpHound.exe -c All
 rusthound-ce --domain fluffy.htb -u user -p password
 ```
 
+### BloodyAD
+```powershell
+python3 bloodyAD -u user -p password -d domain.local --host 10.10.10.10 add groupMember 'service accounts' user
+```
+
 ### SharpHound (Windows)
 ```powershell
 # Collect everything
