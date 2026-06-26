@@ -152,7 +152,7 @@ Reference: [SMB Protocol Attacks](https://github.com/Aghalarovf/Penetration-Test
 
 ## 17. Windows Explorer Spoofing
 
-Reference: [Capture NTLM Hash Methods]()
+Reference: [Capture NTLM Hash Methods](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Active_Directory/AD-Attacks)
 
 ---
 
