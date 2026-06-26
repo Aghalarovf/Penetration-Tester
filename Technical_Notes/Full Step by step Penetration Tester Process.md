@@ -375,6 +375,10 @@ Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/
 
 ---
 
+## 27. AD CS Enumeration
+
+Reference: [Certificate Services Abuse]()
+
 ## 27. Data Visualization with BloodHound
 
 Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
