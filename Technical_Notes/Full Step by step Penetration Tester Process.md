@@ -132,6 +132,11 @@ Reference: [Service Enumeration notes](https://github.com/Aghalarovf/Penetration
 
 ---
 
+## 13.1 Change Kerberos Clock
+```powershell
+sudo ntpdate domain.local
+```
+
 ## 14. Vulnerability Scanning
 
 Reference: [Service-specific attack notes](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services/Services-Attacks)
