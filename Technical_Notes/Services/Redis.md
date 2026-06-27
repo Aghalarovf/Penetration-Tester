@@ -42,31 +42,95 @@ redis-cli -h target.com CONFIG GET *
 
 ```bash
 # Server info
-INFO
-INFO server
-INFO keyspace
-INFO replication
+redis-cli -h 10.129.19.146 INFO
+redis-cli -h 10.129.19.146 INFO server
+redis-cli -h 10.129.19.146 INFO keyspace
+redis-cli -h 10.129.19.146 INFO replication
+redis-cli -h 10.129.19.146 INFO clients
+redis-cli -h 10.129.19.146 INFO memory
+redis-cli -h 10.129.19.146 INFO stats
+redis-cli -h 10.129.19.146 INFO persistence
 
-# List all keys
-KEYS *
-
-# Get specific key
-GET <key>
-
-# Database size
-DBSIZE
+# Keys
+redis-cli -h 10.129.19.146 KEYS "*"
+redis-cli -h 10.129.19.146 DBSIZE
+redis-cli -h 10.129.19.146 SCAN 0 COUNT 1000
+redis-cli -h 10.129.19.146 RANDOMKEY
 
 # Config
-CONFIG GET dir
-CONFIG GET dbfilename
-CONFIG GET requirepass
-CONFIG GET bind
+redis-cli -h 10.129.19.146 CONFIG GET "*"
+redis-cli -h 10.129.19.146 CONFIG GET dir
+redis-cli -h 10.129.19.146 CONFIG GET dbfilename
+redis-cli -h 10.129.19.146 CONFIG GET requirepass
+redis-cli -h 10.129.19.146 CONFIG GET bind
+redis-cli -h 10.129.19.146 CONFIG GET maxmemory
+redis-cli -h 10.129.19.146 CONFIG GET logfile
+redis-cli -h 10.129.19.146 CONFIG GET loglevel
+redis-cli -h 10.129.19.146 CONFIG GET databases
+redis-cli -h 10.129.19.146 CONFIG GET save
+redis-cli -h 10.129.19.146 CONFIG GET appendonly
+redis-cli -h 10.129.19.146 CONFIG GET slaveof
+redis-cli -h 10.129.19.146 CONFIG GET masterauth
 
-# Client list
-CLIENT LIST
+# Client
+redis-cli -h 10.129.19.146 CLIENT LIST
+redis-cli -h 10.129.19.146 CLIENT GETNAME
+redis-cli -h 10.129.19.146 CLIENT INFO
 
-# Slowlog
-SLOWLOG GET
+# Debug & Monitor
+redis-cli -h 10.129.19.146 SLOWLOG GET
+redis-cli -h 10.129.19.146 SLOWLOG LEN
+redis-cli -h 10.129.19.146 DEBUG JMAP
+redis-cli -h 10.129.19.146 MONITOR
+
+# DB select (0-15)
+redis-cli -h 10.129.19.146 SELECT 0
+redis-cli -h 10.129.19.146 SELECT 1
+redis-cli -h 10.129.19.146 SELECT 2
+
+# Command list
+redis-cli -h 10.129.19.146 COMMAND
+redis-cli -h 10.129.19.146 COMMAND COUNT
+redis-cli -h 10.129.19.146 COMMAND INFO get set del
+
+# ACL (Redis 6+)
+redis-cli -h 10.129.19.146 ACL LIST
+redis-cli -h 10.129.19.146 ACL WHOAMI
+redis-cli -h 10.129.19.146 ACL CAT
+
+# Module
+redis-cli -h 10.129.19.146 MODULE LIST
+
+# Cluster
+redis-cli -h 10.129.19.146 CLUSTER INFO
+redis-cli -h 10.129.19.146 CLUSTER NODES
+
+# Replication
+redis-cli -h 10.129.19.146 REPLICAOF NO ONE
+
+# Pub/Sub
+redis-cli -h 10.129.19.146 PUBSUB CHANNELS
+redis-cli -h 10.129.19.146 PUBSUB NUMSUB
+redis-cli -h 10.129.19.146 PUBSUB NUMPAT
+
+# Latency
+redis-cli -h 10.129.19.146 LATENCY HISTORY
+redis-cli -h 10.129.19.146 LATENCY LATEST
+redis-cli -h 10.129.19.146 LATENCY RESET
+
+# Memory
+redis-cli -h 10.129.19.146 MEMORY DOCTOR
+redis-cli -h 10.129.19.146 MEMORY STATS
+redis-cli -h 10.129.19.146 MEMORY USAGE payload
+
+# Object
+redis-cli -h 10.129.19.146 OBJECT HELP
+
+# Tüm DB-ləri scan et
+for db in $(seq 0 15); do echo "=== DB $db ==="; redis-cli -h 10.129.19.146 SELECT $db; redis-cli -h 10.129.19.146 -n $db KEYS "*"; done
+
+# Bütün key-value cütlərini dump et
+redis-cli -h 10.129.19.146 --scan | while read key; do echo "KEY: $key"; redis-cli -h 10.129.19.146 TYPE $key; redis-cli -h 10.129.19.146 GET "$key"; done
 ```
 
 ---
