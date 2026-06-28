@@ -39,6 +39,7 @@ rusthound-ce --domain fluffy.htb -u user -p password
 ### BloodyAD
 ```powershell
 python3 bloodyAD -u user -p password -d domain.local --host 10.10.10.10 add groupMember 'service accounts' user
+python3 /home/sako/Tools/bloodyAD/bloodyAD.py --host 10.129.232.167 -d tombwatcher.htb -u SAM -p 'SakoCyberDark2026!' set owner 
 ```
 
 ### SharpHound (Windows)
