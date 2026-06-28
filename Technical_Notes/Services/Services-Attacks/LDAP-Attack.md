@@ -47,5 +47,57 @@ ldapsearch -x -H "ldef-sunucu:389" -b "dc=hedef,dc=com" "(description=*)(|(cn=*)
 
 # LDAP Enumeration
 ```powershell
-ldapsearch -H ldap://10.129.232.167 -D 'JOHN@tombwatcher.htb' -w 'JohnSakoCyberDark2026!' -b 'CN=Deleted Objects,DC=tombwatcher,DC=htb' -E 
+# Domain info
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=domain)" dc,distinguishedName
+
+# Bütün userlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=user)" sAMAccountName,memberOf,description
+
+# Bütün qruplar
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=group)" sAMAccountName,member
+
+# Bütün computerlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=computer)" sAMAccountName,operatingSystem
+
+# Konkret user
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(sAMAccountName=administrator)" *
+
+# Description-da şifrə axtarışı
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(description=*pass*)" sAMAccountName,description
+
+# Kerberoastable userlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(&(objectClass=user)(servicePrincipalName=*)(!samAccountName=krbtgt))" sAMAccountName,servicePrincipalName
+
+# ASREPRoastable userlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(&(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=4194304))" sAMAccountName
+
+# Domain Admins üzvləri
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b "CN=Domain Admins,CN=Users,$BASE" "(objectClass=group)" member
+
+# RBCD atributu olan computerlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=computer)" msDS-AllowedToActOnBehalfOfOtherIdentity,sAMAccountName
+
+# Unconstrained delegation
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(&(objectClass=computer)(userAccountControl:1.2.840.113556.1.4.803:=524288))" sAMAccountName
+
+# Constrained delegation
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(msDS-AllowedToDelegateTo=*)" sAMAccountName,msDS-AllowedToDelegateTo
+
+# Silinmiş bütün obyektlər (Recycle Bin)
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b "CN=Deleted Objects,$BASE" -E '!1.2.840.113556.1.4.417' "(objectClass=*)" sAMAccountName,distinguishedName
+
+# Silinmiş yalnız userlər
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b "CN=Deleted Objects,$BASE" -E '!1.2.840.113556.1.4.417' "(&(isDeleted=TRUE)(objectClass=user))" sAMAccountName,distinguishedName
+
+# Domain Controllers
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(userAccountControl:1.2.840.113556.1.4.803:=8192)" sAMAccountName,operatingSystem
+
+# GPO-lar
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=groupPolicyContainer)" displayName,gPCFileSysPath
+
+# Trust-lar
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=trustedDomain)" trustPartner,trustDirection
+
+# Password Policy
+ldapsearch -H ldap://$HOST -D $USER -w $PASS -b $BASE "(objectClass=domain)" minPwdLength,pwdHistoryLength,lockoutThreshold
 ```
