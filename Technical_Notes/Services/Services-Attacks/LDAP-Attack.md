@@ -44,3 +44,8 @@ ldapsearch -x -H "ldap://hedef-sunucu:389" -b "dc=hedef,dc=com" "(cn=*)" "*"
 ldapsearch -x -H "ldap://hedef-sunucu:389" -b "dc=hedef,dc=com" "(description=*)" 
 ldapsearch -x -H "ldef-sunucu:389" -b "dc=hedef,dc=com" "(description=*)(|(cn=*))"
 ```
+
+# LDAP Enumeration
+```powershell
+ldapsearch -H ldap://10.129.232.167 -D 'JOHN@tombwatcher.htb' -w 'JohnSakoCyberDark2026!' -b 'CN=Deleted Objects,DC=tombwatcher,DC=htb' -E 
+```
