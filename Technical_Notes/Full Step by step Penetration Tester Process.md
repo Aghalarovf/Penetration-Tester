@@ -157,7 +157,7 @@ Reference: [SMB Protocol Attacks](https://github.com/Aghalarovf/Penetration-Test
 
 ## 17. LLMNR Poisining Trigger
 
-Reference: [NTLM Hash Capture Triggers](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows-Explorer-Spoofing.md)
+Reference: [NTLM Hash Capture Triggers](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR%20Poisining%20Triggers.md)
 
 ---
 
