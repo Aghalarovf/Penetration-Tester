@@ -58,6 +58,7 @@ Client → EPM (TCP 135) → Get Dynamic Port → Connect to RPC Service
 ```bash
 # rpcclient — null session
 rpcclient -U "" -N <target_ip>
+nxc smb 10.129.232.167 -u '' -p '' --users
 
 # rpcclient — authenticated
 rpcclient -U "DOMAIN\user%Password123" <target_ip>
