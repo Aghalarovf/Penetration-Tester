@@ -2,93 +2,54 @@
 
 ---
 
-# Enumeration
+## Reconaissance
+```powershell
+// Basic DNS Queries
+nslookup example.com
+nslookup -type=ANY example.com
 
-## DNS Transfer Zone
+host -l example.com ns1.example.com | grep -E "A|MX|CNAME|TXT"
 
-```bash
-nmap -sU -p 53 --script dns-zone-transfer --script-args dns-zonetransfer.domain=target.com 192.168.1.0/24
-nmap -p 53 --script dns-recursion -sV target.com
-nmap -p 53 --script dns-service-discovery target.com
-nmap -n --script "(default and *dns*) or fcrdns or dns-srv-enum" 192.168.0.1
+// Retrieves all available DNS records (A, MX, NS, TXT, etc.) for a domain.
+dig example.com ANY +short
+dig @8.8.8.8 example.com
 
-# Bütün ad serverlərini tapmaq
-host -t ns hədəf.com
-
-# Dig ilə Zone Transfer cəhdi (hər bir NS üçün yoxlanılmalıdır)
-dig @10.129.18.236 FLUFFY.HTB
-dig axfr @ns1.hədəf.com hədəf.com
-dig ANY hədəf.com +noall +answer
+dig example.com NS
+dig example.com SOA
+dig example.com MX
+dig example.com TXT
+dig example.com CNAME
+dig example.com AAAA
+dig example.com A
+dig example.com SRV
+dig example.com DNSKEY
+dig example.com DS
+dig example.com NSEC
 
 // PTR Record
-dig @10.129.18.236 -x 10.129.18.236
+dig -x example.com 
 ```
 
-## Subdomain
+---
 
-```bash
---- Passive ---
+## Enumeration
+```powershell
+// Zone Transfer
+dig @ns1.example.com example.com AXFR
+host -l example.com ns1.example.com
+nslookup -type=AXFR example.com ns1.example.com
+fierce --domain example.com
 
-# Config Special DNS Server
-/etc/resolv.conf --> nameserver 10.10.10.10
+// DNS Zone Transfer Exploitation
+dig @ns1.example.com example.com AXFR | tee zone_dump.txt
 
-# Subfinder (fastest, passive)
-subfinder -d target.com -all -o subdomains.txt -t 100 -silent
-
-# Amass (passive intel)
-amass enum -passive -d target.com -o amass-passive.txt
-
-# Dig (basic records)
-dig target.com ANY +short
-dig target.com AXFR @ns1.target.com  # Zone transfer attempt
-
-
---- Active ---
-
-# Subbrute (fast DNS brute)
-subbrute target.com /usr/share/wordlists/dnsmap.txt -t 50 -o subbrute.txt
-python3 subbrute.py -p hədəf.com > resolved_subs.txt
-
-# Fierce (classic brute)
-fierce --domain target.com --subdomains /usr/share/wordlists/dnsmap.txt -o fierce.txt
-
-# DNSrecon brute
-dnsrecon -d inlanefreight.htb -D /usr/share/wordlists/seclists/Discovery/DNS/subdomains-top1million-20000.txt -t brt -j results.json
-
-ffuf -u http://target.com -H "Host: FUZZ.target.com" \
-     -w /usr/share/wordlists/SecLists/Discovery/DNS/subdomains-top1million-5000.txt \
-     -fs 0 -t 100 -o vhost-http.json
-
--fs SIZE      # Filter by response size
--fw WORDS     # Filter by word count  
--fl LINES     # Filter by line count
--mc 200,301   # Match status codes only
--H "Host: X"  # Custom Host header
--k            # Ignore SSL errors
--t 100        # 100 threads
--o file.json  # JSON output
--rate 10      # Requests per second
-
+nmap -sU -p 53 --script dns-brute example.com
+nmap -sU -p 53 --script dns-zone-transfer --script-args dns-zone-transfer.domain=example.com <ns_ip>
+nmap -sU -p 53 --script dns-srv-enum --script-args dns-srv-enum.domain=example.com <target>
+nmap -p 53 --script dns-recursion <target>
 ```
 
-# DNS Zone Transfer & VHOST Discovery
-
-```bash
-# Zone Transfer Attempts
-dig @ns1.target.com target.com AXFR
-dig @8.8.8.8 target.com AXFR  # Public NS test
-
-# Multiple NS servers
-for ns in $(dig ns target.com +short); do 
-    dig @"$ns" target.com AXFR +short; 
-done
-
-# Virtual Host Discovery
-ffuf -u https://target.com -H "Host: FUZZ.target.com" -w all-subdomains.txt -fs 0
-gobuster vhost -u https://target.com -w all-subdomains.txt -t 50
-ffuf -w /path/to/subdomains.txt -u http://<HƏDƏF_IP> -H "Host: FUZZ.hədəf.com" -fs 1234
-
-```
+---
 
 # DNS Spoofing
 
