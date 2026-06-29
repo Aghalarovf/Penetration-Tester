@@ -233,6 +233,9 @@ ldapsearch -H ldap://192.168.0.200 -x -b "DC=OXSIUM,DC=LOCAL" -s sub "(&(objectc
 # windapsearch
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 
+# Usernameanarchy
+./username-anarchy --input-file /home/sako/Labaratory/hostname
+
 # Kerbrute
 kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ```
