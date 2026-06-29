@@ -27,7 +27,7 @@ dig example.com DS
 dig example.com NSEC
 
 // PTR Record
-dig -x example.com 
+dig @10.10.10.10 -x example.com
 ```
 
 ---
