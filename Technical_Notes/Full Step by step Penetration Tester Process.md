@@ -244,6 +244,12 @@ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 
 ---
 
+## 20. AS-REP Roasting
+
+Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
+
+---
+
 ## 21. Password Spraying
 
 **Linux**
@@ -398,12 +404,6 @@ Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/
 ## 27. AD CS Enumeration
 
 Reference: [Certificate Services Abuse]()
-
----
-
-## 27. AS-REP Roasting
-
-Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 
 ---
 
