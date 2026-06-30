@@ -41,6 +41,11 @@ Reference: [File Enumeration](https://github.com/Aghalarovf/Penetration-Tester/b
 
 ---
 
+## 5. Parameter Discovery
+Reference: [File Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Ffuf.md)
+
+---
+
 ## 6. Email and Comment Collector with ReconSpider
 Reference: [ReconSpider](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Crawl%20Methods/ReconSpider.md)
 
