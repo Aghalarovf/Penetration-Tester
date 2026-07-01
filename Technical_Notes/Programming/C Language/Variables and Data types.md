@@ -53,7 +53,7 @@ int main() {
     printf("Character: %c\n", character);
     printf("Unsigned Character: %u\n", uCharacter);
     printf("Signed Character: %d\n", sCharacter);
-    printf("String Char: %s\n", name);
+    printf("Size of Char array: %zu bytes\n", sizeof(d));
 
     printf("Bool (true): %d\n", isTrue);
     printf("Bool (false): %d\n", isFalse);
