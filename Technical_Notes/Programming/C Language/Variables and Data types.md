@@ -34,3 +34,11 @@ int main() {
     return 0;
 }
 ```
+
+## Type Modifiers
+```powershell
+unsigned int yash = 25;       // only positive
+short int kicik_eded = 100; 
+long int boyuk_eded = 123456789;
+long long int cox_boyuk = 9223372036854775807;
+```
