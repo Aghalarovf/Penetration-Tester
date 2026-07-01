@@ -45,9 +45,9 @@ int main() {
     printf("Unsigned Long: %lu\n", uLongNum);
     printf("Unsigned Long Long: %llu\n", uVeryLongNum);
 
-    printf("Decimal (float): %f\n", decimal);
-    printf("Large Decimal (double): %lf\n", largeDecimal);
-    printf("Very Large Decimal (long double): %Lf\n", veryLargeDecimal);
+    printf("Float: %f\n", decimal);
+    printf("Double: %lf\n", largeDecimal);
+    printf("Long double: %Lf\n", veryLargeDecimal);
 
     printf("Character: %c\n", character);
     printf("Unsigned Character: %u\n", uCharacter);
