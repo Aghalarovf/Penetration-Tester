@@ -6,27 +6,22 @@ scanf("format_specifier", &variable);
 #include <stdio.h>
 
 int main() {
-    int wholeNum;
-    float decimal;
-    double bigDecimal;
-    char letter;
+    char name[50];
+    char surname[50];
+    int age;
 
-    printf("Enter an integer: ");
-    scanf("%d", &wholeNum);
+    printf("Enter the Name:\n");
+    scanf("%s", name);
 
-    printf("Enter a decimal number: ");
-    scanf("%f", &decimal);
+    printf("Enter the Surname: ");
+    scanf("%s", surname);
 
-    printf("Enter a large decimal number: ");
-    scanf("%lf", &bigDecimal);   // %lf for double!
+    printf("Enter the Age: ");
+    scanf("%d", &age);
 
-    printf("Enter a single character: ");
-    scanf(" %c", &letter);        // note: starts with a space
-
-    printf("Integer: %d\n", wholeNum);
-    printf("Decimal: %f\n", decimal);
-    printf("Large decimal: %lf\n", bigDecimal);
-    printf("Character: %c\n", letter);
+    printf("Your name is: %s\n", name);
+    printf("Your surname is: %s\n", surname);
+    printf("Your age is: %d\n", age);
 
     return 0;
 }
