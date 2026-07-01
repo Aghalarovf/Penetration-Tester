@@ -27,6 +27,7 @@ int main() {
 
     // Character types
     char character = 'A';
+    char name[] = "Olivia";
     unsigned char uCharacter = 250;
     signed char sCharacter = -100;
 
@@ -52,6 +53,7 @@ int main() {
     printf("Character: %c\n", character);
     printf("Unsigned Character: %u\n", uCharacter);
     printf("Signed Character: %d\n", sCharacter);
+    printf("String Char: %s\n", name);
 
     printf("Bool (true): %d\n", isTrue);
     printf("Bool (false): %d\n", isFalse);
