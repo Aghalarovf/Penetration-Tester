@@ -42,3 +42,16 @@ short int kicik_eded = 100;
 long int boyuk_eded = 123456789;
 long long int cox_boyuk = 9223372036854775807;
 ```
+
+## SizeOf operators
+```powershell
+#include <stdio.h>
+
+int main() {
+    printf("int olcusu: %zu bayt\n", sizeof(int));
+    printf("float olcusu: %zu bayt\n", sizeof(float));
+    printf("double olcusu: %zu bayt\n", sizeof(double));
+    printf("char olcusu: %zu bayt\n", sizeof(char));
+    return 0;
+}
+```
