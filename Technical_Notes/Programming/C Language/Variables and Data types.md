@@ -5,53 +5,57 @@
 
 ```powershell
 #include <stdio.h>
-int main() {
-    int yash = 20;
-    float boy = 1.75;
-    double dunya_nufusu = 8000000000.0;
-    char herf = 'C';
-    printf("Yas: %d\n", yash);
-    printf("Boy: %.2f\n", boy);
-    printf("Dunya nufusu: %.0f\n", dunya_nufusu);
-    printf("Herf: %c\n", herf);
-    return 0;
-}
-```
-
-```powershell
-#include <stdio.h>
+#include <stdbool.h>   // required for _Bool / bool
 
 int main() {
-    int eded = 25;
-    float kesr = 3.14159;
-    char simvol = 'A';
+    // Basic integer types
+    short int shortNum = 100;
+    int integer = 10;
+    long int longNum = 100000L;
+    long long int veryLongNum = 9000000000LL;
 
-    printf("%d\n", eded);      // Çıxış: 25
-    printf("%.2f\n", kesr);    // Çıxış: 3.14
-    printf("%.0f\n", kesr);    // Çıxış: 3
-    printf("%c\n", simvol);    // Çıxış: A
+    // Unsigned integer types
+    unsigned short int uShortNum = 200;
+    unsigned int uInteger = 20;
+    unsigned long int uLongNum = 200000UL;
+    unsigned long long int uVeryLongNum = 18000000000ULL;
 
-    return 0;
-}
-```
+    // Floating-point types
+    float decimal = 3.14f;
+    double largeDecimal = 2.71828;
+    long double veryLargeDecimal = 3.14159265358979L;
 
-## Type Modifiers
-```powershell
-unsigned int yash = 25;       // only positive
-short int kicik_eded = 100; 
-long int boyuk_eded = 123456789;
-long long int cox_boyuk = 9223372036854775807;
-```
+    // Character types
+    char character = 'A';
+    unsigned char uCharacter = 250;
+    signed char sCharacter = -100;
 
-## SizeOf operators
-```powershell
-#include <stdio.h>
+    // Boolean type (C99+, with stdbool.h)
+    bool isTrue = true;
+    bool isFalse = false;
 
-int main() {
-    printf("int olcusu: %zu bayt\n", sizeof(int));
-    printf("float olcusu: %zu bayt\n", sizeof(float));
-    printf("double olcusu: %zu bayt\n", sizeof(double));
-    printf("char olcusu: %zu bayt\n", sizeof(char));
+    // ---- Printing ----
+    printf("Short: %hd\n", shortNum);
+    printf("Integer: %d\n", integer);
+    printf("Long: %ld\n", longNum);
+    printf("Long Long: %lld\n", veryLongNum);
+
+    printf("Unsigned Short: %hu\n", uShortNum);
+    printf("Unsigned Integer: %u\n", uInteger);
+    printf("Unsigned Long: %lu\n", uLongNum);
+    printf("Unsigned Long Long: %llu\n", uVeryLongNum);
+
+    printf("Decimal (float): %f\n", decimal);
+    printf("Large Decimal (double): %lf\n", largeDecimal);
+    printf("Very Large Decimal (long double): %Lf\n", veryLargeDecimal);
+
+    printf("Character: %c\n", character);
+    printf("Unsigned Character: %u\n", uCharacter);
+    printf("Signed Character: %d\n", sCharacter);
+
+    printf("Bool (true): %d\n", isTrue);
+    printf("Bool (false): %d\n", isFalse);
+
     return 0;
 }
 ```
