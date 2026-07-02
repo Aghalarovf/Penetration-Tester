@@ -7,6 +7,13 @@
 ```bash
 crackmapexec smb 10.10.11.69 -u 'j.fleischman' -p 'J0elTHEM4n1990!' --shares
 
+nxc smb dc.voleur.htb -u ryan.naylor -p HollowOct31Nyt --shares -d voleur.htb -k
+
+impacket-getTGT voleur.htb/ryan.naylor:HollowOct31Nyt -dc-ip 10.129.232.130
+export KRB5CCNAME=$(pwd)/ryan.naylor.ccache
+impacket-smbclient -k -no-pass dc.voleur.htb
+
+
 smbclient '//10.10.11.69/IT' -U 'j.fleischman%J0elTHEM4n1990!'
 
 # Basic Syntaxis
