@@ -75,4 +75,7 @@ SELECT distinct b.name
    SELECT SYSTEM_USER;
 ```
 
-## 
+## MSFCONSOLE
+```
+msf6 > use auxiliary/admin/mssql/mssql_enum_domain_accounts
+```
