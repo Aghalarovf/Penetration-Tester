@@ -29,7 +29,7 @@ SELECT column_name FROM information_schema.columns WHERE table_name = '<table>';
 
 ## Dump data
 ```
-SELECT column_name FROM information_schema.columns WHERE table_name = '<table>';
+SELECT id, username, password_hash, email FROM <table>;
 ```
 
 ## Linked servers (lateral movement potential)
