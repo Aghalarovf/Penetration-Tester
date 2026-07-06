@@ -1,6 +1,25 @@
 # For
 ```powershell
+#include <stdio.h>
 
+int main() {
+    int say, i;
+    long long faktorial = 1;
+
+    printf("Ədəd daxil edin: ");
+    scanf("%d", &say);
+
+    if (say < 0) {
+        printf("Mənfi ədədlərin faktorialı yoxdur!\n");
+    } else {
+        for (i = 1; i <= say; i++) {
+            faktorial *= i;
+        }
+        printf("%d! = %lld\n", say, faktorial);
+    }
+
+    return 0;
+}
 ```
 
 # While
