@@ -1,10 +1,10 @@
 # For
-```
+```powershell
 
 ```
 
 # While
-```
+```powershell
 #include <stdio.h>
 
 int main() {
