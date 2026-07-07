@@ -280,6 +280,15 @@ Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorActio
 
 ---
 
+## 22. Terminal History
+```
+type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
+
+history
+```
+
+---
+
 ## 22. Data Visualization with BloodHound
 
 Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
