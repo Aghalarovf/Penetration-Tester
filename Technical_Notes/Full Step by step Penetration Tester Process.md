@@ -15,7 +15,7 @@ fping -asgq 172.16.7.0/23
 
 **Fast scan of a specific host**
 ```bash
-nmap -p- -Pn -T4 --min-rate 2000 --max-retries 2 -oN open_ports 10.10.10.10
+nmap -p- -Pn -T4 --min-rate 2000 --max-retries 5 -oN open_ports 10.10.10.10
 
 2 RETRY
 ```
