@@ -15,7 +15,7 @@ nmap -p 1433 --script ms-sql-* <target>
 # Users and Passwords
 nmap -p 1433 --script ms-sql-hasdbaccess,ms-sql-empty-password <target>
 
-# Verilənlər bazası / cədvəl siyahısı
+# Databases / Tables
 nmap -p 1433 --script ms-sql-databases,ms-sql-tables <target>
 
 # Brute force
