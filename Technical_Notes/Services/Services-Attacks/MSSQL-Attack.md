@@ -3,6 +3,37 @@ SELECT @@version;
 SELECT SERVERPROPERTY('productversion'), SERVERPROPERTY('productlevel'), SERVERPROPERTY('edition');
 ```
 
+## Nmap Scan
+
+```bash
+# Version
+nmap -p 1433 --script ms-sql-info <target>
+
+# Enumeration
+nmap -p 1433 --script ms-sql-* <target>
+
+# Users and Passwords
+nmap -p 1433 --script ms-sql-hasdbaccess,ms-sql-empty-password <target>
+
+# Verilənlər bazası / cədvəl siyahısı
+nmap -p 1433 --script ms-sql-databases,ms-sql-tables <target>
+
+# Brute force
+nmap -p 1433 --script ms-sql-brute \
+  --script-args mssqluserdb=users.txt,mssqlpassdb=pass.txt <target>
+
+# xp_cmdshell 
+nmap -p 1433 --script ms-sql-xp-cmdshell <target>
+
+# Hash dump 
+nmap -p 1433 --script ms-sql-dump-hashes \
+  --script-args mssqlusername='sa',mssqlpassword='pass' <target>
+
+# Backup Configuration
+nmap -p 1433 --script ms-sql-config <target> \
+  --script-args mssqlusername='sa',mssqlpassword='pass'
+```
+
 ## Current user & privileges
 ```
 SELECT SYSTEM_USER;
