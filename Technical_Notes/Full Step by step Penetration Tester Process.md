@@ -17,6 +17,8 @@ fping -asgq 172.16.7.0/23
 ```bash
 nmap -p- -Pn -T4 --min-rate 2000 --max-retries 5 -oN open_ports 10.10.10.10
 
+sudo nmap -sU --min-rate=400 --min-parallelism=512 --open 10.10.11.75
+
 2 RETRY
 ```
 
