@@ -163,12 +163,12 @@ netexec ldap MACHINE_IP -u pentest -p 'p3nt3st2025!&' -M pre2k
 
 ## 18. Delegation
 ```powershell
-
-```
 nxc ldap dc.sendai.vl -u user -p pass --trusted-for-delegation
 nxc ldap dc.sendai.vl -u user -p pass --find-delegation
 
 impacket-findDelegation sendai.vl/user:pass
+```
+
 ---
 
 ## 18. RBCD
