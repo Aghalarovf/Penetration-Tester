@@ -3,6 +3,11 @@
 findstr /SIM /C:"password" *.txt *.ini *.cfg *.config *.xml
 ```
 
+# Search PATH Files
+```powershell
+dir -Path HKLM:\SYSTEM\CurrentControlSet\services | Get-ItemProperty | Select-Object ImagePath | select-string -NotMatch "svchost.exe" | select-string "exe"
+```
+
 # Dictionary Files
 ```powershell
 gc 'C:\Users\htb-student\AppData\Local\Google\Chrome\User Data\Default\Custom Dictionary.txt' | Select-String password
