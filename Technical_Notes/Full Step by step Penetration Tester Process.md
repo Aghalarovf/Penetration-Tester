@@ -102,6 +102,22 @@ Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/
 
 ---
 
+## 19. Username Enumeration
+
+```bash
+# NXC
+nxc smb dc.sendai.vl -u 'test' -p '' --rid-brute 10000 > nxc_result.txt
+cat nxc_result.txt | grep TypeUser | awk '{ print $6}' | cut -d '\' -f 2 > users.txt
+
+# Usernameanarchy
+./username-anarchy --input-file /home/sako/Labaratory/hostname
+
+# Kerbrute
+kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
+```
+
+---
+
 ## 16. Enumerate Writable Objects
 ```powershell
 bloodyAD --host <target-ip> --dns <target-ip> -d checkpoint.htb \
@@ -147,20 +163,6 @@ Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/
 
 ---
 
-## 19. Username Enumeration
-
-```bash
-# windapsearch
-./windapsearch.py --dc-ip 172.16.5.5 -u "" -U
-
-# Usernameanarchy
-./username-anarchy --input-file /home/sako/Labaratory/hostname
-
-# Kerbrute
-kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
-```
-
----
 
 ## 20. Credential Discovery 
 
