@@ -133,23 +133,6 @@ Get-DomainObjectAcl -Identity "RBCD-PC" -ResolveGUIDs | `
     Where-Object { $_.ActiveDirectoryRights -match "GenericAll|GenericWrite|WriteProperty" }
 ```
 
-### 5.3 Lab Setup — Target Object
-
-```powershell
-Import-Module ActiveDirectory
-
-# Target computer account - under the Delegation OU
-New-ADComputer -Name "RBCD-PC" -SAMAccountName "RBCD-PC" -Enabled $true `
-    -Path "OU=Delegation,DC=warzone,DC=oxsium,DC=local"
-
-# Manually add the CIFS SPN (it doesn't register automatically since this isn't a real domain-joined computer)
-setspn -A CIFS/RBCD-PC.warzone.oxsium.local RBCD-PC$
-
-# Check - TrustedForDelegation is False, msDS-AllowedToActOnBehalfOfOtherIdentity is empty, SPN is present
-Get-ADComputer -Identity "RBCD-PC" -Properties TrustedForDelegation, msDS-AllowedToActOnBehalfOfOtherIdentity, ServicePrincipalName
-setspn -L RBCD-PC$
-```
-
 ### 5.4 Attack Chain — Attacker-Controlled Object
 
 ```powershell
