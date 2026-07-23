@@ -227,7 +227,7 @@ impacket-getST -spn cifs/TARGET.sendai.vl \
 
 ## 20. Credential Discovery 
 
-Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Enumeration/Username_Password-Enumeration.md)
+Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Credential%20Harvesting.md)
 
 ---
 
