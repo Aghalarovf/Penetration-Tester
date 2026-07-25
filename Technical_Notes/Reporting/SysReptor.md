@@ -45,7 +45,6 @@ docker compose up -d
 # Findings
 ---
 
-```powershell
 ## Description
 A critical Remote Code Execution (RCE) vulnerability was identified on the target host, 
 attributed to the MS17-010 (EternalBlue) flaw in the SMBv1 protocol. This vulnerability 
