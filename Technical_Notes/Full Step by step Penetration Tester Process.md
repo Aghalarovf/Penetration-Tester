@@ -54,6 +54,15 @@ ModHeader
 SSL Certificate Viewer
 HackBar
 HackTools
+
+□ Tam port scan (bütün portlar)
+□ Servis versiyaları
+□ Web varsa → gobuster/ffuf ilə directory
+□ Vhost enumeration
+□ Default credentials
+□ CVE axtarışı (servis versiyasına görə)
+□ Robots.txt, sitemap.xml
+□ Source code bax
 ```
 
 ---
@@ -214,6 +223,91 @@ kinit 'fs01$'
 ```
 
 > **Note:** Look for members of the **Pre-Windows 2000 Compatible Access** group — computer accounts in this group may have weak or default passwords.
+
+---
+
+## 21. Trust Abuse
+```powershell
+1. nmap → DC tap
+2. ldapsearch/nxc → Domain info
+3. Get-ADTrust / Get-DomainTrust → Trust tap
+4. TrustDirection yoxla (Inbound/Outbound/Bidi?)
+5. SID Filtering yoxla (0x4 var? → abuse olmaz)
+6. BloodHound → Visual path tap
+7. Foreign group members yoxla
+8. SID History olan hesablar yoxla
+9. Trust key / KRBTGT hash əldə et
+10. ExtraSID attack → Enterprise Admin
+
+:: Bütün trustları gör
+nltest /domain_trusts
+nltest /domain_trusts /all_trusts
+
+:: Specific domain haqqında
+nltest /sc_query:partner.local
+nltest /dsgetdc:partner.local
+
+:: Domain məlumatları
+net view /domain
+netdom query trust
+netdom query fsmo
+netdom query dc /domain:corp.local
+
+# Import
+Import-Module .\PowerView.ps1
+# və ya
+. .\PowerView.ps1
+
+# Əsas trust enumeration
+Get-DomainTrust
+Get-DomainTrust -Domain corp.local
+
+# Forest trustları
+Get-ForestTrust
+Get-ForestTrust -Forest corp.local
+
+# Bütün forest domain-ləri
+Get-ForestDomain
+Get-ForestDomain -Forest partner.local
+
+# Trust üzərindən user enumeration
+Get-DomainUser -Domain partner.local
+
+# Trust üzərindən group enumeration
+Get-DomainGroup -Domain partner.local
+
+# Foreign group membership (cross-domain)
+Get-DomainForeignGroupMember
+Get-DomainForeignGroupMember -Domain partner.local
+
+# ACL abuse üçün
+Get-DomainObjectAcl -Identity "Domain Admins" -ResolveGUIDs
+
+# SID History olan hesablar (çox vacib!)
+Get-ADUser -Filter {SIDHistory -like "*"} -Properties SIDHistory
+Get-DomainUser -LDAPFilter "(sidHistory=*)"
+
+# PowerView ilə
+Get-DomainTrust | Select-Object TargetName, TrustDirection, TrustType, `
+  @{Name="SIDFiltering";Expression={
+    if($_.TrustAttributes -band 0x4) {"Enabled - Quarantine"}
+    elseif($_.TrustAttributes -band 0x40) {"Enabled - Forest"}
+    else {"DISABLED - Vulnerable!"}
+  }}
+
+# Native PowerShell
+(Get-ADTrust -Filter *).SIDFilteringQuarantined
+(Get-ADTrust -Filter *).SIDFilteringForestAware
+
+0x00000001 = Non-transitive
+0x00000002 = Up-level (Windows 2000+)
+0x00000004 = Quarantine (SID Filtering ON) ← Əgər varsa, SID abuse olmaz
+0x00000008 = Forest transitive
+0x00000010 = Cross-organizational
+0x00000020 = Within forest
+0x00000040 = Treat as external
+0x00000080 = Uses RC4 encryption
+```
 
 ---
 
