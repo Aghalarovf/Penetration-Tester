@@ -1,260 +1,284 @@
-# C# Fundamentals Roadmap — 40 Steps to Master the Basics
+# C# Red Team Roadmap — Filterlənmiş Versiya
 
-> **Goal:** Strengthen your C# foundation step by step — variables, loops, LINQ, collections, OOP, and more. No advanced modules, just solid fundamentals.
+> **Hədəf:** Red Team tooling üçün lazım olan C# bazasını qurmaq. Lazımsız mövzular çıxarılmışdır.
 
 ---
 
-## 🟢 Stage 1: Language Basics (Steps 1–10)
+## 🟢 Stage 1 — Language Basics (Steps 1–10)
+> Hamısı mütləqdir. Sintaksis bazası olmadan heç nə yazılmaz.
 
 ### Step 1 — Hello World & Program Structure
-Understand the entry point of a C# program. Learn what `namespace`, `class`, and `Main()` mean. Run your first console app.
+`namespace`, `class`, `Main()` — proqramın giriş nöqtəsi.
 ```csharp
 Console.WriteLine("Hello, World!");
 ```
 
 ### Step 2 — Variables & Data Types
-Learn the core types: `int`, `double`, `float`, `decimal`, `bool`, `char`, `string`. Understand value types vs reference types.
+`int`, `double`, `float`, `bool`, `char`, `string`. Value type vs reference type fərqi.
 ```csharp
-int age = 25;
-string name = "Anar";
-bool isActive = true;
+int port = 4444;
+string host = "10.0.0.1";
+bool isOpen = true;
 ```
 
 ### Step 3 — Type Conversion
-Understand implicit vs explicit casting, `Convert.ToInt32()`, `int.Parse()`, `int.TryParse()`. Know when each is appropriate.
+`Convert.ToInt32()`, `int.Parse()`, `int.TryParse()`. Network data parse edəndə daim lazım olur.
 ```csharp
-string input = "42";
-int number = int.Parse(input);
+string input = "4444";
+int port = int.Parse(input);
 ```
 
 ### Step 4 — Operators
-Arithmetic (`+`, `-`, `*`, `/`, `%`), comparison (`==`, `!=`, `>`, `<`), logical (`&&`, `||`, `!`), and assignment operators (`+=`, `-=`).
+Arithmetic (`+`, `-`, `*`, `/`, `%`), comparison (`==`, `!=`, `>`, `<`), logical (`&&`, `||`, `!`), assignment (`+=`, `-=`).
 
 ### Step 5 — String Operations
-Learn `string.Length`, `ToUpper()`, `ToLower()`, `Trim()`, `Replace()`, `Contains()`, `Split()`, `Substring()`, and string interpolation.
+`Length`, `ToUpper()`, `ToLower()`, `Trim()`, `Replace()`, `Contains()`, `Split()`, `Substring()`, string interpolation.
 ```csharp
-string full = $"Hello, {name}! You are {age} years old.";
+string beacon = $"HOST={host};PORT={port}";
+string[] parts = "10.0.0.1:4444".Split(':');
 ```
 
-### Step 6 — Conditional Statements (if / else / switch)
-Control the flow of your program using `if`, `else if`, `else`, and `switch` statements.
+### Step 6 — Conditional Statements
+`if`, `else if`, `else`, `switch`.
 ```csharp
-if (age >= 18) Console.WriteLine("Adult");
-else Console.WriteLine("Minor");
+if (isOpen) Console.WriteLine("[+] Port open");
+else Console.WriteLine("[-] Filtered");
 ```
 
-### Step 7 — Ternary Operator & Null Coalescing
-Use `? :` for short conditionals and `??` for null-safe defaults.
+### Step 7 — Ternary & Null Coalescing
+`? :` və `??` — qısa şərtlər üçün.
 ```csharp
-string result = age >= 18 ? "Adult" : "Minor";
-string display = name ?? "Anonymous";
+string status = isOpen ? "OPEN" : "CLOSED";
+string target = input ?? "127.0.0.1";
 ```
 
 ### Step 8 — Loops: for & while
-Master `for` and `while` loops. Understand loop variables, conditions, and increments. Use `break` and `continue`.
+Loop dəyişənləri, `break`, `continue`.
 ```csharp
-for (int i = 0; i < 10; i++) Console.WriteLine(i);
+for (int port = 1; port <= 1024; port++)
+    Scan(host, port);
 ```
 
 ### Step 9 — Loops: foreach & do-while
-Use `foreach` to iterate over collections. Use `do-while` when the body must run at least once.
+Collection-lar üzərində iterate etmək.
 ```csharp
-foreach (var item in myList) Console.WriteLine(item);
+foreach (string host in liveHosts)
+    Console.WriteLine($"[+] {host}");
 ```
 
-### Step 10 — Methods (Functions)
-Define and call methods. Understand parameters, return types, `void`, and `return`. Learn method overloading.
+### Step 10 — Methods
+Parametrlər, return tipləri, `void`, overloading.
 ```csharp
-int Add(int a, int b) => a + b;
+bool IsPortOpen(string host, int port) => TcpConnect(host, port);
 ```
 
 ---
 
-## 🔵 Stage 2: Collections & Data Structures (Steps 11–20)
+## 🔵 Stage 2 — Collections (Seçilmiş Steps)
 
 ### Step 11 — Arrays
-Declare and use single-dimensional arrays. Access elements by index. Understand `array.Length`.
+Fixed-size. Shellcode byte array-ləri, sabit port siyahıları.
 ```csharp
-int[] numbers = { 1, 2, 3, 4, 5 };
+byte[] shellcode = { 0x90, 0x90, 0xCC };
+int[] commonPorts = { 22, 80, 443, 3389 };
 ```
 
-### Step 12 — Multi-dimensional & Jagged Arrays
-Learn 2D arrays (`int[,]`) and jagged arrays (`int[][]`). Know when to use each.
-
 ### Step 13 — List\<T\>
-Use `List<T>` for dynamic-size collections. Methods: `Add()`, `Remove()`, `Contains()`, `Count`, `Clear()`, `Sort()`.
+Dynamic collection. Live host-lar, açıq portlar, loot toplamaq.
 ```csharp
-var names = new List<string> { "Ali", "Veli" };
-names.Add("Anar");
+var liveHosts = new List<string>();
+liveHosts.Add("10.0.0.1");
+liveHosts.Sort();
 ```
 
 ### Step 14 — Dictionary\<TKey, TValue\>
-Store key-value pairs. Use `Add()`, `Remove()`, `ContainsKey()`, `TryGetValue()`, iterate with `foreach`.
+Key-value. Credential store, port→service mapping, recon nəticələri.
 ```csharp
-var ages = new Dictionary<string, int> { { "Ali", 30 } };
+var creds = new Dictionary<string, string>();
+creds["admin"] = "Password123!";
+var portMap = new Dictionary<int, string> { {22, "SSH"}, {3389, "RDP"} };
 ```
 
 ### Step 15 — HashSet\<T\>
-Unique element collections. Understand `Add()`, `Contains()`, `UnionWith()`, `IntersectWith()`.
-
-### Step 16 — Stack\<T\> & Queue\<T\>
-Understand LIFO (`Stack`) and FIFO (`Queue`) data structures. Use `Push/Pop` and `Enqueue/Dequeue`.
-
-### Step 17 — Tuple & ValueTuple
-Return multiple values from a method using `Tuple` or named `ValueTuple`.
+Unikal elementlər. Scan edilmiş IP-ləri dedup etmək.
 ```csharp
-(string Name, int Age) GetPerson() => ("Anar", 25);
+var scanned = new HashSet<string>();
+scanned.Add("10.0.0.1");
+scanned.Add("10.0.0.1"); // ignore edilir
 ```
 
-### Step 18 — IEnumerable\<T\> & ICollection\<T\>
-Understand the collection interfaces. Know why `IEnumerable` is the base for all iteration in C#.
-
-### Step 19 — Sorting & Searching Collections
-Use `List.Sort()`, `Array.Sort()`, `Array.BinarySearch()`. Understand custom sorting with `IComparer<T>`.
-
-### Step 20 — Collection Initialization Patterns
-Master object and collection initializers for cleaner, more readable code.
+### Step 16 — Queue\<T\> & Stack\<T\>
+C2 task queue (FIFO), execution history (LIFO).
 ```csharp
-var person = new Person { Name = "Anar", Age = 25 };
+var taskQueue = new Queue<string>();
+taskQueue.Enqueue("whoami");
+taskQueue.Enqueue("ipconfig");
+string next = taskQueue.Dequeue(); // → "whoami"
 ```
 
 ---
 
-## 🟣 Stage 3: Object-Oriented Programming (Steps 21–28)
+## 🟣 Stage 3 — OOP (Seçilmiş Steps)
 
 ### Step 21 — Classes & Objects
-Define a class with fields, properties, and constructors. Create objects with `new`.
+Tool-ları strukturlaşdırmaq üçün — Scanner, Beacon, Implant class-ları.
 ```csharp
-class Car { public string Brand { get; set; } }
+class PortScanner
+{
+    public string Target { get; set; }
+    public List<int> OpenPorts { get; set; } = new();
+}
 ```
 
 ### Step 22 — Properties & Access Modifiers
-Use `public`, `private`, `protected`, `internal`. Understand auto-properties vs full properties with getters/setters.
-
-### Step 23 — Constructors & Destructors
-Parameterless and parameterized constructors. Constructor chaining with `this(...)`.
-
-### Step 24 — Inheritance
-Extend a base class with `: BaseClass`. Use `base` keyword to call parent members.
+`public`, `private`, `internal`. Implant config-lərini encapsulate etmək.
 ```csharp
-class ElectricCar : Car { public int BatteryCapacity { get; set; } }
+class BeaconConfig
+{
+    public string C2Host { get; set; }
+    private int _sleepInterval = 60;
+    public int SleepInterval => _sleepInterval;
+}
+```
+
+### Step 23 — Constructors
+Parameterli constructor — tool initialization.
+```csharp
+class ReverseShell
+{
+    private string _host;
+    private int _port;
+
+    public ReverseShell(string host, int port)
+    {
+        _host = host;
+        _port = port;
+    }
+}
 ```
 
 ### Step 25 — Polymorphism & Virtual Methods
-Use `virtual` and `override` to allow child classes to redefine behavior.
+Fərqli C2 channel-ları üçün eyni interface — HTTP, TCP, SMB Pipe.
+```csharp
+class C2Channel
+{
+    public virtual string Receive() => "";
+}
 
-### Step 26 — Abstract Classes & Interfaces
-`abstract` forces subclasses to implement. `interface` defines a contract. Understand when to use each.
+class HttpChannel : C2Channel
+{
+    public override string Receive() => PollHttp();
+}
+
+class TcpChannel : C2Channel
+{
+    public override string Receive() => ReadSocket();
+}
+```
 
 ### Step 27 — Static Members & Static Classes
-Fields and methods that belong to the class, not instances. Utility classes pattern.
-
-### Step 28 — Records & Structs
-Use `record` for immutable data objects. Use `struct` for lightweight value types.
+Utility class-ları — helper metodlar, sabit config dəyərləri.
 ```csharp
-record Person(string Name, int Age);
+static class Utils
+{
+    public static string XorEncrypt(string data, byte key) { ... }
+    public static byte[] ToBytes(string hex) { ... }
+}
 ```
 
 ---
 
-## 🟡 Stage 4: LINQ (Steps 29–34)
+## 🟡 Stage 4 — LINQ (Seçilmiş Steps)
 
-### Step 29 — What is LINQ?
-Language Integrated Query — query collections using SQL-like syntax. Understand deferred execution.
-
-### Step 30 — LINQ: Where & Select
-Filter with `Where()`, transform with `Select()`.
+### Step 30 — Where & Select
+Şərtə görə filter + transform. Port/host siyahılarını emal etmək.
 ```csharp
-var adults = people.Where(p => p.Age >= 18).Select(p => p.Name);
+var highPorts = ports.Where(p => p > 1024).ToList();
+var hostnames = results.Select(r => r.Hostname).ToList();
 ```
 
-### Step 31 — LINQ: OrderBy, GroupBy, Distinct
-Sort with `OrderBy/OrderByDescending`, group with `GroupBy`, remove duplicates with `Distinct`.
-
-### Step 32 — LINQ: First, Single, Any, All, Count
-Use aggregation and existence checks: `FirstOrDefault()`, `SingleOrDefault()`, `Any()`, `All()`, `Count()`.
-
-### Step 33 — LINQ: Sum, Min, Max, Average
-Numeric aggregations on collections.
+### Step 31 — OrderBy, GroupBy, Distinct
+Nəticələri sırala, qruplaşdır, təkrarları sil.
 ```csharp
-double avg = scores.Average();
-int total = scores.Sum();
+var sorted = openPorts.OrderBy(p => p).ToList();
+var unique = foundHosts.Distinct().ToList();
 ```
 
-### Step 34 — LINQ Query Syntax vs Method Syntax
-Know both styles. Method syntax is more common; query syntax is more readable for complex joins.
+### Step 32 — First, Any, All, Count
+Sürətli yoxlamalar — hər hansı admin var mı, port açıqdırmı.
 ```csharp
-// Method syntax
-var result = list.Where(x => x > 5).OrderBy(x => x);
-
-// Query syntax
-var result = from x in list where x > 5 orderby x select x;
+bool hasAdmin = users.Any(u => u.Contains("admin"));
+int openCount = ports.Count(p => p < 1024);
+string first = liveHosts.FirstOrDefault();
 ```
 
 ---
 
-## 🔴 Stage 5: Error Handling & Other Essentials (Steps 35–40)
+## 🔴 Stage 5 — Essentials (Seçilmiş Steps)
 
-### Step 35 — Exception Handling (try / catch / finally)
-Wrap risky code in `try`. Catch specific exceptions. Use `finally` for cleanup.
+### Step 35 — Exception Handling
+Network tooling-də mütləq lazım — connection fail, timeout, access denied.
 ```csharp
-try { int.Parse("abc"); }
-catch (FormatException ex) { Console.WriteLine(ex.Message); }
-finally { Console.WriteLine("Done"); }
-```
-
-### Step 36 — Custom Exceptions
-Create your own exception classes inheriting from `Exception`.
-```csharp
-class AgeException : Exception { public AgeException(string msg) : base(msg) {} }
+try
+{
+    using TcpClient tc = new TcpClient();
+    tc.Connect(host, port);
+    // ...
+}
+catch (SocketException ex)
+{
+    Console.WriteLine($"[-] {host}:{port} — {ex.Message}");
+}
+finally
+{
+    // cleanup
+}
 ```
 
 ### Step 37 — Nullable Types & Null Safety
-Use `int?`, `string?`. Understand null-conditional (`?.`), null-coalescing (`??`), and null-forgiving (`!`) operators.
+Null check olmadan tool-lar crash edir.
 ```csharp
-int? age = null;
-int result = age ?? 0;
+string? response = GetC2Response();
+string cmd = response ?? "sleep";
+int? pid = FindProcess("lsass")?.Id;
 ```
 
-### Step 38 — Delegates & Events (Basics)
-Understand what a delegate is — a type-safe function pointer. Learn basic event wiring with `+=` and `-=`.
+### Step 38–39 — Delegates, Lambda, Func/Action
+Callback-lər, async operation-lar, LINQ chain-ləri üçün mütləq lazım.
 ```csharp
-Action<string> greet = name => Console.WriteLine($"Hello {name}");
-```
+Action<string> log = msg => Console.WriteLine($"[*] {msg}");
 
-### Step 39 — Lambda Expressions & Func/Action
-Write concise anonymous functions with `=>`. Use `Func<T, TResult>` and `Action<T>` as parameter types.
-```csharp
-Func<int, int, int> add = (a, b) => a + b;
-```
+Func<string, int, bool> isOpen = (host, port) => TcpConnect(host, port);
 
-### Step 40 — var, const, readonly & Pattern Matching
-Use `var` for type inference. Distinguish `const` vs `readonly`. Master `switch` pattern matching with `is` and `when`.
-```csharp
-if (obj is string s && s.Length > 0) Console.WriteLine(s);
+// Parallel scan
+var tasks = ports.Select(p => Task.Run(() => ScanPort(host, p)));
+await Task.WhenAll(tasks);
 ```
 
 ---
 
-## 📌 Recommended Practice Order
+## 📌 Oxuma Sırası
 
-| Priority | Topic |
-|---|---|
-| 🔥 First | Steps 1–10 (Language Basics) |
-| 🔥 Second | Steps 11–14 (List, Dictionary) |
-| 🔥 Third | Steps 21–26 (OOP) |
-| 🔥 Fourth | Steps 29–34 (LINQ) |
-| 🔥 Fifth | Steps 35–40 (Exceptions, Delegates) |
-
----
-
-## 📚 Recommended Resources
-
-- [Microsoft C# Documentation](https://learn.microsoft.com/en-us/dotnet/csharp/)
-- [C# Fundamentals for Absolute Beginners – Channel 9](https://learn.microsoft.com/en-us/shows/csharp-fundamentals-for-absolute-beginners/)
-- [LeetCode Easy problems](https://leetcode.com) — practice with C#
-- [dotnetfiddle.net](https://dotnetfiddle.net) — run C# in browser
+| Mərhələ | Mövzu | Vaxt |
+|---|---|---|
+| 1 | Stage 1 — Bütün Steps 1-10 | 3-4 gün |
+| 2 | Stage 2 — Steps 11, 13, 14, 15, 16 | 2-3 gün |
+| 3 | Stage 3 — Steps 21, 22, 23, 25, 27 | 3-4 gün |
+| 4 | Stage 4 — Steps 30, 31, 32 | 1-2 gün |
+| 5 | Stage 5 — Steps 35, 37, 38-39 | 2 gün |
+| 6 | **Red Team Library Roadmap-a keç** | — |
 
 ---
 
-*Good luck! 🚀 Master the fundamentals and everything else becomes much easier.*
+## ⚡ Sonra Keçəcəyin Mövzular
+
+Bu roadmap bitdikdən sonra birbaşə:
+
+```
+System.Net.Sockets     → Reverse shell, C2 channel
+System.Diagnostics     → Process execution, enumeration  
+System.Net             → HTTP beacon, payload download
+System.Runtime.InteropServices → P/Invoke, shellcode injection
+System.Reflection      → In-memory execution, AV bypass
+System.Security.Cryptography  → C2 traffic encryption
+```
