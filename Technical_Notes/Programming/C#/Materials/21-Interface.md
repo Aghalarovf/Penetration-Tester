@@ -25,4 +25,13 @@ class PortScanner : IScanner
         return $"Port 80 is open";
     }
 }
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        IScanner Port = new PortScanner("80");
+        Console.WriteLine($"Port aktivdir: {Port.Target}");
+    }
+}
 ```
