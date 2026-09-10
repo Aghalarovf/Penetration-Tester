@@ -1,3 +1,4 @@
+```
 using System;
 using System.Collections.Generic;
 
@@ -129,3 +130,4 @@ class Program
         Console.WriteLine($"Total DB Logs: {dbLogger.GetTotalLogsCount()}");
     }
 }
+```
