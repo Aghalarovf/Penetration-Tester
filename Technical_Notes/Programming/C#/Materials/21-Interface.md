@@ -31,8 +31,8 @@ class Program
     static void Main(string[] args)
     {
         IScanner Port = new PortScanner("80");
-        Console.WriteLine(Host.Scan());     
-        Console.WriteLine(Host.GetResult()); 
+        Console.WriteLine(Port.Scan());     
+        Console.WriteLine(Port.GetResult()); 
     }
 }
 ```
