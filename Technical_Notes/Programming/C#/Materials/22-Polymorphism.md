@@ -1,3 +1,4 @@
+## Virtual Polymorphism
 ```csharp
 using System;
 
@@ -34,6 +35,55 @@ class Program
 
         a1.MakeSound();
         a2.MakeSound();
+    }
+}
+```
+
+## Abstract Polymorphism
+```csharp
+using System;
+
+public abstract class Employee
+{
+    public abstract void GetRole();
+
+}
+
+public class Manager : Employee
+{
+    public override void GetRole()
+    {
+        Console.WriteLine("Mən Manageram");
+    }
+}
+
+public class Developer : Employee
+{
+    public override void GetRole()
+    {
+        Console.WriteLine("Mən Developerəm");
+    }
+}
+
+public class Designer : Employee
+{
+    public override void GetRole()
+    {
+        Console.WriteLine("Mən Designerəm");
+    }
+}
+
+class Program
+{
+    static void Main(string[] args)
+    {
+        Employee e1 = new Manager();
+        Employee e2 = new Developer();
+        Employee e3 = new Designer();
+
+        e1.GetRole();
+        e2.GetRole();
+        e3.GetRole();
     }
 }
 ```
