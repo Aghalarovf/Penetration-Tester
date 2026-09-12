@@ -87,3 +87,34 @@ class Program
     }
 }
 ```
+
+## Interface Polymorphism
+```csharp
+public interface IChannel
+{
+    void Send(string message);
+}
+
+public class HttpChannel : IChannel
+{
+    public void Send(string message)
+    {
+        Console.WriteLine($"HTTP: {message}");
+    }
+}
+
+public class SmsChannel : IChannel
+{
+    public void Send(string message)
+    {
+        Console.WriteLine($"SMS: {message}");
+    }
+}
+
+// Polimorfizm
+IChannel c1 = new HttpChannel();
+IChannel c2 = new SmsChannel();
+
+c1.Send("salam"); // HTTP: salam
+c2.Send("salam"); // SMS: salam
+```
