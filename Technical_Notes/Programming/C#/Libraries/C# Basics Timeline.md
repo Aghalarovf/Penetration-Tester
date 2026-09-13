@@ -1,5 +1,5 @@
-# C# Red Team — Study Plan (Step 19 → Step 75)
-> A detailed day-by-day schedule from Step 19 to the end of the roadmap.
+# C# Red Team — Study Plan (Step 19 → Step 135)
+> Updated plan — AD + Windows PrivEsc modules added after C2 infrastructure is complete.
 > Based on 2 hours of focused study per day.
 
 ---
@@ -146,8 +146,6 @@ Each day follows this structure:
 ---
 
 ## 🌐 Stage 5.5 — Network Fundamentals (Steps 32–34)
-
-> These steps bridge the gap between C# essentials and Windows Internals networking code.
 
 ### Step 32 — TCP/IP & Networking Concepts
 **Duration: 2 days**
@@ -455,7 +453,7 @@ Each day follows this structure:
 
 ---
 
-## 🟣 Stage 11 — Credential Access (Steps 60–62)
+## 🟣 Stage 11 — Credential Access (Steps 60–63)
 
 ### Step 60 — Token Impersonation
 **Duration: 3 days**
@@ -500,76 +498,9 @@ Each day follows this structure:
 
 ---
 
-## 🔵 Stage 12 — Active Directory (Steps 64–69)
+## ⚪ Stage 12 — AppLocker & CLM Bypass (Steps 64–66)
 
-> ⚠️ An **Active Directory lab** is required for this stage: Domain Controller + 2 Windows VMs.
-
-### Step 64 — LDAP Enumeration
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | `DirectoryEntry + DirectorySearcher` — list all users. Understand filter syntax |
-| 2 | Query group membership, AdminCount=1, disabled accounts. Find users with SPNs |
-
----
-
-### Step 65 — Kerberoasting
-**Duration: 3 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | What Kerberoasting is — SPN, TGS, RC4 encryption. Find Kerberoastable accounts via LDAP |
-| 2 | Request a TGS with `KerberosRequestorSecurityToken`. Extract raw ticket bytes |
-| 3 | Crack offline with `hashcat -m 13100`. Crack a service account password in the lab |
-
----
-
-### Step 66 — DACL / ACL Enumeration
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | ACL/DACL/ACE concepts. Read object permissions with `ActiveDirectorySecurity` |
-| 2 | Find `GenericAll`, `WriteDACL`, `GenericWrite`. Build a privilege escalation path in the lab |
-
----
-
-### Step 67 — COM Object Lateral Movement
-**Duration: 3 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | COM/DCOM basics. `MMC20.Application` ProgID. `Type.GetTypeFromProgID` |
-| 2 | Execute a command on a remote host via `ExecuteShellCommand` (in lab) |
-| 3 | Test `ShellWindows` and `ShellBrowserWindow` COM objects |
-
----
-
-### Step 68 — DCSync
-**Duration: 3 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | DCSync principle — MS-DRSR protocol. Which privileges are required |
-| 2 | Execute Mimikatz `lsadump::dcsync` through a PowerShell runspace |
-| 3 | Extract the `krbtgt` hash. Understand the Golden Ticket concept |
-
----
-
-### Step 69 — Pass-the-Hash
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | PTH mechanics — NTLM auth flow. `LogonUser` with `LOGON32_LOGON_NEW_CREDENTIALS` |
-| 2 | Authenticate to SMB, WMI, WinRM via PTH in the lab. Compare with Impacket |
-
----
-
-## ⚪ Stage 13 — AppLocker & CLM Bypass (Steps 70–72)
-
-### Step 70 — AppLocker Enumeration
+### Step 64 — AppLocker Enumeration
 **Duration: 2 days**
 
 | Day | Goal |
@@ -579,7 +510,7 @@ Each day follows this structure:
 
 ---
 
-### Step 71 — MSBuild Inline Task Execution
+### Step 65 — MSBuild Inline Task Execution
 **Duration: 2 days**
 
 | Day | Goal |
@@ -589,7 +520,7 @@ Each day follows this structure:
 
 ---
 
-### Step 72 — CLM Detection & Bypass
+### Step 66 — CLM Detection & Bypass
 **Duration: 3 days**
 
 | Day | Goal |
@@ -600,9 +531,9 @@ Each day follows this structure:
 
 ---
 
-## 🟢 Stage 14 — Advanced Post-Exploitation (Steps 73–75)
+## 🟢 Stage 13 — C2 Hardening (Steps 67–69)
 
-### Step 73 — Registry Persistence
+### Step 67 — Registry Persistence
 **Duration: 2 days**
 
 | Day | Goal |
@@ -612,7 +543,7 @@ Each day follows this structure:
 
 ---
 
-### Step 74 — Situational Awareness
+### Step 68 — Situational Awareness
 **Duration: 2 days**
 
 | Day | Goal |
@@ -622,12 +553,701 @@ Each day follows this structure:
 
 ---
 
-### Step 75 — Agent Hardening & Operational Security
+### Step 69 — Agent Hardening & Operational Security
 **Duration: 2 days**
 
 | Day | Goal |
 |-----|------|
 | 1 | Sleep masking — encrypt agent in memory during sleep intervals. Detect and evade common sandbox triggers |
 | 2 | Malleable C2 profiles — randomize beacon intervals, URI paths, headers. String obfuscation at compile time |
+
+---
+
+## 🔐 Stage 14 — Windows Privilege Escalation (Steps 70–90)
+
+> ⚠️ C2 infrastructure is fully operational from this point. All techniques are implemented as agent modules.
+
+### Step 70 — Privilege Enumeration Module
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate all token privileges with `GetTokenInformation`. List enabled, disabled, and removed privileges |
+| 2 | Build a reusable `PrivilegeChecker` class — check for specific privileges by name. Output as structured JSON for C2 |
+
+---
+
+### Step 71 — SeImpersonatePrivilege & Potato Attacks
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Understand `SeImpersonatePrivilege` — why IIS/SQL service accounts have it. How Potato attacks abuse NTLM relay |
+| 2 | Implement a named pipe server that captures SYSTEM token via `ImpersonateNamedPipeClient`. Verify SYSTEM context |
+| 3 | Study PrintSpoofer technique — `SpoolSample` triggers authentication to attacker-controlled pipe. Implement in C# |
+
+---
+
+### Step 72 — SeDebugPrivilege Abuse
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enable `SeDebugPrivilege` programmatically. Open a handle to `lsass` — verify elevated access |
+| 2 | Migrate into a SYSTEM process by injecting shellcode via `SeDebug`. Full SYSTEM shell via process injection |
+
+---
+
+### Step 73 — SeBackupPrivilege & SeRestorePrivilege
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `SeBackupPrivilege` — read any file regardless of DACL. Extract SAM/SYSTEM hives using backup APIs (`BackupRead`) |
+| 2 | `SeRestorePrivilege` — write any file regardless of DACL. Overwrite a privileged binary or service executable |
+
+---
+
+### Step 74 — SeTakeOwnershipPrivilege & SeAssignPrimaryTokenPrivilege
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `SeTakeOwnershipPrivilege` — take ownership of any object. Change DACL on a privileged file/registry key |
+| 2 | `SeAssignPrimaryTokenPrivilege` — assign a primary token to a process. Spawn a process under SYSTEM token |
+
+---
+
+### Step 75 — SeTCBPrivilege
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `SeTCBPrivilege` — Act as part of the operating system. Understand what this enables over SeImpersonate |
+| 2 | Use `LsaLogonUser` with `SeTCBPrivilege` to create a logon session for any user without credentials. Spawn shell |
+
+---
+
+### Step 76 — UAC Bypass — COM Elevation
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | UAC internals — consent.exe, auto-elevation, manifest flags. How COM objects bypass UAC |
+| 2 | Abuse `ICMLuaUtil` COM interface via `CoCreateInstance` — execute a command as elevated without UAC prompt |
+
+---
+
+### Step 77 — UAC Bypass — Token Manipulation
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Duplicate an elevated token from a high-integrity process. Use `CreateProcessWithTokenW` to spawn elevated shell |
+| 2 | `fodhelper.exe` registry hijack — write payload to `HKCU\Software\Classes\ms-settings\shell\open\command`. Trigger elevation |
+
+---
+
+### Step 78 — UAC Bypass — DLL Hijack in Auto-Elevate Binary
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Find auto-elevate binaries (`requestedExecutionLevel=highestAvailable`). Identify DLL load order in `eventvwr.exe` |
+| 2 | Drop a malicious DLL into the search path. Trigger `eventvwr.exe` — verify elevated execution |
+
+---
+
+### Step 79 — DLL Hijacking — Basics
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | DLL search order — `KnownDLLs`, application directory, `PATH`. Use `Procmon` to find missing DLL loads |
+| 2 | Write a proxy DLL — export the same functions as the original, add payload in `DllMain`. Drop and trigger |
+
+---
+
+### Step 80 — DLL Sideloading
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Difference between hijacking and sideloading — legitimate signed binary loads attacker DLL from same directory |
+| 2 | Find a vulnerable signed binary with `Sigcheck` + `Procmon`. Build a sideloading DLL. Execute payload under signed process |
+
+---
+
+### Step 81 — DLL Proxying
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Full proxy DLL — forward all exports to the original DLL using `#pragma comment(linker, "/export=...")`. Build with C# + embedded native DLL |
+| 2 | Replace a legitimate DLL in a service directory. Service loads proxy → payload runs → original functions still work |
+
+---
+
+### Step 82 — DLL Injection via Reflective Loading
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Reflective DLL injection concept — DLL maps itself into memory without `LoadLibrary`. Study the bootstrap stub |
+| 2 | Implement a C# loader that injects a reflective DLL into a remote process. No disk write required |
+
+---
+
+### Step 83 — Registry PrivEsc — AlwaysInstallElevated
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Check `AlwaysInstallElevated` in `HKLM` and `HKCU`. Understand why MSI packages run as SYSTEM when enabled |
+| 2 | Generate a malicious `.msi` with `msfvenom`. Execute — verify SYSTEM shell. Implement the check in C# agent module |
+
+---
+
+### Step 84 — Registry PrivEsc — Service Binary Path & ImagePath
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate services with weak registry permissions — `HKLM\SYSTEM\CurrentControlSet\Services`. Find writable keys |
+| 2 | Modify `ImagePath` to point to payload. Restart the service — verify SYSTEM execution |
+
+---
+
+### Step 85 — Registry PrivEsc — Autorun Keys & Weak Permissions
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate `Run`, `RunOnce`, `RunServices` keys. Check write permissions with `RegGetKeySecurity` |
+| 2 | Write payload path to a writable autorun key. Verify execution on next login/boot |
+
+---
+
+### Step 86 — Scheduled Task PrivEsc — Weak Permissions
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate scheduled tasks with `ITaskService`. Find tasks running as SYSTEM with user-writable action paths |
+| 2 | Replace the target binary with payload. Wait for task trigger — verify SYSTEM execution |
+
+---
+
+### Step 87 — Scheduled Task PrivEsc — Task XML Manipulation
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Read and parse task XML definitions from `C:\Windows\System32\Tasks`. Identify misconfigured triggers and principals |
+| 2 | Modify task XML to inject a new action or change the principal to SYSTEM. Re-register with `RegisterTask` |
+
+---
+
+### Step 88 — Service Misconfigurations — Unquoted Service Path
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Understand unquoted path vulnerability — Windows resolves `C:\Program Files\Service\svc.exe` as `C:\Program.exe` first |
+| 2 | Enumerate unquoted service paths in C#. Drop payload at the winning resolution path. Restart service |
+
+---
+
+### Step 89 — Service Misconfigurations — Weak Service DACL
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Query service DACLs with `QueryServiceObjectSecurity`. Find services where low-priv users have `SERVICE_CHANGE_CONFIG` |
+| 2 | Use `ChangeServiceConfig` to redirect `BinaryPathName` to payload. Start service — verify SYSTEM shell |
+
+---
+
+### Step 90 — Token Impersonation via Named Pipe (Advanced)
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Trigger a SYSTEM process to connect to an attacker-controlled named pipe using print spooler or other primitives |
+| 2 | Capture and duplicate the SYSTEM token. Spawn a new process under SYSTEM using `CreateProcessWithTokenW` |
+
+---
+
+## 🏰 Stage 15 — Active Directory Enumeration (Steps 91–95)
+
+### Step 91 — LDAP Enumeration Module
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `DirectoryEntry` + `DirectorySearcher` — enumerate all users, computers, groups. Understand LDAP filter syntax |
+| 2 | Query `AdminCount=1`, disabled accounts, password-never-expires, users with SPNs set |
+| 3 | Build a structured AD enumeration class — output results as JSON to C2. Add domain info: DC, forest, trusts |
+
+---
+
+### Step 92 — ACE & ACL Enumeration (ACE Collector)
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ACL/DACL/ACE concepts — `ObjectSecurity`, `ActiveDirectorySecurity`. Read ACEs on AD objects |
+| 2 | Enumerate dangerous ACEs: `GenericAll`, `GenericWrite`, `WriteDACL`, `WriteOwner`, `AllExtendedRights` |
+| 3 | Build an ACE Collector module — scan all users and groups, output attack paths. Find shortest path to DA |
+
+---
+
+### Step 93 — Group Policy Enumeration
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate GPOs via LDAP — `(objectClass=groupPolicyContainer)`. Read `gPCFileSysPath`, parse `GptTmpl.inf` |
+| 2 | Find GPOs with weak permissions — users who can modify a GPO linked to privileged OUs |
+
+---
+
+### Step 94 — Domain Trust Enumeration
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Query domain trusts via LDAP `(objectClass=trustedDomain)`. Understand trust direction, transitivity, trust type |
+| 2 | Identify exploitable trusts — external trusts, forest trusts with SID filtering disabled. Map attack paths |
+
+---
+
+### Step 95 — AD Situational Awareness Module
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Combine all enumeration — domain info, users, groups, computers, GPOs, trusts into a single `ADRecon` module |
+| 2 | Output structured JSON report to C2. Integrate as an agent command: `adrecon full` |
+
+---
+
+## ⚔️ Stage 16 — Kerberos Attacks (Steps 96–104)
+
+### Step 96 — Kerberoasting
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | SPN, TGS, RC4 encryption — why service account hashes are crackable. Find Kerberoastable accounts via LDAP |
+| 2 | Request TGS tickets with `KerberosRequestorSecurityToken`. Extract raw ticket bytes from memory |
+| 3 | Format as `$krb5tgs$` hash. Crack offline with `hashcat -m 13100`. Implement as C# agent module |
+
+---
+
+### Step 97 — AS-REP Roasting
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Understand `DONT_REQUIRE_PREAUTH` flag. Find affected accounts via LDAP. AS-REQ without pre-auth returns encrypted data |
+| 2 | Send raw AS-REQ with `KerberosClient`. Extract `$krb5asrep$` hash. Crack with `hashcat -m 18200` |
+
+---
+
+### Step 98 — Pass-the-Hash
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | NTLM auth flow — challenge/response. `LogonUser` with `LOGON32_LOGON_NEW_CREDENTIALS` and NTLM hash |
+| 2 | Authenticate to SMB and WinRM via PTH in C#. Implement as agent module: `pth <user> <hash> <cmd>` |
+
+---
+
+### Step 99 — Pass-the-Ticket
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Extract TGT from memory with `KERB_RETRIEVE_TKT_REQUEST` via LSA. Export as `.kirbi` bytes |
+| 2 | Inject a ticket with `KERB_SUBMIT_TKT_REQUEST`. Verify — access resources as the ticket owner |
+
+---
+
+### Step 100 — Silver Ticket
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Silver Ticket concept — forge a TGS using the service account NTLM hash. No DC contact required |
+| 2 | Build the forged TGS structure — PAC, authorization data, encrypted part using RC4/AES |
+| 3 | Inject the Silver Ticket and access the target service (CIFS, HTTP, MSSQL). Verify offline forgery works |
+
+---
+
+### Step 101 — Golden Ticket
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Golden Ticket concept — forge a TGT using `krbtgt` NTLM hash. Grants access to any service in the domain |
+| 2 | Build the forged TGT structure. Requires: domain SID, `krbtgt` hash, arbitrary username and RID |
+| 3 | Inject the Golden Ticket via LSA. Verify access to domain resources. Implement as C# agent module |
+
+---
+
+### Step 102 — Diamond Ticket
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Diamond Ticket concept — request a legitimate TGT, then decrypt and modify the PAC. More stealthy than Golden Ticket |
+| 2 | Modify PAC group memberships (add Domain Admins SID). Re-encrypt with `krbtgt` key |
+| 3 | Inject and verify — compare with Golden Ticket detection signatures. Understand why Diamond evades some detections |
+
+---
+
+### Step 103 — Sapphire Ticket
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Sapphire Ticket concept — obtain a privileged user's TGT via S4U2self + U2U, copy PAC into a new ticket |
+| 2 | Implement the S4U2self + U2U flow in C#. Verify the resulting ticket grants DA-level access |
+
+---
+
+### Step 104 — Kerberos Delegation Attacks
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Delegation types — Unconstrained, Constrained, Resource-Based Constrained (RBCD). Enumerate via LDAP |
+| 2 | Unconstrained delegation — capture TGTs from connecting users/computers via `TGT Delegation` flag |
+| 3 | RBCD abuse — write `msDS-AllowedToActOnBehalfOfOtherIdentity`. S4U2proxy to impersonate domain admin |
+
+---
+
+## 🗝️ Stage 17 — ACL & GPO Abuse (Steps 105–110)
+
+### Step 105 — GenericAll Abuse
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `GenericAll` on a user — reset password via `SetPassword` LDAP extended operation. Take over the account |
+| 2 | `GenericAll` on a group — add self to Domain Admins with `AddMember` LDAP operation |
+
+---
+
+### Step 106 — WriteDACL & WriteOwner Abuse
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `WriteDACL` — grant self `GenericAll` on an object. Modify the DACL using `ActiveDirectorySecurity` |
+| 2 | `WriteOwner` — take ownership of an AD object. Then grant self full control. Chain into DA escalation |
+
+---
+
+### Step 107 — GenericWrite & AllExtendedRights Abuse
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `GenericWrite` on a user — write `scriptPath` (logon script), `msDS-KeyCredentialLink` (Shadow Credentials) |
+| 2 | `AllExtendedRights` — includes `User-Force-Change-Password` and `DS-Replication-Get-Changes`. Abuse each |
+
+---
+
+### Step 108 — Shadow Credentials
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Shadow Credentials concept — write a Key Credential to `msDS-KeyCredentialLink`. PKINIT authenticates with it |
+| 2 | Generate a certificate key pair in C#. Construct the `KeyCredential` structure and write it via LDAP |
+| 3 | Authenticate using the certificate via PKINIT. Retrieve NTLM hash from the AS-REP. Full account takeover |
+
+---
+
+### Step 109 — GPO Abuse — Immediate Scheduled Task
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Find GPOs where current user has `CreateChild` or `GenericWrite`. Understand GPO file system structure in SYSVOL |
+| 2 | Add an immediate scheduled task to a GPO via `ScheduledTasks.xml` in the GPO SYSVOL path |
+| 3 | Force GPO refresh on target with `gpupdate`. Verify payload executes under SYSTEM on all affected machines |
+
+---
+
+### Step 110 — GPO Abuse — Logon Script & Registry Policy
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Write a malicious logon script to a GPO's `Scripts\Logon` path. Script runs as the logging-in user |
+| 2 | Inject a registry Run key via GPO `Registry.pol` file. Parse and write `.pol` format in C# |
+
+---
+
+## 🏅 Stage 18 — ADCS Certificate Attacks (Steps 111–120)
+
+### Step 111 — ADCS Enumeration
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Enumerate Certificate Authorities via LDAP — `(objectClass=pKIEnrollmentService)`. Find CA name, DNS, templates |
+| 2 | Enumerate certificate templates — permissions, flags, EKUs, `msPKI-Certificate-Name-Flag`. Build full ADCS map |
+
+---
+
+### Step 112 — ESC1 — SAN Spoofing
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC1 — template allows `ENROLLEE_SUPPLIES_SUBJECT` + any user can enroll + authentication EKU. Identify via enum |
+| 2 | Request a certificate with arbitrary SAN (Domain Admin UPN) using `CertRequest` COM interface in C#. Authenticate as DA |
+
+---
+
+### Step 113 — ESC2 — Any Purpose EKU
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC2 — template has `Any Purpose` or no EKU. Can be used as a SubCA to sign subordinate certs. Enroll and abuse |
+
+---
+
+### Step 114 — ESC3 — Enrollment Agent Abuse
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC3 — two templates: one grants Enrollment Agent rights, one allows agent to enroll on behalf of another user |
+| 2 | Enroll as Enrollment Agent. Use agent cert to request a certificate on behalf of Domain Admin. Authenticate as DA |
+
+---
+
+### Step 115 — ESC4 — Template Write Permissions
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC4 — low-priv user has `WriteProperty` or `GenericWrite` on a certificate template object |
+| 2 | Modify the template to add `ENROLLEE_SUPPLIES_SUBJECT` flag and authentication EKU. Exploit as ESC1 |
+
+---
+
+### Step 116 — ESC5 — PKI Object Control
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC5 — control over the CA object, NTAuthCertificates, or Root CA itself. Understand the PKI object hierarchy |
+| 2 | Modify `NTAuthCertificates` to trust an attacker-controlled CA. Issue arbitrary certs that authenticate to AD |
+
+---
+
+### Step 117 — ESC6 — EDITF_ATTRIBUTESUBJECTALTNAME2
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC6 — CA has `EDITF_ATTRIBUTESUBJECTALTNAME2` flag set. Any template with authentication EKU becomes ESC1-vulnerable. Exploit |
+
+---
+
+### Step 118 — ESC7 — CA Officer/Manager Rights
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC7 — attacker has `ManageCA` or `ManageCertificates` rights on the CA. Enable `EDITF_ATTRIBUTESUBJECTALTNAME2` flag |
+| 2 | Approve pending certificate requests as CA Manager. Issue arbitrary certs without template restrictions |
+
+---
+
+### Step 119 — ESC8 — NTLM Relay to AD CS HTTP Endpoint
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC8 — AD CS web enrollment (`/certsrv`) does not require HTTPS or extended protection. NTLM relay is possible |
+| 2 | Set up NTLM relay with `ntlmrelayx` targeting `/certsrv/certfnsh.asp`. Coerce DC authentication via print spooler |
+| 3 | Relay DC$ machine account auth → obtain DC certificate → use PKINIT to get DC TGT → DCSync |
+
+---
+
+### Step 120 — ESC9 & ESC10 — Certificate Mapping Attacks
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | ESC9 — `CT_FLAG_NO_SECURITY_EXTENSION` on template. Certificate does not embed SID — allows UPN mapping abuse |
+| 2 | ESC10 — weak certificate mapping in `CertificateMappingMethods` registry. Map a cert to any account via UPN |
+| 3 | Combine ESC9/ESC10 with `GenericWrite` on a user to change UPN, enroll cert, reset UPN, authenticate as victim |
+
+---
+
+## 🌐 Stage 19 — AD Lateral Movement & Domain Dominance (Steps 121–130)
+
+### Step 121 — DCSync
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | DCSync principle — MS-DRSR protocol (`IDL_DRSGetNCChanges`). Required rights: `DS-Replication-Get-Changes-All` |
+| 2 | Implement DCSync in C# using `DsGetDcName` + `DsBind` + `DsGetNCChanges` P/Invoke calls |
+| 3 | Extract `krbtgt`, Administrator, and all user hashes. Implement as C2 agent module: `dcsync <domain> <user>` |
+
+---
+
+### Step 122 — Pass-the-Hash Lateral Movement
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Use extracted NTLM hashes to authenticate over SMB — list shares, read files, execute commands via SCM |
+| 2 | WinRM lateral movement with PTH — `WSManConnectionInfo` with NTLM hash. Execute commands on remote host |
+
+---
+
+### Step 123 — OverPass-the-Hash (Pass-the-Key)
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Use AES256 Kerberos key instead of NTLM hash — request TGT with AES key via `KERB_AS_REQ`. Avoids NTLM traffic |
+| 2 | Implement in C# — extract AES key from LSASS, request TGT, inject. Compare with PTH in terms of detection |
+
+---
+
+### Step 124 — Remote Service Creation (SCM Lateral Movement)
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Connect to remote SCM with `OpenSCManager`. Create and start a service that runs payload on the remote host |
+| 2 | Clean up — delete the service after execution. Implement as agent module: `scm-exec <host> <cmd>` |
+
+---
+
+### Step 125 — WMI Lateral Movement
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `ManagementScope` with credentials — connect to remote WMI. `Win32_Process.Create` to run a command |
+| 2 | WMI event subscription for persistence — `__EventFilter` + `__EventConsumer` + `__FilterToConsumerBinding` |
+
+---
+
+### Step 126 — DCOM Lateral Movement
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `MMC20.Application` — `Type.GetTypeFromProgID` with remote host. `ExecuteShellCommand` to run payload |
+| 2 | `ShellWindows` and `ShellBrowserWindow` COM objects — navigate to UNC path to trigger execution |
+
+---
+
+### Step 127 — Domain Persistence — AdminSDHolder
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | AdminSDHolder concept — `SDProp` process resets DACLs on protected accounts every 60 minutes |
+| 2 | Write a backdoor ACE to `AdminSDHolder` object — `GenericAll` for a low-priv account. Wait for SDProp — verify propagation |
+
+---
+
+### Step 128 — Domain Persistence — DSRM Account
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | DSRM (Directory Services Restore Mode) account — local admin on every DC. Dump hash with `lsadump::lsa` |
+| 2 | Enable remote DSRM login via registry: `DsrmAdminLogonBehavior = 2`. PTH with DSRM hash to DC |
+
+---
+
+### Step 129 — SID History Injection
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | SID History concept — extra SIDs in a user's token grant access to resources of the historical domain |
+| 2 | Inject Enterprise Admins SID into a user's `SIDHistory` via `DsAddSidHistory` — verify cross-domain DA access |
+
+---
+
+### Step 130 — Cross-Forest Trust Attacks
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Forest trust internals — inter-realm TGT referral, SID filtering, `quarantine` flag. Enumerate via LDAP |
+| 2 | Trust key extraction — get the inter-realm trust key with DCSync (`[domain]\[target]$` account) |
+| 3 | Forge an inter-realm TGT with the trust key. Access resources in the trusted forest. SID filtering bypass if disabled |
+
+---
+
+## 🧹 Stage 20 — Operational Security & Cleanup (Steps 131–135)
+
+### Step 131 — Event Log Manipulation
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Clear Security, System, and PowerShell Operational logs with `EventLog.Clear()` and `EvtClearLog` |
+| 2 | Selectively delete specific event IDs using `EvtQuery` + `EvtFormatMessage`. Avoid clearing all logs (noisy) |
+
+---
+
+### Step 132 — Anti-Forensics — Timestomping
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | `SetFileTime` via P/Invoke — modify `CreationTime`, `LastWriteTime`, `LastAccessTime` on dropped files |
+| 2 | Copy timestamps from a legitimate system file to the payload. Verify with forensic tools that timestamp looks native |
+
+---
+
+### Step 133 — Anti-Forensics — Secure Delete & Memory Cleanup
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Secure file delete — overwrite with random bytes N times before deletion. `File.WriteAllBytes` + `File.Delete` |
+| 2 | Clear sensitive strings from managed memory using `SecureString` and `Marshal.ZeroFreeGlobalAllocUnicode` |
+
+---
+
+### Step 134 — Indicator Removal — Persistence Cleanup
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Remove all registry run keys, scheduled tasks, and WMI subscriptions created during the operation |
+| 2 | Build a `Cleanup` module for the C2 agent — single command removes all indicators. `cleanup --all` |
+
+---
+
+### Step 135 — Full Operation Simulation
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Simulate a full attack chain: initial access → PrivEsc → credential dump → lateral movement → DA |
+| 2 | Use only C# agent modules — no external tools. Document every step with C2 task logs |
+| 3 | Run cleanup module — verify no indicators remain. Review what a defender would see in logs |
 
 ---
