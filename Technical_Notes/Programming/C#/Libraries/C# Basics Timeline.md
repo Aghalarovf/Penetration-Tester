@@ -145,11 +145,44 @@ Each day follows this structure:
 
 ---
 
-## ⚫ Stage 6 — Windows Internals & API (Steps 32–36)
+## 🌐 Stage 5.5 — Network Fundamentals (Steps 32–34)
+
+> These steps bridge the gap between C# essentials and Windows Internals networking code.
+
+### Step 32 — TCP/IP & Networking Concepts
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Understand IP addressing, subnets, gateway, DNS. TCP vs UDP differences. OSI model layers 3–7. Well-known ports (22, 53, 80, 443, 445, 3389) |
+| 2 | TCP 3-way handshake (SYN → SYN-ACK → ACK). Connection teardown. What happens during a port scan. Wireshark — capture a real TCP handshake |
+
+---
+
+### Step 33 — Socket API Basics
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Understand what a socket is. `IPAddress`, `IPEndPoint` classes. Low-level `Socket` class — bind, listen, accept, connect flow |
+| 2 | Write a raw `Socket`-based echo server and client. Understand blocking vs non-blocking sockets. Compare `Socket` vs `TcpClient` abstraction level |
+
+---
+
+### Step 34 — NetworkStream & Framing
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | `NetworkStream` read/write. `BinaryReader` / `BinaryWriter` over a stream. Length-prefixed message framing — send structured data without splitting issues |
+
+---
+
+## ⚫ Stage 6 — Windows Internals & API (Steps 35–40)
 
 > ⚠️ A **Windows VM** is mandatory from this stage onward.
 
-### Step 32 — P/Invoke Basics
+### Step 35 — P/Invoke Basics
 **Duration: 2 days**
 
 | Day | Goal |
@@ -159,7 +192,7 @@ Each day follows this structure:
 
 ---
 
-### Step 33 — Windows Data Types
+### Step 36 — Windows Data Types
 **Duration: 2 days**
 
 | Day | Goal |
@@ -169,7 +202,7 @@ Each day follows this structure:
 
 ---
 
-### Step 34 — Process Enumeration
+### Step 37 — Process Enumeration
 **Duration: 2 days**
 
 | Day | Goal |
@@ -179,7 +212,7 @@ Each day follows this structure:
 
 ---
 
-### Step 35 — Handle & Memory Basics
+### Step 38 — Handle & Memory Basics
 **Duration: 2 days**
 
 | Day | Goal |
@@ -189,7 +222,7 @@ Each day follows this structure:
 
 ---
 
-### Step 36 — Token & Privilege Basics
+### Step 39 — Token & Privilege Basics
 **Duration: 2 days**
 
 | Day | Goal |
@@ -199,9 +232,7 @@ Each day follows this structure:
 
 ---
 
-## 🔥 Stage 7 — Memory Manipulation (Steps 37–40)
-
-### Step 37 — unsafe & Pointers
+### Step 40 — unsafe & Pointers
 **Duration: 3 days**
 
 | Day | Goal |
@@ -212,7 +243,9 @@ Each day follows this structure:
 
 ---
 
-### Step 38 — Marshal Class
+## 🔥 Stage 7 — Memory Manipulation (Steps 41–43)
+
+### Step 41 — Marshal Class
 **Duration: 2 days**
 
 | Day | Goal |
@@ -222,7 +255,7 @@ Each day follows this structure:
 
 ---
 
-### Step 39 — VirtualAlloc & Memory Protection
+### Step 42 — VirtualAlloc & Memory Protection
 **Duration: 3 days**
 
 | Day | Goal |
@@ -233,7 +266,7 @@ Each day follows this structure:
 
 ---
 
-### Step 40 — CreateThread & Shellcode Execution
+### Step 43 — CreateThread & Shellcode Execution
 **Duration: 3 days**
 
 | Day | Goal |
@@ -244,9 +277,9 @@ Each day follows this structure:
 
 ---
 
-## 🟠 Stage 8 — Reflection & In-Memory Loading (Steps 41–44)
+## 🟠 Stage 8 — Reflection & In-Memory Loading (Steps 44–47)
 
-### Step 41 — Reflection Basics
+### Step 44 — Reflection Basics
 **Duration: 2 days**
 
 | Day | Goal |
@@ -256,7 +289,7 @@ Each day follows this structure:
 
 ---
 
-### Step 42 — Assembly.Load() — In-Memory Execution
+### Step 45 — Assembly.Load() — In-Memory Execution
 **Duration: 3 days**
 
 | Day | Goal |
@@ -267,7 +300,7 @@ Each day follows this structure:
 
 ---
 
-### Step 43 — Dynamic Invocation
+### Step 46 — Dynamic Invocation
 **Duration: 2 days**
 
 | Day | Goal |
@@ -277,7 +310,7 @@ Each day follows this structure:
 
 ---
 
-### Step 44 — PowerShell Runspace (AppLocker Bypass)
+### Step 47 — PowerShell Runspace (AppLocker Bypass)
 **Duration: 2 days**
 
 | Day | Goal |
@@ -287,9 +320,9 @@ Each day follows this structure:
 
 ---
 
-## 🔴 Stage 9 — Networking & C2 (Steps 45–49)
+## 🔴 Stage 9 — Networking & C2 (Steps 48–52)
 
-### Step 45 — TCP Client & Server
+### Step 48 — TCP Client & Server
 **Duration: 2 days**
 
 | Day | Goal |
@@ -299,7 +332,7 @@ Each day follows this structure:
 
 ---
 
-### Step 46 — HTTP Beaconing
+### Step 49 — HTTP Beaconing
 **Duration: 2 days**
 
 | Day | Goal |
@@ -309,7 +342,7 @@ Each day follows this structure:
 
 ---
 
-### Step 47 — DNS over HTTPS (DoH) Beaconing
+### Step 50 — DNS over HTTPS (DoH) Beaconing
 **Duration: 3 days**
 
 | Day | Goal |
@@ -320,7 +353,7 @@ Each day follows this structure:
 
 ---
 
-### Step 48 — Named Pipes & Impersonation
+### Step 51 — Named Pipes & Impersonation
 **Duration: 3 days**
 
 | Day | Goal |
@@ -331,21 +364,22 @@ Each day follows this structure:
 
 ---
 
-### Step 49 — MSSQL Interaction
-**Duration: 2 days**
+### Step 52 — Agent Architecture & Command Dispatcher
+**Duration: 3 days**
 
 | Day | Goal |
 |-----|------|
-| 1 | Set up a local MSSQL instance (Developer Edition). Connect with `SqlConnection`, run a query |
-| 2 | Enable `xp_cmdshell`, execute `whoami`. Enumerate linked servers |
+| 1 | Design a modular agent — `ICommand` interface, command registry using `Dictionary<string, Action<string[]>>` |
+| 2 | Implement built-in commands: `shell`, `sleep`, `exit`. Wire them to the beacon loop |
+| 3 | Add a task queue — agent polls the C2, receives a task ID + command, executes, returns output |
 
 ---
 
-## 🟤 Stage 10 — AV/EDR Evasion (Steps 50–56)
+## 🟤 Stage 10 — AV/EDR Evasion (Steps 53–59)
 
 > ⚠️ Windows Defender must be tested on a **real VM** from this stage onward.
 
-### Step 50 — AMSI Bypass
+### Step 53 — AMSI Bypass
 **Duration: 3 days**
 
 | Day | Goal |
@@ -356,7 +390,7 @@ Each day follows this structure:
 
 ---
 
-### Step 51 — ETW Patching
+### Step 54 — ETW Patching
 **Duration: 3 days**
 
 | Day | Goal |
@@ -367,7 +401,7 @@ Each day follows this structure:
 
 ---
 
-### Step 52 — Unhooking via Fresh NTDLL
+### Step 55 — Unhooking via Fresh NTDLL
 **Duration: 3 days**
 
 | Day | Goal |
@@ -378,7 +412,7 @@ Each day follows this structure:
 
 ---
 
-### Step 53 — Direct Syscalls
+### Step 56 — Direct Syscalls
 **Duration: 3 days**
 
 | Day | Goal |
@@ -389,7 +423,7 @@ Each day follows this structure:
 
 ---
 
-### Step 54 — Payload Obfuscation
+### Step 57 — Payload Obfuscation
 **Duration: 2 days**
 
 | Day | Goal |
@@ -399,7 +433,7 @@ Each day follows this structure:
 
 ---
 
-### Step 55 — Process Injection — Classic
+### Step 58 — Process Injection — Classic
 **Duration: 3 days**
 
 | Day | Goal |
@@ -410,7 +444,7 @@ Each day follows this structure:
 
 ---
 
-### Step 56 — Process Hollowing
+### Step 59 — Process Hollowing
 **Duration: 3 days**
 
 | Day | Goal |
@@ -421,9 +455,9 @@ Each day follows this structure:
 
 ---
 
-## 🟣 Stage 11 — Credential Access (Steps 57–60)
+## 🟣 Stage 11 — Credential Access (Steps 60–62)
 
-### Step 57 — Token Impersonation
+### Step 60 — Token Impersonation
 **Duration: 3 days**
 
 | Day | Goal |
@@ -434,7 +468,7 @@ Each day follows this structure:
 
 ---
 
-### Step 58 — Custom MiniDump (LSASS)
+### Step 61 — Custom MiniDump (LSASS)
 **Duration: 3 days**
 
 | Day | Goal |
@@ -445,7 +479,7 @@ Each day follows this structure:
 
 ---
 
-### Step 59 — SAM & Registry Extraction
+### Step 62 — SAM & Registry Extraction
 **Duration: 2 days**
 
 | Day | Goal |
@@ -455,7 +489,7 @@ Each day follows this structure:
 
 ---
 
-### Step 60 — Kerberos Ticket Manipulation
+### Step 63 — Kerberos Ticket Manipulation
 **Duration: 3 days**
 
 | Day | Goal |
@@ -466,11 +500,11 @@ Each day follows this structure:
 
 ---
 
-## 🔵 Stage 12 — Active Directory (Steps 61–68)
+## 🔵 Stage 12 — Active Directory (Steps 64–69)
 
 > ⚠️ An **Active Directory lab** is required for this stage: Domain Controller + 2 Windows VMs.
 
-### Step 61 — LDAP Enumeration
+### Step 64 — LDAP Enumeration
 **Duration: 2 days**
 
 | Day | Goal |
@@ -480,7 +514,7 @@ Each day follows this structure:
 
 ---
 
-### Step 62 — Kerberoasting
+### Step 65 — Kerberoasting
 **Duration: 3 days**
 
 | Day | Goal |
@@ -491,7 +525,7 @@ Each day follows this structure:
 
 ---
 
-### Step 63 — DACL / ACL Enumeration
+### Step 66 — DACL / ACL Enumeration
 **Duration: 2 days**
 
 | Day | Goal |
@@ -501,7 +535,7 @@ Each day follows this structure:
 
 ---
 
-### Step 64 — COM Object Lateral Movement
+### Step 67 — COM Object Lateral Movement
 **Duration: 3 days**
 
 | Day | Goal |
@@ -512,17 +546,7 @@ Each day follows this structure:
 
 ---
 
-### Step 65 — WMI Lateral Movement
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | Connect to remote WMI with `ManagementScope`. Execute via `Win32_Process.Create` |
-| 2 | Read the output file. Set up WMI event subscription for persistence |
-
----
-
-### Step 66 — DCSync
+### Step 68 — DCSync
 **Duration: 3 days**
 
 | Day | Goal |
@@ -533,7 +557,7 @@ Each day follows this structure:
 
 ---
 
-### Step 67 — Pass-the-Hash
+### Step 69 — Pass-the-Hash
 **Duration: 2 days**
 
 | Day | Goal |
@@ -543,20 +567,9 @@ Each day follows this structure:
 
 ---
 
-### Step 68 — BloodHound Data Collection
-**Duration: 3 days**
+## ⚪ Stage 13 — AppLocker & CLM Bypass (Steps 70–72)
 
-| Day | Goal |
-|-----|------|
-| 1 | Read SharpHound source code. Understand the collection methods |
-| 2 | Execute SharpHound in-memory via `Assembly.Load`. Capture the JSON output |
-| 3 | Import into BloodHound UI. Analyze attack paths — find the shortest route to Domain Admin |
-
----
-
-## ⚪ Stage 13 — AppLocker & CLM Bypass (Steps 69–71)
-
-### Step 69 — AppLocker Enumeration
+### Step 70 — AppLocker Enumeration
 **Duration: 2 days**
 
 | Day | Goal |
@@ -566,7 +579,7 @@ Each day follows this structure:
 
 ---
 
-### Step 70 — MSBuild Inline Task Execution
+### Step 71 — MSBuild Inline Task Execution
 **Duration: 2 days**
 
 | Day | Goal |
@@ -576,7 +589,7 @@ Each day follows this structure:
 
 ---
 
-### Step 71 — CLM Detection & Bypass
+### Step 72 — CLM Detection & Bypass
 **Duration: 3 days**
 
 | Day | Goal |
@@ -587,25 +600,15 @@ Each day follows this structure:
 
 ---
 
-## 🟢 Stage 14 — Advanced Post-Exploitation (Steps 72–75)
+## 🟢 Stage 14 — Advanced Post-Exploitation (Steps 73–75)
 
-### Step 72 — Registry Persistence
+### Step 73 — Registry Persistence
 **Duration: 2 days**
 
 | Day | Goal |
 |-----|------|
 | 1 | HKCU `Run` key — user-level persistence. Verify it survives a reboot |
 | 2 | HKLM `Run` key — system-level. Add WMI subscription persistence |
-
----
-
-### Step 73 — Scheduled Task Creation
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | Task Scheduler COM interface. `ITaskService`, `ITaskDefinition`, `IExecAction` |
-| 2 | Create a task with a boot trigger. Disguise it under a legitimate name. Verify with `schtasks` |
 
 ---
 
@@ -619,76 +622,12 @@ Each day follows this structure:
 
 ---
 
-### Step 75 — Anti-Forensics & Cleanup
+### Step 75 — Agent Hardening & Operational Security
 **Duration: 2 days**
 
 | Day | Goal |
 |-----|------|
-| 1 | Clear event logs — Security, System, PowerShell Operational. `EventLog.Clear()` |
-| 2 | Secure delete (overwrite + delete). Timestomp — `SetFileTime` via P/Invoke |
-
----
-
-## 📊 Full Summary Table
-
-| Step | Topic | Days |
-|------|-------|------|
-| 19 | Interfaces | 2 |
-| 20 | Polymorphism & Virtual Methods | 2 |
-| 21 | Static Members & Static Classes | 1 |
-| 22 | Where & Select | 2 |
-| 23 | OrderBy, GroupBy, Distinct | 2 |
-| 24 | First, Any, All, Count | 1 |
-| 25 | Exception Handling | 2 |
-| 26 | Nullable Types & Null Safety | 1 |
-| 27 | Delegates, Lambda, Func/Action | 2 |
-| 28 | using & IDisposable | 1 |
-| 29 | Encoding & Byte Conversion | 2 |
-| 30 | File I/O | 1 |
-| 31 | Async / Await | 3 |
-| 32 | P/Invoke Basics | 2 |
-| 33 | Windows Data Types | 2 |
-| 34 | Process Enumeration | 2 |
-| 35 | Handle & Memory Basics | 2 |
-| 36 | Token & Privilege Basics | 2 |
-| 37 | unsafe & Pointers | 3 |
-| 38 | Marshal Class | 2 |
-| 39 | VirtualAlloc & Memory Protection | 3 |
-| 40 | CreateThread & Shellcode Execution | 3 |
-| 41 | Reflection Basics | 2 |
-| 42 | Assembly.Load() — In-Memory Execution | 3 |
-| 43 | Dynamic Invocation | 2 |
-| 44 | PowerShell Runspace (AppLocker Bypass) | 2 |
-| 45 | TCP Client & Server | 2 |
-| 46 | HTTP Beaconing | 2 |
-| 47 | DNS over HTTPS (DoH) Beaconing | 3 |
-| 48 | Named Pipes & Impersonation | 3 |
-| 49 | MSSQL Interaction | 2 |
-| 50 | AMSI Bypass | 3 |
-| 51 | ETW Patching | 3 |
-| 52 | Unhooking via Fresh NTDLL | 3 |
-| 53 | Direct Syscalls | 3 |
-| 54 | Payload Obfuscation | 2 |
-| 55 | Process Injection — Classic | 3 |
-| 56 | Process Hollowing | 3 |
-| 57 | Token Impersonation | 3 |
-| 58 | Custom MiniDump (LSASS) | 3 |
-| 59 | SAM & Registry Extraction | 2 |
-| 60 | Kerberos Ticket Manipulation | 3 |
-| 61 | LDAP Enumeration | 2 |
-| 62 | Kerberoasting | 3 |
-| 63 | DACL / ACL Enumeration | 2 |
-| 64 | COM Object Lateral Movement | 3 |
-| 65 | WMI Lateral Movement | 2 |
-| 66 | DCSync | 3 |
-| 67 | Pass-the-Hash | 2 |
-| 68 | BloodHound Data Collection | 3 |
-| 69 | AppLocker Enumeration | 2 |
-| 70 | MSBuild Inline Task Execution | 2 |
-| 71 | CLM Detection & Bypass | 3 |
-| 72 | Registry Persistence | 2 |
-| 73 | Scheduled Task Creation | 2 |
-| 74 | Situational Awareness | 2 |
-| 75 | Anti-Forensics & Cleanup | 2 |
+| 1 | Sleep masking — encrypt agent in memory during sleep intervals. Detect and evade common sandbox triggers |
+| 2 | Malleable C2 profiles — randomize beacon intervals, URI paths, headers. String obfuscation at compile time |
 
 ---
