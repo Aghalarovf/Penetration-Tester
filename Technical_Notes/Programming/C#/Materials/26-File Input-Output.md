@@ -1,3 +1,4 @@
+### Write File
 ```csharp
 using System;
 using System.IO;
@@ -6,78 +7,93 @@ class Program
 {
     static void Main()
     {
-        string rootPath = AppDomain.CurrentDomain.BaseDirectory;
-        string wordlistPath = Path.Combine(rootPath, "wordlist.txt");
-        string outputPath = Path.Combine(rootPath, "filtered_results.txt");
+        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sample.txt");
 
-        CreateSampleWordlist(wordlistPath);
+        Console.WriteLine($"Directory: {Path.GetDirectoryName(filePath)}");
+        Console.WriteLine($"Filename Without Extension: {Path.GetFileNameWithoutExtension(filePath)}");
+        Console.WriteLine($"Extension: {Path.GetExtension(filePath)}");
 
-        try
+        File.WriteAllText(filePath, "Hello, World!");
+        Console.WriteLine("File written successfully.");
+    }
+}
+```
+
+### Reading from File
+```csharp
+using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sample.txt");
+
+        Console.WriteLine($"Directory: {Path.GetDirectoryName(filePath)}");
+        Console.WriteLine($"Filename Without Extension: {Path.GetFileNameWithoutExtension(filePath)}");
+        Console.WriteLine($"Extension: {Path.GetExtension(filePath)}");
+
+        if (File.Exists(filePath))
         {
-            using (StreamReader reader = new StreamReader(wordlistPath))
-            using (StreamWriter writer = new StreamWriter(outputPath, append: false))
-            {
-                string? currentLine;
-                int totalProcessed = 0;
-                int matchesFound = 0;
-
-                while ((currentLine = reader.ReadLine()) != null)
-                {
-                    totalProcessed++;
-
-                    if (IsTargetMatch(currentLine))
-                    {
-                        writer.WriteLine(currentLine);
-                        matchesFound++;
-                    }
-                }
-
-                Console.WriteLine($"Total Lines Analyzed: {totalProcessed}");
-                Console.WriteLine($"Filtered Matches Saved: {matchesFound}");
-            }
-
-            DisplayPathMetadata(wordlistPath);
-            DisplayPathMetadata(outputPath);
-        }
-        catch (FileNotFoundException ex)
-        {
-            Console.WriteLine($"Error: File missing -> {ex.FileName}");
-        }
-        catch (IOException ex)
-        {
-            Console.WriteLine($"I/O Exception: {ex.Message}");
+            string content = File.ReadAllText(filePath);
+            Console.WriteLine($"Content: {content}");
         }
     }
+}
+```
 
-    static bool IsTargetMatch(string entry)
-    {
-        return entry.Length >= 8 && entry.StartsWith("admin", StringComparison.OrdinalIgnoreCase);
-    }
+### File Existence Check
+```csharp
+using System;
+using System.IO;
 
-    static void DisplayPathMetadata(string path)
+class Program
+{
+    static void Main()
     {
-        Console.WriteLine($"\nFile Info:");
-        Console.WriteLine($"Full Directory: {Path.GetDirectoryName(path)}");
-        Console.WriteLine($"Filename: {Path.GetFileName(path)}");
-        Console.WriteLine($"Filename Without Extension: {Path.GetFileNameWithoutExtension(path)}");
-        Console.WriteLine($"Extension: {Path.GetExtension(path)}");
-    }
+        string filePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "sample.txt");
 
-    static void CreateSampleWordlist(string path)
-    {
-        if (!File.Exists(path))
+        Console.WriteLine($"Directory: {Path.GetDirectoryName(filePath)}");
+        Console.WriteLine($"Filename Without Extension: {Path.GetFileNameWithoutExtension(filePath)}");
+        Console.WriteLine($"Extension: {Path.GetExtension(filePath)}");
+
+        if (File.Exists(filePath))
         {
-            string[] items = 
-            {
-                "admin",
-                "administrator_pass_2026",
-                "user123",
-                "admin_root_token",
-                "guest_account",
-                "admin_secure_99"
-            };
+            Console.WriteLine("File exists.");
+        }
+        else
+        {
+            Console.WriteLine("File does not exist.");
+        }
+    }
+}
+```
 
-            File.WriteAllLines(path, items);
+### Directory Existence Check
+```csharp
+using System;
+using System.IO;
+
+class Program
+{
+    static void Main()
+    {
+        string dirPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "MyFolder");
+        string dummyPath = Path.Combine(dirPath, "data.txt");
+
+        Console.WriteLine($"Directory: {Path.GetDirectoryName(dummyPath)}");
+        Console.WriteLine($"Filename Without Extension: {Path.GetFileNameWithoutExtension(dummyPath)}");
+        Console.WriteLine($"Extension: {Path.GetExtension(dummyPath)}");
+
+        if (Directory.Exists(dirPath))
+        {
+            Console.WriteLine("Directory exists.");
+        }
+        else
+        {
+            Directory.CreateDirectory(dirPath);
+            Console.WriteLine("Directory did not exist, so it was created.");
         }
     }
 }
