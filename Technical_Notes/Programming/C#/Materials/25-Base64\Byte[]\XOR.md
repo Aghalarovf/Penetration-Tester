@@ -59,3 +59,31 @@ class Program
 ```
 
 ---
+
+### HEX
+```csharp
+using System;
+using System.Text;
+
+class Program
+{
+    static void Main()
+    {
+        string exampleText = "Confidential Payload Data 2026";
+
+        byte[] originalBytes = Encoding.UTF8.GetBytes(exampleText);
+        string hexEncoded = BitConverter.ToString(originalBytes).Replace("-", "");
+
+        byte[] hexDecodedBytes = new byte[hexEncoded.Length / 2];
+        for (int i = 0; i < hexDecodedBytes.Length; i++)
+        {
+            hexDecodedBytes[i] = Convert.ToByte(hexEncoded.Substring(i * 2, 2), 16);
+        }
+        string hexDecodedText = Encoding.UTF8.GetString(hexDecodedBytes);
+
+        Console.WriteLine($"Original Text: {exampleText}");
+        Console.WriteLine($"Hex Encoded: {hexEncoded}");
+        Console.WriteLine($"Hex Decoded: {hexDecodedText}");
+    }
+}
+```
