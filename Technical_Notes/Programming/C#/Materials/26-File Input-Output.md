@@ -19,6 +19,8 @@ class Program
 }
 ```
 
+---
+
 ### Reading from File
 ```csharp
 using System;
@@ -42,6 +44,8 @@ class Program
     }
 }
 ```
+
+----
 
 ### File Existence Check
 ```csharp
@@ -69,6 +73,8 @@ class Program
     }
 }
 ```
+
+---
 
 ### Directory Existence Check
 ```csharp
@@ -98,3 +104,5 @@ class Program
     }
 }
 ```
+
+----
