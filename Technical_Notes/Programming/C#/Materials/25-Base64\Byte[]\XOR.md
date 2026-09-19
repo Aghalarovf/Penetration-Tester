@@ -22,6 +22,8 @@ class Program
 }
 ```
 
+---
+
 ### XOR
 ```csharp
 using System;
@@ -55,3 +57,5 @@ class Program
     }
 }
 ```
+
+---
