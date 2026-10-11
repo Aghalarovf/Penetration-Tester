@@ -113,35 +113,27 @@ Pastebin, Ghostbin, Hastebin — sızmış data axtarışı
 - Install: `Logger++`, `Hackvertor`, `Active Scan++`, `Param Miner`, `Turbo Intruder`, `Collaborator Everywhere` / `Taborator`, `JS Miner`, `JS Link Finder`, `AutoVader`, `Backslash Powered Scanner`, `Autorize`, `AuthMatrix`, `AutoRepeater`, `Auth Analyzer`, `CSRF Token Tracker`, `Upload Scanner`, `Content Type Converter`, `JWT Editor`, `HTTP Request Smuggler`, `NoSQLi Scanner`, `Java Deserialization Scanner`, `Freddy`, `InQL`, `GraphQL Raider`, `Additional CORS Checks`, `Web Cache Deception Scanner`, `OAUTHScan`, `EsPReSSO`, `SAML Raider`, `Retire.js`, `Software Vulnerability Scanner`, `Backup Finder`, `Burp Bounty`, `Server-Side Prototype Pollution Scanner`, `SQLiPy` / `CO2`, `XSS Validator`, `Reflector`, `WebSocket Turbo Intruder`, `Wsdler`.
 - Start **Logger++** and leave it running for the whole engagement.
 
-## Phase 1 — Passive Reconnaissance
-
-- Browse the target normally, let Proxy populate Site map.
-- **JS Miner** and **JS Link Finder** passively mine loaded JS.
-- **Retire.js** flags outdated JS libraries.
-- **Software Vulnerability Scanner** fingerprints server/software versions.
-
-## Phase 2 — Active Mapping / Crawling
-
-- **Burp Crawler** (built-in, Pro) with authenticated login configured.
-- **JS File Extractor** recursively pulls every JS file across the crawled domain.
-- **Param Miner** (`Guess everything`) to surface hidden parameters/headers before vulnerability testing starts.
-- **InQL** / **GraphQL Raider** to pull the GraphQL schema if present.
-
----
-
-## Vulnerability Steps (ordered quietest → most critical)
-
 ### Step 1 — Information Disclosure
 **Extensions:** `JS Miner`, `Retire.js`, `Software Vulnerability Scanner`, `Backup Finder`, `Param Miner`
 Review JS for secrets/source maps, check for outdated libraries, probe for `.bak`/`.old`/`.zip` leftovers, and check verbose error messages and headers via Logger++.
+
+---
 
 ### Step 2 — Clickjacking
 **Extensions:** `Burp Clickbandit` (built-in)
 Record a clickjacking PoC on sensitive pages lacking `X-Frame-Options` / CSP `frame-ancestors`.
 
+---
+
 ### Step 3 — CORS Misconfiguration
 **Extensions:** `Additional CORS Checks`
 Auto-flags permissive `Access-Control-Allow-Origin` combined with `Access-Control-Allow-Credentials: true`.
+
+```powershell
+Target --> SiteMap --> Extension --> Extensions --> CORS*
+```
+
+---
 
 ### Step 4 — HTTP Host Header Attacks
 **Extensions:** `Param Miner`, `Collaborator Everywhere` / `Taborator`, `Active Scan++`
