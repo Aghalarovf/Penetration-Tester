@@ -24,7 +24,7 @@ semgrep scan --config=my-rule.yaml
 semgrep scan --config "p/python"
 ```
 
-# Top 50 Semgrep Rulesets
+# Top Semgrep Rulesets
 
 ## A. Core security
 | Config | URL |
@@ -61,15 +61,7 @@ semgrep scan --config "p/python"
 | p/expressjs | https://semgrep.dev/p/expressjs |
 | p/react | https://semgrep.dev/p/react |
 
-## D. IaC
-| Config | URL |
-| --- | --- |
-| p/terraform | https://semgrep.dev/p/terraform |
-| p/dockerfile | https://semgrep.dev/p/dockerfile |
-| p/docker-compose | https://semgrep.dev/p/docker-compose |
-| p/kubernetes | https://semgrep.dev/p/kubernetes |
-
-## E. Vulnerability class
+## D. Vulnerability class (əsas)
 | Config | URL |
 | --- | --- |
 | p/sql-injection | https://semgrep.dev/p/sql-injection |
@@ -77,8 +69,17 @@ semgrep scan --config "p/python"
 | p/command-injection | https://semgrep.dev/p/command-injection |
 | p/jwt | https://semgrep.dev/p/jwt |
 | p/insecure-transport | https://semgrep.dev/p/insecure-transport |
+| p/xxe | https://semgrep.dev/p/xxe |
+| p/path-traversal | https://semgrep.dev/p/path-traversal |
+| p/ssrf | https://semgrep.dev/p/ssrf |
+| p/csrf | https://semgrep.dev/p/csrf |
+| p/open-redirect | https://semgrep.dev/p/open-redirect |
+| p/deserialization | https://semgrep.dev/p/deserialization |
+| p/hardcoded-secrets | https://semgrep.dev/p/hardcoded-secrets |
+| p/insecure-cookie | https://semgrep.dev/p/insecure-cookie |
+| p/supply-chain | https://semgrep.dev/p/supply-chain |
 
-## F. Ported linter / external-tool
+## E. Ported linter / external-tool
 | Config | URL |
 | --- | --- |
 | p/eslint-plugin-security | https://semgrep.dev/p/eslint-plugin-security |
@@ -87,7 +88,7 @@ semgrep scan --config "p/python"
 | p/smart-contracts | https://semgrep.dev/p/smart-contracts |
 | p/gitlab-bandit | https://semgrep.dev/p/gitlab-bandit |
 
-## G. Third-party GitHub repos
+## F. Third-party GitHub repos
 | Repo | URL |
 | --- | --- |
 | trailofbits/semgrep-rules | https://github.com/trailofbits/semgrep-rules |
