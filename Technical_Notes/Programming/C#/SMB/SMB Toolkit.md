@@ -2,7 +2,7 @@
 
 ---
 
-## 📋 Mündəricat
+## 📋 Table of Contents
 
 - [Common SMB](#-common-smb)
 - [System Information](#-system-information)
@@ -15,178 +15,177 @@
 - [Authentication & Relay](#-authentication--relay)
 - [Post-Exploitation](#-post-exploitation)
 - [Intelligence & Analysis](#-intelligence--analysis)
-- [Başlamaq üçün ardıcıllıq](#-başlamaq-üçün-ardıcıllıq)
+- [Recommended Starting Sequence](#-recommended-starting-sequence)
 
 ---
 
 ## 🔵 Common SMB
 
-> Heç bir credential olmadan protokol səviyyəsində ilk təmas — dialect, signing, capability, fingerprint.
+> First contact at the protocol level without any credentials — dialect, signing, capability, fingerprint.
 
-| # | Alət adı | Texniki dərinlik | Nə edir |
+| # | Tool Name | Technical Depth | What It Does |
 |---|---|---|---|
-| 1 | **SMBDialectProber** | `TcpClient` → manual SMB Negotiate paketi | SMBv1/v2/v3 dialect dəstəyini, max dialect-i müəyyənləşdirir |
-| 2 | **SMBSigningAuditor** | SMB Negotiate response flag-ları | `SecurityMode` flag-ını oxuyur — signing required/enabled/disabled ayrı-ayrı report edir |
-| 3 | **SMBCapabilityScanner** | SMBv3 Negotiate response | Compression, encryption, multi-channel capability-lərini tapır |
-| 4 | **SMBv1Detector** | `TcpClient` → yalnız `PC NETWORK PROGRAM 1.0` dialect | SMBv1-in aktiv olub-olmadığını müəyyən edir — EternalBlue/WannaCry üçün ilk şərt |
-| 5 | **SMBEncryptionChecker** | SMBv3 `GLOBAL_CAP_ENCRYPTION` flag | Encryption required vs. supported fərqini ayırır — relay hücumuna qarşı qorunmanı müəyyən edir |
-| 6 | **SMBPortMapper** | TCP 445 + TCP 139 | Hər iki SMB portunu xəritələyir — NetBIOS over TCP/IP (139) vs Direct SMB (445) |
-| 7 | **SMBDialectDowngradeChecker** | `NEGOTIATE` request-ə yalnız köhnə dialektlər | Server-i daha zəif dialektə downgrade etmək mümkündürmü yoxlayır |
-| 8 | **GuestAccessProber** | `username: Guest`, `password: boş` | Guest hesabı ilə autentifikasiya cəhdi — admin share-lərə çatmaq mümkündürmü |
-| 9 | **SMBServerStringExtractor** | `NEGOTIATE` response → `ServerString` sahəsi | OS versiyası, service pack, build number çıxarır — honeypot aşkarlamaq üçün də istifadə olunur |
-| 10 | **SMBTimeoutBehaviorProber** | Yarımçıq `NEGOTIATE` paketi | Timeout dəyərləri, TCP RST vs FIN davranışı ilə passiv OS fingerprint |
+| 1 | **SMBDialectProber** | `TcpClient` → manual SMB Negotiate packet | Determines SMBv1/v2/v3 dialect support and the maximum dialect |
+| 2 | **SMBSigningAuditor** | SMB Negotiate response flags | Reads the `SecurityMode` flag — reports signing required/enabled/disabled separately |
+| 3 | **SMBCapabilityScanner** | SMBv3 Negotiate response | Finds compression, encryption, and multi-channel capabilities |
+| 4 | **SMBv1Detector** | `TcpClient` → only `PC NETWORK PROGRAM 1.0` dialect | Determines whether SMBv1 is active — the first condition for EternalBlue/WannaCry |
+| 5 | **SMBEncryptionChecker** | SMBv3 `GLOBAL_CAP_ENCRYPTION` flag | Distinguishes encryption required vs. supported — determines protection against relay attacks |
+| 6 | **SMBPortMapper** | TCP 445 + TCP 139 | Maps both SMB ports — NetBIOS over TCP/IP (139) vs Direct SMB (445) |
+| 7 | **SMBDialectDowngradeChecker** | `NEGOTIATE` request with only older dialects | Checks whether the server can be downgraded to a weaker dialect |
+| 8 | **GuestAccessProber** | `username: Guest`, `password: blank` | Attempts authentication with the guest account — checks whether admin shares can be reached |
+| 9 | **SMBServerStringExtractor** | `NEGOTIATE` response → `ServerString` field | Extracts OS version, service pack, build number — also used for honeypot detection |
+| 10 | **SMBTimeoutBehaviorProber** | Incomplete `NEGOTIATE` packet | Passive OS fingerprinting via timeout values, TCP RST vs FIN behavior |
 
 ---
 
 ## 🟡 System Information
 
-> Host səviyyəsində məlumat toplama — OS, servis, şəbəkə, patch vəziyyəti, RPC infrastrukturu.
+> Host-level information gathering — OS, services, network, patch status, RPC infrastructure.
 
-| # | Alət adı | Texniki dərinlik | Nə edir |
+| # | Tool Name | Technical Depth | What It Does |
 |---|---|---|---|
-| 11 | **NetBIOSNameScanner** | UDP 137 — raw `NetBIOS Name Service` query | NBNS sorğusu göndərib hostname, domain, MAC, workgroup alır |
-| 12 | **SMBFingerprintMapper** | Negotiate + Session Setup error kodları | Credential olmadan OS versiyası, build number, domain adı çıxarır |
-| 13 | **SMBNullSessionProber** | `\\host\IPC$` anonymous bind | Null session mümkündürmü yoxlayır, RPC endpoint-lərini siyahıya alır |
-| 14 | **WKSSVCInfoGatherer** | `wkssvc` — `NetWkstaGetInfo` (Level 102) | Kompüterin adı, domain, OS versiyası, LAN kanalı sayı |
-| 15 | **RPCEndpointMapper** | `epmapper` — port 135 → SMB pipe | Bütün RPC endpoint-lərini, UUID-lərini, annotasiyalarını çıxarır |
-| 16 | **NamedPipeEnumerator** | `\\host\IPC$` — `NtQueryDirectoryFile` | Mövcud named pipe-ları listə alır (`svcctl`, `samr`, `lsarpc`, `netlogon`...) |
-| 17 | **SystemTimeReader** | `srvsvc` — `NetRemoteTOD` | Uzaq kompüterin sistem saatını çıxarır — Kerberos 5 dəqiqəlik skew üçün vacibdir |
-| 18 | **ComputerDescriptionReader** | `srvsvc` — `NetServerGetInfo` Level 101 | Admin tərəfindən yazılmış server açıqlamasını oxuyur — host rolunu dərhal açıqlayır |
-| 19 | **InstalledServicesLister** | `svcctl` — `EnumServicesStatusExW` | Bütün servisləri adı, vəziyyəti, start tipi ilə listə alır |
-| 20 | **AntivirusDetector** | `svcctl` + məlum AV servis adları siyahısı | Windows Defender, CrowdStrike, SentinelOne, Carbon Black, Sophos — aktiv AV/EDR tapır |
-| 21 | **UACConfigReader** | `winreg` — `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | `EnableLUA`, `LocalAccountTokenFilterPolicy` dəyərlərini oxuyur |
-| 22 | **HotfixEnumerator** | `winreg` — `Component Based Servicing\Packages` | Quraşdırılmış KB patch-lərini listə alır — PrintNightmare, ZeroLogon, PetitPotam patch-lərini yoxlayır |
-| 23 | **NetworkInterfaceEnumerator** | `winreg` — `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces` | Bütün network interface-ləri IP, subnet, gateway, DNS ilə çıxarır — dual-homed host-ları tapır |
-| 24 | **WMIAccessProber** | `\\host\root\cimv2` — `IWbemServices::ExecQuery` | WMI-nin uzaqdan əlçatan olub-olmadığını test edir — lateral movement vektoru kimi qiymətləndirir |
+| 11 | **NetBIOSNameScanner** | UDP 137 — raw `NetBIOS Name Service` query | Sends an NBNS query to retrieve hostname, domain, MAC, workgroup |
+| 12 | **SMBFingerprintMapper** | Negotiate + Session Setup error codes | Extracts OS version, build number, domain name without credentials |
+| 13 | **SMBNullSessionProber** | `\\host\IPC$` anonymous bind | Checks whether a null session is possible, lists RPC endpoints |
+| 14 | **WKSSVCInfoGatherer** | `wkssvc` — `NetWkstaGetInfo` (Level 102) | Computer name, domain, OS version, number of LAN channels |
+| 15 | **RPCEndpointMapper** | `epmapper` — port 135 → SMB pipe | Extracts all RPC endpoints, their UUIDs, and annotations |
+| 16 | **NamedPipeEnumerator** | `\\host\IPC$` — `NtQueryDirectoryFile` | Lists available named pipes (`svcctl`, `samr`, `lsarpc`, `netlogon`...) |
+| 17 | **SystemTimeReader** | `srvsvc` — `NetRemoteTOD` | Retrieves the remote computer's system clock — important due to Kerberos' 5-minute skew tolerance |
+| 18 | **ComputerDescriptionReader** | `srvsvc` — `NetServerGetInfo` Level 101 | Reads the server description written by an admin — immediately reveals the host's role |
+| 19 | **InstalledServicesLister** | `svcctl` — `EnumServicesStatusExW` | Lists all services with name, status, start type |
+| 20 | **AntivirusDetector** | `svcctl` + list of known AV service names | Finds active AV/EDR — Windows Defender, CrowdStrike, SentinelOne, Carbon Black, Sophos |
+| 21 | **UACConfigReader** | `winreg` — `HKLM\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System` | Reads `EnableLUA`, `LocalAccountTokenFilterPolicy` values |
+| 22 | **HotfixEnumerator** | `winreg` — `Component Based Servicing\Packages` | Lists installed KB patches — checks patches for PrintNightmare, ZeroLogon, PetitPotam |
+| 23 | **NetworkInterfaceEnumerator** | `winreg` — `HKLM\SYSTEM\CurrentControlSet\Services\Tcpip\Parameters\Interfaces` | Extracts all network interfaces with IP, subnet, gateway, DNS — finds dual-homed hosts |
+| 24 | **WMIAccessProber** | `\\host\root\cimv2` — `IWbemServices::ExecQuery` | Tests whether WMI is remotely accessible — evaluates it as a lateral movement vector |
 
 ---
 
 ## 🟠 Domain Information
 
-> Domain siyasəti, SID məlumatları, functional level, trust və LSA üzərindən domain-ə aid kəşfiyyat.
+> Domain policy, SID information, functional level, trust, and domain-related reconnaissance via LSA.
 
-| # | Alət adı | RPC Interface / Protokol | Nə edir |
+| # | Tool Name | RPC Interface / Protocol | What It Does |
 |---|---|---|---|
-| 25 | **LSARPolicyReader** | `lsarpc` — `LsarQueryInformationPolicy` | Audit policy, domain SID, LSA secrets adları oxunur |
-| 26 | **LSARSIDResolver** | `lsarpc` — `LsarLookupNames` / `LsarLookupSids` | SID ↔ Username qarşılıqlı çevirmə (bulk) |
-| 27 | **DomainPasswordPolicyReader** | `samr` — `SamrQueryInformationDomain` (Level 1) | Min uzunluq, lockout threshold, lockout duration — spray etməzdən əvvəl mütləq lazımdır |
-| 28 | **DomainFunctionalLevelReader** | `LDAP` — `domainFunctionality`, `forestFunctionality` | Domain/Forest/DC functional level — köhnə level = RC4 default, NTLM v1 aktiv ola bilər |
-| 29 | **TrustRelationshipAnalyzer** | `lsarpc` — `LsarEnumerateTrustedDomains` + `LsarQueryTrustedDomainInfo` | Trust tipi, istiqamət, SID filtering, transitivity — cross-forest attack path analizi |
-| 30 | **DomainSIDExtractor** | `lsarpc` — `LsarQueryInformationPolicy` (PolicyAccountDomainInformation) | Domain SID-ini `S-1-5-21-X-X-X` formatında çıxarır — Golden/Silver Ticket üçün mütləq lazımdır |
-| 31 | **LSASecretNameDumper** | `lsarpc` — `LsarEnumeratePrivileges` + secret key adları | LSA secret adlarını listə alır — `_SC_*` servis credential-larını, `$MACHINE.ACC` machine account-u göstərir |
+| 25 | **LSARPolicyReader** | `lsarpc` — `LsarQueryInformationPolicy` | Reads audit policy, domain SID, LSA secret names |
+| 26 | **LSARSIDResolver** | `lsarpc` — `LsarLookupNames` / `LsarLookupSids` | Bulk SID ↔ Username mutual conversion |
+| 27 | **DomainPasswordPolicyReader** | `samr` — `SamrQueryInformationDomain` (Level 1) | Minimum length, lockout threshold, lockout duration — essential before spraying |
+| 28 | **DomainFunctionalLevelReader** | `LDAP` — `domainFunctionality`, `forestFunctionality` | Domain/Forest/DC functional level — an older level may mean RC4 is default, NTLMv1 may be active |
+| 29 | **TrustRelationshipAnalyzer** | `lsarpc` — `LsarEnumerateTrustedDomains` + `LsarQueryTrustedDomainInfo` | Trust type, direction, SID filtering, transitivity — cross-forest attack path analysis |
+| 30 | **DomainSIDExtractor** | `lsarpc` — `LsarQueryInformationPolicy` (PolicyAccountDomainInformation) | Extracts the domain SID in `S-1-5-21-X-X-X` format — essential for Golden/Silver Ticket |
+| 31 | **LSASecretNameDumper** | `lsarpc` — `LsarEnumeratePrivileges` + secret key names | Lists LSA secret names — shows `_SC_*` service credentials, `$MACHINE.ACC` machine account |
 
 ---
 
 ## 🔴 DC (Domain Controller)
 
-> Domain Controller-i locate etmə, rol müəyyənləşdirmə, servis vəziyyəti və replikasiya analizi.
+> Locating the Domain Controller, determining its role, service status, and replication analysis.
 
-| # | Alət adı | Texniki dərinlik | Nə edir |
+| # | Tool Name | Technical Depth | What It Does |
 |---|---|---|---|
-| 32 | **DCLocatorSMB** | UDP 389 LDAP ping + SMB portcheck | Domain Controller-i SMB üzərindən locate edir (`_ldap._tcp.dc._msdcs`) |
-| 33 | **LSARPolicyReader** | `lsarpc` — `LsarQueryInformationPolicy` | DC-nin audit policy-sini, domain SID-ini, LSA secrets adlarını oxuyur |
-| 34 | **FSMORoleIdentifier** | `LDAP` — `fSMORoleOwner` atributu | 5 FSMO rolunun hansı DC-də olduğunu tapır — PDC Emulator hücumda ilk hədəfdir |
-| 35 | **DCRoleChecker** | `LDAP` — `userAccountControl` + `msDS-IsGC`, `msDS-IsRODC` | DC rolunu müəyyən edir — Primary DC, Global Catalog, RODC fərqini ayırır |
-| 36 | **DCReplicationPartnerEnum** | `MS-DRSR` — `DsReplicaGetInfo` | DC replication partner-lərini, son replikasiya vaxtını çıxarır |
-| 37 | **NetlogonSecureChannelProber** | `netlogon` — `NetrServerAuthenticate3` | ZeroLogon (CVE-2020-1472) üçün ön yoxlama — exploit etmir, yalnız vulnerable olub-olmadığını yoxlayır |
-| 38 | **DCServiceStatusChecker** | `svcctl` — `QueryServiceStatusEx` | NTDS, KDC, Netlogon, DFSR, DNS, W32Time servis vəziyyətlərini yoxlayır |
-| 39 | **PrintSpoolerStatusChecker** | `svcctl` — `QueryServiceStatus` → `Spooler` | DC-də Print Spooler aktiv mi — PrintNightmare və coercion hücumları üçün ilk şərt |
+| 32 | **DCLocatorSMB** | UDP 389 LDAP ping + SMB port check | Locates the Domain Controller via SMB (`_ldap._tcp.dc._msdcs`) |
+| 33 | **LSARPolicyReader** | `lsarpc` — `LsarQueryInformationPolicy` | Reads the DC's audit policy, domain SID, LSA secret names |
+| 34 | **FSMORoleIdentifier** | `LDAP` — `fSMORoleOwner` attribute | Finds which DC holds each of the 5 FSMO roles — PDC Emulator is the first target in an attack |
+| 35 | **DCRoleChecker** | `LDAP` — `userAccountControl` + `msDS-IsGC`, `msDS-IsRODC` | Determines DC role — distinguishes Primary DC, Global Catalog, RODC |
+| 36 | **DCReplicationPartnerEnum** | `MS-DRSR` — `DsReplicaGetInfo` | Extracts DC replication partners and last replication time |
+| 37 | **NetlogonSecureChannelProber** | `netlogon` — `NetrServerAuthenticate3` | Preliminary check for ZeroLogon (CVE-2020-1472) — does not exploit, only checks vulnerability |
+| 38 | **DCServiceStatusChecker** | `svcctl` — `QueryServiceStatusEx` | Checks NTDS, KDC, Netlogon, DFSR, DNS, W32Time service statuses |
+| 39 | **PrintSpoolerStatusChecker** | `svcctl` — `QueryServiceStatus` → `Spooler` | Whether Print Spooler is active on the DC — the first condition for PrintNightmare and coercion attacks |
 
 ---
 
 ## 🟢 Enumeration
 
-> SMB üzərindən aktiv sessiyalar, share-lər və bağlantıların siyahıya alınması.
+> Listing active sessions, shares, and connections over SMB.
 
-| # | Alət adı | RPC Interface | Nə edir |
+| # | Tool Name | RPC Interface | What It Does |
 |---|---|---|---|
-| 40 | **SRVSVCShareEnum** | `srvsvc` — `NetShareEnumAll` (Level 2) | Share-ləri adı, yolu, şərhi, max/current connection sayı ilə çıxarır |
-| 41 | **SRVSVCSessionEnum** | `srvsvc` — `NetSessionEnum` (Level 10) | Aktiv SMB sessiyaları — kim, hansı kompüterdən, neçə saniyədir |
-| 42 | **SRVSVCConnectionEnum** | `srvsvc` — `NetConnectionEnum` | Hansı share-ə kim connected-dir, PID ilə birlikdə |
-| 43 | **DFSShareMapper** | `netdfs` — `NetrDfsEnum` | Distributed File System share-lərini və referral target-larını tapır |
-| 44 | **ShareSecurityDescriptorReader** | `srvsvc` — `NetrShareGetInfo` (Level 502) | Share-in security descriptor-ını (DACL) RPC üzərindən, fiziki qoşulmadan oxuyur — kimlərin hansı icazəyə sahib olduğunu göstərir |
-| 45 | **PrinterShareEnum** | `spoolss` — `EnumPrinters` | SMB üzərindən paylaşılan printerləri siyahıya alır — PrintNightmare/coercion hədəflərini aşkarlayır |
+| 40 | **SRVSVCShareEnum** | `srvsvc` — `NetShareEnumAll` (Level 2) | Extracts shares with name, path, comment, max/current connection count |
+| 41 | **SRVSVCSessionEnum** | `srvsvc` — `NetSessionEnum` (Level 10) | Active SMB sessions — who, from which computer, for how many seconds |
+| 42 | **SRVSVCConnectionEnum** | `srvsvc` — `NetConnectionEnum` | Which share is connected to by whom, along with PID |
+| 43 | **DFSShareMapper** | `netdfs` — `NetrDfsEnum` | Finds Distributed File System shares and referral targets |
+| 44 | **ShareSecurityDescriptorReader** | `srvsvc` — `NetrShareGetInfo` (Level 502) | Reads a share's security descriptor (DACL) via RPC without physically connecting — shows who has which permission |
+| 45 | **PrinterShareEnum** | `spoolss` — `EnumPrinters` | Lists printers shared over SMB — identifies PrintNightmare/coercion targets |
 
 ---
 
 ## 🟣 Object Enumeration
 
-> İstifadəçi, qrup və hesab obyektlərinin RPC üzərindən siyahıya alınması.
+> Listing user, group, and account objects via RPC.
 
-| # | Alət adı | RPC Interface | Nə edir |
+| # | Tool Name | RPC Interface | What It Does |
 |---|---|---|---|
-| 46 | **WKSSVCUserEnum** | `wkssvc` — `NetWkstaUserEnum` | Kompüterdə hal-hazırda login olan bütün istifadəçilər (domain + local) |
-| 47 | **SAMRUserEnumerator** | `samr` — `SamrEnumerateUsersInDomain` | SAM RPC üzərindən lokal istifadəçiləri enumerate edir (null session-la da işləyə bilər) |
-| 48 | **SAMRGroupEnumerator** | `samr` — `SamrEnumerateGroupsInDomain` | Lokal qrupları enumerate edir |
-| 49 | **SAMRLocalAdminDumper** | `samr` — `SamrGetMembersInGroup` | Administrators qrupunun üzvlərini tam məlumatla çıxarır |
+| 46 | **WKSSVCUserEnum** | `wkssvc` — `NetWkstaUserEnum` | All users (domain + local) currently logged in on the computer |
+| 47 | **SAMRUserEnumerator** | `samr` — `SamrEnumerateUsersInDomain` | Enumerates local users via SAM RPC (can also work with a null session) |
+| 48 | **SAMRGroupEnumerator** | `samr` — `SamrEnumerateGroupsInDomain` | Enumerates local groups |
+| 49 | **SAMRLocalAdminDumper** | `samr` — `SamrGetMembersInGroup` | Extracts full information on Administrators group members |
 
 ---
 
 ## 🔶 Vulnerabilities
 
-> Patch edilməmiş zəifliklərin SMB protokolu üzərindən yoxlanması.
+> Checking for unpatched vulnerabilities via the SMB protocol.
 
-| # | Alət adı | CVE / Texnika | Nə edir |
+| # | Tool Name | CVE / Technique | What It Does |
 |---|---|---|---|
-| 50 | **SMBGhostChecker** | CVE-2020-0796 — compression header | SMBv3.1.1 `NEGOTIATE_CONTEXT` — CompressionCapabilities — vulnerable host-u tapır |
-| 51 | **EternalBlueChecker** | CVE-2017-0144 (MS17-010) — SMBv1 `Trans2 SESSION_SETUP` | SMBv1-in EternalBlue-ya qarşı patch olunub-olunmadığını crafted paket cavabından yoxlayır (exploit etmədən) |
-| 52 | **SMBLorisDetector** | Connection exhaustion (DoS) — yarımçıq SMB bağlantıları | Çoxlu yarımçıq SMB session açaraq server-in connection table-ının limitini və DoS həssaslığını test edir |
-| 53 | **SMBCompoundRequestChecker** | CVE-2022-24500 sinfi — compound request flood | Çoxlu SMB2 compound request göndərərək server-in bu növ sorğulara qarşı zəifliyini yoxlayır |
+| 50 | **SMBGhostChecker** | CVE-2020-0796 — compression header | SMBv3.1.1 `NEGOTIATE_CONTEXT` — CompressionCapabilities — finds vulnerable hosts |
+| 51 | **EternalBlueChecker** | CVE-2017-0144 (MS17-010) — SMBv1 `Trans2 SESSION_SETUP` | Checks whether SMBv1 is patched against EternalBlue from a crafted packet's response (without exploiting) |
+| 52 | **SMBLorisDetector** | Connection exhaustion (DoS) — partial SMB connections | Opens many partial SMB sessions to test the server's connection table limit and DoS susceptibility |
+| 53 | **SMBCompoundRequestChecker** | CVE-2022-24500 class — compound request flood | Sends multiple SMB2 compound requests to check the server's vulnerability to this type of request |
 
 ---
 
 ## 🗂️ Share & File Reconnaissance
 
-> Share-lərə daxil olub məzmunu kəşf etmə, credential axtarışı.
+> Accessing shares to discover content and search for credentials.
 
-| # | Alət adı | API / Metod | Nə edir |
+| # | Tool Name | API / Method | What It Does |
 |---|---|---|---|
-| 54 | **ShareAccessTester** | `WNetAddConnection2` + `CreateFile` | Hər share-ə read/write/no-access testini edir, nəticəni matris kimi göstərir |
-| 55 | **SensitiveFileHunter** | Recursive `FindFirstFile/FindNextFile` | Share-lərdə `*.txt, *.xml, *.config, *.kdbx, web.config, unattend.xml` axtarır |
-| 56 | **SYSVOLCrawler** | `\\domain\SYSVOL` recursive walk | `Groups.xml` (GPP cpassword), login script-lər, scheduled task XML-lərini tapır |
-| 57 | **GPPPasswordExtractor** | `Groups.xml` parser + AES-256 decrypt | SYSVOL-dakı `cpassword` dəyərini Microsoft-un public AES key-i ilə deşifrə edir |
-| 58 | **NETLOGONScriptAnalyzer** | `\\domain\NETLOGON` crawler | Logon script-ləri yükləyir, içindəki credential-ları və UNC path-ları analiz edir |
-| 59 | **ShareWriteProber** | Test file create/delete | Yazıla bilən share-lərə test faylı yazıb pozur — real write icazəsini təsdiqləyir |
-| 60 | **FileMetadataExtractor** | `GetFileInformationByHandle` | Fayl tarixlərini, sahibini, ACL-ini, alternate data stream-lərini oxuyur |
-| 61 | **SMBFileSearcher** | Pattern-based recursive search | Share-lərdə regex pattern ilə axtarış — məsələn `password`, `admin`, `secret` |
+| 54 | **ShareAccessTester** | `WNetAddConnection2` + `CreateFile` | Tests read/write/no-access for each share, displays results as a matrix |
+| 55 | **SensitiveFileHunter** | Recursive `FindFirstFile/FindNextFile` | Searches shares for `*.txt, *.xml, *.config, *.kdbx, web.config, unattend.xml` |
+| 56 | **SYSVOLCrawler** | `\\domain\SYSVOL` recursive walk | Finds `Groups.xml` (GPP cpassword), logon scripts, scheduled task XML files |
+| 57 | **GPPPasswordExtractor** | `Groups.xml` parser + AES-256 decrypt | Decrypts the `cpassword` value in SYSVOL using Microsoft's public AES key |
+| 58 | **NETLOGONScriptAnalyzer** | `\\domain\NETLOGON` crawler | Downloads logon scripts, analyzes credentials and UNC paths within them |
+| 59 | **ShareWriteProber** | Test file create/delete | Writes and deletes a test file on writable shares — confirms actual write permission |
+| 60 | **FileMetadataExtractor** | `GetFileInformationByHandle` | Reads file dates, owner, ACL, alternate data streams |
+| 61 | **SMBFileSearcher** | Pattern-based recursive search | Regex pattern search across shares — e.g. `password`, `admin`, `secret` |
 
 ---
 
 ## ⚔️ Authentication & Relay
 
-> NTLM, Pass-the-Hash, coercion və relay texnikaları.
+> NTLM, Pass-the-Hash, coercion, and relay techniques.
 
-| # | Alət adı | Protokol / Texnika | Nə edir |
+| # | Tool Name | Protocol / Technique | What It Does |
 |---|---|---|---|
-| 62 | **NTLMAuthTester** | `WNetAddConnection2` + NTLM | NTLM hash ilə SMB autentifikasiyasını test edir (Pass-the-Hash) |
-| 63 | **SMBRelayListener** | Raw TCP 445 + SMB handshake | Gələn NTLM autentifikasiyasını başqa host-a relay edir |
-| 64 | **PrintSpoolerCoercer** | `MS-RPRN` — `RpcRemoteFindFirstPrinterChangeNotification` | Print spooler-i attacker host-a NTLM auth göndərməyə məcbur edir |
-| 65 | **PetitPotamCoercer** | `MS-EFSRPC` — `EfsRpcOpenFileRaw` | EFSRPC üzərindən DC-ni autentifikasiya etməyə coerce edir |
-| 66 | **DFSCoercer** | `MS-DFSNM` — `NetrDfsAddStdRoot` | DFS namespace RPC üzərindən coercion (PrintSpooler-ə alternativ) |
-| 67 | **SMBAuthCapturer** | TCP listener + NTLMv2 challenge/response | Gələn NTLMv2 hash-ləri capture edib `hashcat` formatında saxlayır |
+| 62 | **NTLMAuthTester** | `WNetAddConnection2` + NTLM | Tests SMB authentication with an NTLM hash (Pass-the-Hash) |
+| 63 | **SMBRelayListener** | Raw TCP 445 + SMB handshake | Relays incoming NTLM authentication to another host |
+| 64 | **PrintSpoolerCoercer** | `MS-RPRN` — `RpcRemoteFindFirstPrinterChangeNotification` | Forces the print spooler to send NTLM auth to the attacker's host |
+| 65 | **PetitPotamCoercer** | `MS-EFSRPC` — `EfsRpcOpenFileRaw` | Coerces the DC into authenticating via EFSRPC |
+| 66 | **DFSCoercer** | `MS-DFSNM` — `NetrDfsAddStdRoot` | Coercion via DFS namespace RPC (an alternative to PrintSpooler) |
+| 67 | **SMBAuthCapturer** | TCP listener + NTLMv2 challenge/response | Captures incoming NTLMv2 hashes and saves them in `hashcat` format |
 
 ---
 
 ## 🔧 Post-Exploitation
 
-> Sistemdə foothold əldə etdikdən sonra SMB üzərindən lateral movement və kalıcılıq.
+> Lateral movement and persistence via SMB after a foothold has been established on a system.
 
-| # | Alət adı | API / Protokol | Nə edir |
+| # | Tool Name | API / Protocol | What It Does |
 |---|---|---|---|
-| 68 | **RemoteServiceCreator** | `svcctl` RPC — `CreateServiceW` | Uzaq kompüterdə servis yaradır, shellcode-u servis kimi işlədir, silinir |
-| 69 | **RemoteServiceManager** | `svcctl` — `QueryServiceStatus/ChangeServiceConfig` | Mövcud servisləri listə alır, başladır, dayandırır, konfiqurasiya dəyişir |
-| 70 | **RemoteRegistryReader** | `winreg` RPC — `RegConnectRegistry` | Uzaq kompüterin registry-sini SMB üzərindən oxuyur |
-| 71 | **RemoteRegistryWriter** | `winreg` — `RegSetValueEx` | Uzaq registry-yə dəyər yazır (persistence, config dəyişikliyi) |
-| 72 | **SAMHiveExtractor** | `winreg` — `RegSaveKey` via SMB | SAM + SYSTEM hive-larını uzaqdan çıxarır, secretsdump üçün hazırlayır |
-| 73 | **RemoteFileDeployer** | `CreateFile` UNC + `WriteFile` | Uzaq share-ə fayl yazır — payload deploy etmək üçün |
-| 74 | **RemoteFileEraser** | `DeleteFile` over SMB | İz silmək üçün uzaq host-dan fayl silir |
-| 75 | **VSShadowAccessor** | `\\host\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy*` | Volume Shadow Copy üzərindən `ntds.dit` + SYSTEM hive-ını kopyalayır |
-| 76 | **TaskSchedulerSMB** | `atsvc` / `ITaskSchedulerV2` RPC | Uzaq kompüterdə scheduled task yaradır — lateral movement üçün |
-| 77 | **SCCMShareExplorer** | `\\SCCM\SMSPKG*` share crawler | SCCM deployment share-lərini axtarır, içindəki credential-ları tapır |
+| 68 | **RemoteServiceCreator** | `svcctl` RPC — `CreateServiceW` | Creates a service on the remote computer, runs shellcode as a service, then deletes it |
+| 69 | **RemoteServiceManager** | `svcctl` — `QueryServiceStatus/ChangeServiceConfig` | Lists existing services, starts, stops, and reconfigures them |
+| 70 | **RemoteRegistryReader** | `winreg` RPC — `RegConnectRegistry` | Reads the remote computer's registry via SMB |
+| 71 | **RemoteRegistryWriter** | `winreg` — `RegSetValueEx` | Writes a value to the remote registry (persistence, config changes) |
+| 72 | **SAMHiveExtractor** | `winreg` — `RegSaveKey` via SMB | Remotely extracts SAM + SYSTEM hives, prepares them for secretsdump |
+| 73 | **RemoteFileDeployer** | `CreateFile` UNC + `WriteFile` | Writes a file to a remote share — for deploying a payload |
+| 74 | **RemoteFileEraser** | `DeleteFile` over SMB | Deletes a file from the remote host to erase traces |
+| 75 | **VSShadowAccessor** | `\\host\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy*` | Copies `ntds.dit` + the SYSTEM hive via Volume Shadow Copy |
+| 76 | **TaskSchedulerSMB** | `atsvc` / `ITaskSchedulerV2` RPC | Creates a scheduled task on the remote computer — for lateral movement |
+| 77 | **SCCMShareExplorer** | `\\SCCM\SMSPKG*` share crawler | Searches SCCM deployment shares, finds credentials within them |
 
 ---
 
-
 ---
 
-> **Qeyd:** Bütün alətlər yalnız icazəniz olan mühitlərdə — öz lab-ınızda, CTF-də və ya rəsmi pentest müqaviləsi olan sistemlərdə istifadə edilməlidir.
+> **Note:** All tools must be used only in environments you are authorized to test — your own lab, a CTF, or systems covered by a formal penetration-testing agreement.
