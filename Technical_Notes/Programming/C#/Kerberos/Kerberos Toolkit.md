@@ -1,188 +1,226 @@
-Kerberos Expert Tool Kit — C# Implementation
-📋 Mündəricat
-Common Kerberos
-Protocol & Ticket Analysis
-Enumeration
-Attacks — User Accounts
-Attacks — Service Accounts
-Delegation Attacks
-Certificate & PKINIT Attacks
-DC & Infrastructure Attacks
-Ticket Forge & Manipulation
-Authentication & Abuse
-Mitigation & Hardening Analysis
-Post-Exploitation
-Intelligence & Analysis
-Başlamaq üçün ardıcıllıq
-🔵 Common Kerberos
-Protokol səviyyəsində ilk təmas — KDC çatma, AS-REQ/TGS-REQ struktur analizi, fingerprint.
+# Kerberos Expert Tool Kit — C# Implementation
 
+## 📋 Table of Contents
 
+- [Common Kerberos](#-common-kerberos)
+- [Protocol & Ticket Analysis](#-protocol--ticket-analysis)
+- [Enumeration](#-enumeration)
+- [Attacks — User Accounts](#-attacks--user-accounts)
+- [Attacks — Service Accounts](#-attacks--service-accounts)
+- [Delegation Attacks](#-delegation-attacks)
+- [Certificate & PKINIT Attacks](#-certificate--pkinit-attacks)
+- [DC & Infrastructure Attacks](#-dc--infrastructure-attacks)
+- [Ticket Forge & Manipulation](#-ticket-forge--manipulation)
+- [Authentication & Abuse](#-authentication--abuse)
+- [Mitigation & Hardening Analysis](#-mitigation--hardening-analysis)
+- [Post-Exploitation](#-post-exploitation)
+- [Intelligence & Analysis](#-intelligence--analysis)
+- [Recommended Starting Sequence](#-recommended-starting-sequence)
 
-#	Alət adı	Texniki dərinlik	Nə edir
-1	KerberosPortProber	TCP 88 + UDP 88 TcpClient/Socket	KDC-nin TCP/UDP üzərindən əlçatanlığını yoxlayır — UDP fragmentation issue-ları aşkarlayır
-2	ASREQProber	Raw AS-REQ (PA-ENC-TIMESTAMP)	KDC-dən KDC_ERR_PREAUTH_REQUIRED cavabı alır — KDC aktivliyi + pre-auth policy təsdiqi
-3	KerberosRealmDiscovery	DNS SRV + kinit analog	_kerberos._tcp.dc._msdcs.domain.com SRV record-larından realm/DC discovery
-4	KerberosEncryptionDetector	AS-REQ etype listing	Dəstəklənən etype-ları tapır — rc4-hmac (23), aes128 (17), aes256 (18) — RC4 default = KRBPASS-ın köhnəliyi
-5	KDCErrorInterpreter	KRB-ERROR parsing	KDC_ERR_ kodlarını tərcümə edir — PREAUTH_REQUIRED(25), CLIENT_NOT_FOUND(6), PRINCIPAL_UNKNOWN — username enumeration əsası
-6	KerberosClockSkewChecker	AS-REQ timestamp	Local ↔ DC vaxt fərqini ölçür — 5 dəqiqəlik skew limitini aşarsa ticket-lar işləməz
-7	KerberosPACParser	PAC structure decoding	PAC_LOGON_INFO, PAC_SIGNATURE_DATA, PAC_CREDENTIALS INFO sahələrini parse edir
-8	KerberosPrincipalFormatter	user@REALM / NT principals	Principal name format-larını çevirir — enterprise, NT, canonical name normalization
-9	KerberosReferralAnalyzer	Cross-realm referral tickets	KDC_ERR_WRONG_REALM + referral TGT-lərini parse edir — trust topologiyasını xəritələyir
-10	KerberosUDPFragmentProber	UDP 88 max packet size	KRB5KDC_ERR_RESPONSE_TOO_BIG aşkarlanır — TCP-yə fallback lazımlığını müəyyənləşdirir
-🟡 Protocol & Ticket Analysis
-Ticket-ların struktur təhlili, crypto sahələri, PAC签名.
+---
 
+## 🔵 Common Kerberos
 
+> First contact at the protocol level — KDC reachability, AS-REQ/TGS-REQ structural analysis, fingerprinting.
 
-#	Alət adı	Texniki dərinlik	Nə edir
-11	ASREPParser	KRB-AS-REP ASN.1 DER	AS-REP içindəki ticket, encrypted part, key sahələrini çıxarır
-12	TGSREPParser	KRB-TGS-REP ASN.1	TGS-REP-dən service ticket, session key, adticket-ləri çıxarır
-13	TicketKvnoExtractor	Ticket kvno field	Ticket version number-ı oxuyur — key rotation hadisələrini aşkarlayır
-14	KerberosTicketFlagAnalyzer	Ticket flags bitfield	forwardable, renewable, initial, pre-authent, ok-as-delegate flag-larını decode edir
-15	PACSigVerifier	PAC_SIGNATURE_DATA	Server/Privilege Server signature-ları yoxlayır — key-ə sahib olsaq forge etmək mümkündürmü
-16	SessionKeyExtractor	AS-REP enc-part	AS-REP enc-part-dan session key çıxarır — service ticket request-lər üçün
-17	KerberosAPREQInspector	AP-REQ + authenticator	Mövcud ticket-lərin authenticator strukturunu, sub-session key-i təhlil edir
-18	KerberosTicketLifetimeChecker	endtime/renew-till	Ticket-ların lifetime/renewal window-unu hesablayır — long-lived ticket-ları tapır
-19	KerberosCrossRealmTicketAnalyzer	Cross-realm TGT	Cross-realm trust üzərindən alınan ticket-lərin SID filtering/statusunu yoxlayır
-20	KerberosCipherStrengthAnalyzer	Etype + key length	istifadə olunan cipher-ların gücünü qiymətləndirir — RC4 = NT hash reuse riski
-🟠 Enumeration
-Kerberos üzərindən istifadəçi, servis, SPN və delegation konfiqurasiyasının kəşfi.
+| # | Tool Name | Technical Depth | What It Does |
+|---|---|---|---|
+| 1 | **KerberosPortProber** | TCP 88 + UDP 88 TcpClient/Socket | Checks KDC reachability over TCP/UDP — detects UDP fragmentation issues |
+| 2 | **ASREQProber** | Raw AS-REQ (PA-ENC-TIMESTAMP) | Receives `KDC_ERR_PREAUTH_REQUIRED` from the KDC — confirms KDC activity + pre-auth policy |
+| 3 | **KerberosRealmDiscovery** | DNS SRV + kinit analog | Realm/DC discovery from `_kerberos._tcp.dc._msdcs.domain.com` SRV records |
+| 4 | **KerberosEncryptionDetector** | AS-REQ etype listing | Finds supported etypes — rc4-hmac (23), aes128 (17), aes256 (18) — RC4 default signals legacy weakness |
+| 5 | **KDCErrorInterpreter** | KRB-ERROR parsing | Translates `KDC_ERR_` codes — `PREAUTH_REQUIRED(25)`, `CLIENT_NOT_FOUND(6)`, `PRINCIPAL_UNKNOWN` — basis for username enumeration |
+| 6 | **KerberosClockSkewChecker** | AS-REQ timestamp | Measures the local ↔ DC time difference — exceeding the 5-minute skew limit will break tickets |
+| 7 | **KerberosPACParser** | PAC structure decoding | Parses `PAC_LOGON_INFO`, `PAC_SIGNATURE_DATA`, `PAC_CREDENTIALS_INFO` fields |
+| 8 | **KerberosPrincipalFormatter** | user@REALM / NT principals | Converts principal name formats — enterprise, NT, canonical name normalization |
+| 9 | **KerberosReferralAnalyzer** | Cross-realm referral tickets | Parses `KDC_ERR_WRONG_REALM` + referral TGTs — maps trust topology |
+| 10 | **KerberosUDPFragmentProber** | UDP 88 max packet size | Detects `KRB5KDC_ERR_RESPONSE_TOO_BIG` — determines whether TCP fallback is required |
 
+---
 
+## 🟡 Protocol & Ticket Analysis
 
-#	Alət adı	Texniki dərinlik	Nə edir
-21	KerberosUserEnum	AS-REQ status codes	KDC_ERR_PREAUTH_REQUIRED vs KDC_ERR_CLIENT_NOT_FOUND fərqi ilə username enumeration (credsiz!)
-22	KerberosUserEnumPasswordSpray	AS-REQ + KDC_ERR_PREAUTH_FAILED	Username + password spray üçün pre-auth testing — lockout-aware
-23	SPNEnumerator	LDAP — servicePrincipalName	Domain-dəki bütün SPN-ləri enumerate edir — Kerberoasting hədəflərini tapır
-24	SPNToUserMapper	LDAP + sAMAccountName	SPN ↔ user account bağlantısını qurur — hansı servis hesab hansı SPN-i daşıyır
-25	DelegationConfigEnumerator	LDAP — msDS-AllowedToDelegateTo	Constrained delegation konfiqurasiyalarını tapır — hədəf SPN-ləri ilə birlikdə
-26	UnconstrainedDelegationFinder	LDAP — userAccountControl & TRUSTED_FOR_DELEGATION	Unconstrained delegation-ı aktiv hesabları/DC-ləri tapır — TGT capture hədəfləri
-27	RBCDFinder	LDAP — msDS-AllowedToActOnBehalfOfOtherIdentity	Resource-Based Constrained Delegation konfiqurasiyalarını enumerate edir
-28	TrustedToAuthForDelegationFinder	TRUSTED_TO_AUTH_FOR_DELEGATION flag	Protocol transition-enabled hesabları tapır — S4U2Self üçün
-29	KerberosServiceAccountAudit	LDAP kombinasiyası	Servis hesabların (spn-lə hesablar) parol yaşı, hash tipi, pre-auth statusu audit-i
-30	KerberosGroupMembershipMapper	LDAP — memberOf	Kerberos hədəf hesabların qrup üzvlüyü — privileged hesabların Kerberos-dan çatılması
-31	ASREPAccountFinder	LDAP — UF_DONT_REQUIRE_PREAUTH	Pre-auth tələb etməyən hesabları tapır — AS-REP Roasting hədəfləri
-32	KerberosTrustEnumerator	LDAP — trustedDomainObject	Trust-ların Kerberos istiqamətini, transitivity, forest trust statusunu tapır
-🔴 Attacks — User Accounts
-İstifadəçi hesablarına qarşı Kerberos zəiflikləri.
+> Structural analysis of tickets, crypto fields, and PAC signatures.
 
+| # | Tool Name | Technical Depth | What It Does |
+|---|---|---|---|
+| 11 | **ASREPParser** | KRB-AS-REP ASN.1 DER | Extracts the ticket, encrypted part, and key fields from the AS-REP |
+| 12 | **TGSREPParser** | KRB-TGS-REP ASN.1 | Extracts the service ticket, session key, and ad-tickets from the TGS-REP |
+| 13 | **TicketKvnoExtractor** | Ticket kvno field | Reads the ticket version number — detects key rotation events |
+| 14 | **KerberosTicketFlagAnalyzer** | Ticket flags bitfield | Decodes forwardable, renewable, initial, pre-authent, ok-as-delegate flags |
+| 15 | **PACSigVerifier** | PAC_SIGNATURE_DATA | Verifies Server/Privilege Server signatures — determines whether forging is possible if the key is held |
+| 16 | **SessionKeyExtractor** | AS-REP enc-part | Extracts the session key from the AS-REP enc-part — for service ticket requests |
+| 17 | **KerberosAPREQInspector** | AP-REQ + authenticator | Analyzes the authenticator structure and sub-session key of existing tickets |
+| 18 | **KerberosTicketLifetimeChecker** | endtime/renew-till | Calculates ticket lifetime/renewal windows — finds long-lived tickets |
+| 19 | **KerberosCrossRealmTicketAnalyzer** | Cross-realm TGT | Checks the SID filtering/status of tickets obtained via cross-realm trust |
+| 20 | **KerberosCipherStrengthAnalyzer** | Etype + key length | Evaluates the strength of ciphers in use — RC4 signals NT hash reuse risk |
 
+---
 
-#	Alət adı	Texnika	Nə edir
-33	ASREP Roaster	AS-REQ (no pre-auth) → enc-part	Pre-auth disabled hesabların AS-REP enc-part hash-ini çıxarır — offline crack üçün (mode 18200)
-34	Kerberoast	TGS-REQ → service ticket	SPN-i olan bütün hesabların TGS-lərini toplayır — RC4 ticket-lar = NT hash (mode 13100)
-35	KerberoastRC4Focus	Etype 23 filter	Yalnız RC4 ticket-ları request edir — cracking dəyərini maksimuma çatdırır
-36	KerberoastAESFocus	Etype 17/18	AES ticket-larını request edir — yavaş crack, amma hash reuse analizi üçün dəyərli
-37	KerberosPasswordSpray	AS-REQ pre-auth	Domain password policy-ə uyğun lockout-aware password spray
-38	KerberosBruteForce	AS-REQ	Yavaş brute-force — honeypot/hosting-lərdə kerberos login failure-ları
-39	KerberosUserEnumerationTiming	Response timing analysis	Response vaxt fərqləri ilə username enumeration — status code-lar maskalandıqda
-40	KerberosPasswordPolicyReader	LDAP	Spray etməzdən əvvəl lockout threshold/duration-u oxuyur — SAMR analoqu LDAP üstündə
-🟣 Attacks — Service Accounts
-Servis hesab hash-larının tutulması və istismarı.
+## 🟠 Enumeration
 
+> Discovery of users, services, SPNs, and delegation configurations via Kerberos.
 
+| # | Tool Name | Technical Depth | What It Does |
+|---|---|---|---|
+| 21 | **KerberosUserEnum** | AS-REQ status codes | Username enumeration via the `KDC_ERR_PREAUTH_REQUIRED` vs `KDC_ERR_CLIENT_NOT_FOUND` difference (no credentials needed) |
+| 22 | **KerberosUserEnumPasswordSpray** | AS-REQ + `KDC_ERR_PREAUTH_FAILED` | Pre-auth testing for username + password spray — lockout-aware |
+| 23 | **SPNEnumerator** | LDAP — `servicePrincipalName` | Enumerates all SPNs in the domain — finds Kerberoasting targets |
+| 24 | **SPNToUserMapper** | LDAP + sAMAccountName | Maps the SPN ↔ user account relationship — which service account carries which SPN |
+| 25 | **DelegationConfigEnumerator** | LDAP — `msDS-AllowedToDelegateTo` | Finds constrained delegation configurations — along with target SPNs |
+| 26 | **UnconstrainedDelegationFinder** | LDAP — `userAccountControl` & `TRUSTED_FOR_DELEGATION` | Finds accounts/DCs with unconstrained delegation active — TGT capture targets |
+| 27 | **RBCDFinder** | LDAP — `msDS-AllowedToActOnBehalfOfOtherIdentity` | Enumerates Resource-Based Constrained Delegation configurations |
+| 28 | **TrustedToAuthForDelegationFinder** | `TRUSTED_TO_AUTH_FOR_DELEGATION` flag | Finds accounts with protocol transition enabled — for S4U2Self |
+| 29 | **KerberosServiceAccountAudit** | LDAP combination | Audits service accounts (accounts with SPNs) for password age, hash type, pre-auth status |
+| 30 | **KerberosGroupMembershipMapper** | LDAP — `memberOf` | Group membership of Kerberos target accounts — how privileged accounts are reachable via Kerberos |
+| 31 | **ASREPAccountFinder** | LDAP — `UF_DONT_REQUIRE_PREAUTH` | Finds accounts that don't require pre-auth — AS-REP Roasting targets |
+| 32 | **KerberosTrustEnumerator** | LDAP — `trustedDomainObject` | Finds the Kerberos direction of trusts, transitivity, and forest trust status |
 
-#	Alət adı	Texnika	Nə edir
-41	KerberoastCracker	Hashcat mode 13100/19600	TGS ticket-ları crack etmək üçün hashcat orchestrator — RC4 + AES hər ikisi
-42	KerberosServiceTicketHarvester	TGS-REQ + krb5cc parse	Bütün servis ticket-larını yığıb hash formatına çevirir
-43	SPNSquattingProber	LDAP + SPN registration test	Boş SPN-ləri tapır — attacker SPN qeyd edib Kerberoast-ı user-lara cəlb edə bilər
-44	KerberosSilverTicketForge	Service account NT hash	krbtgt deyil — service hash ilə TGS forge edir — LANMAN/RC4 + AES
-45	KerberosTicketCacheParser	LSASS / KRB5CCNAME	Local ticket cache-i oxuyur — mövcud ticket-ları export edir (kirbi format)
-46	KerberosKRBCCConverter	kirbi ↔ ccache	Ticket format çevirmələri — Impacket/Rubeus uyğunluğu üçün
-47	KerberosServiceAccountPivot	Crack edilmiş servis hesab	Servis hesab parolundan PTH/PSH və TGT request zənciri qurur
-48	KerberosWeakPasswordScanner	Service account wordlist	Servis hesablarına xüsusi wordlist (service, sql, svc prefix-lər) ilə spray
-⚔️ Delegation Attacks
-Delegation konfiqurasiyalarının istismarı.
+---
 
+## 🔴 Attacks — User Accounts
 
+> Kerberos weaknesses against user accounts.
 
-#	Alət adı	Texnika	Nə edir
-49	S4U2SelfAbuser	S4U2Self + S4U2Proxy	Constrained delegation üzərindən öz adına istənilən user üçün ticket almaq
-50	S4U2ProxyPivot	S4U2Proxy + forwardable TGT	Delegation SPN-inə forwardable TGS ile service ticket almaq — admin impersonation
-51	RBCDAttacker	msDS-AllowedToActOnBehalfOfOtherIdentity yazır	RBCD konfiqurasiya yazır (write access varsa) — machine account control → impersonation
-52	RBCDMachineAccountForge	Machine account SPN + S4U	Yaradılmış machine account SPN qeyd edib RBCD relay-ini tamamlamayır
-53	UnconstrainedDelegationListener	TGT capture (DC + Tier-0)	Unconstrained delegation host-unu monitor edir — gələn TGT-ləri tutur (DCSync-ə qədər zəncir)
-54	KerberosResourceConstrainedFinder	LDAP + ACL analysis	RBCD yazma hüququ olan hesabları tapır — attack path qrafikası
-55	S4UTicketRogue	S4U2Self + PAC manipulation	S4U ticket-larında PAC manipulation — user SID override
-56	DelegationAttackPathPlanner	Graph analysis	Delegation config-lərindən attack path qrafikası qurur — kim kimə impersonation edə bilər
-🔶 Certificate & PKINIT Attacks
-ADCS + PKINIT + Kerberos kəsiyi.
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 33 | **ASREP Roaster** | AS-REQ (no pre-auth) → enc-part | Extracts the AS-REP enc-part hash of accounts with pre-auth disabled — for offline cracking (mode 18200) |
+| 34 | **Kerberoast** | TGS-REQ → service ticket | Collects TGSes for all accounts with an SPN — RC4 tickets = NT hash (mode 13100) |
+| 35 | **KerberoastRC4Focus** | Etype 23 filter | Requests only RC4 tickets — maximizes cracking value |
+| 36 | **KerberoastAESFocus** | Etype 17/18 | Requests AES tickets — slow to crack, but valuable for hash reuse analysis |
+| 37 | **KerberosPasswordSpray** | AS-REQ pre-auth | Lockout-aware password spray consistent with the domain password policy |
+| 38 | **KerberosBruteForce** | AS-REQ | Slow brute-force — Kerberos login failures on honeypots/hosting environments |
+| 39 | **KerberosUserEnumerationTiming** | Response timing analysis | Username enumeration via response time differences — when status codes are masked |
+| 40 | **KerberosPasswordPolicyReader** | LDAP | Reads lockout threshold/duration before spraying — a SAMR analog over LDAP |
 
+---
 
+## 🟣 Attacks — Service Accounts
 
-#	Alət adı	Texnika	Nə edir
-57	PKINITProber	PA-PK-AS-REQ	DC-nin PKINIT dəstəyini yoxlayır — cert-based auth üçün
-58	UnPACTheHash	PKINIT U2U → PA-PAC-REQUEST	Cert-dən NT hash çıxarır — Shadow Credentials, ESC halları ilə istifadə
-59	ShadowCredentialsAbuser	msDS-KeyCredentialLink yazır	KeyCredential yazır, PKINIT ilə NT hash çıxarır, izi təmizləyir
-60	ESC1Abuser	ADCS ENROLLEE_SUPPLIES_SUBJECT	Misconfigured template-dən istənilən user üçün cert alır → Kerberos auth
-61	ESC2-ESC6Scanner	ADCS template flags	Dangerous template flag-larını skan edir — AnyPurpose, EKU-less, EDITF_ATTRIBUTESUBJECTALTNAME2
-62	ESC8RelayProber	ADCS NTLM relay	ADCS HTTP endpoint-i NTLM relay-ə qarşı həssaslığını yoxlayır
-63	CertToKerberosBridge	Cert + PKINIT	Əldə edilmiş cert-dən TGT-yə keçid zənciri — PSH-analog
-🎯 DC & Infrastructure Attacks
-DC, krbtgt və infrastruktura üzərindən hücumlar.
+> Capturing and exploiting service account hashes.
 
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 41 | **KerberoastCracker** | Hashcat mode 13100/19600 | Hashcat orchestrator for cracking TGS tickets — both RC4 and AES |
+| 42 | **KerberosServiceTicketHarvester** | TGS-REQ + krb5cc parse | Collects all service tickets and converts them to hash format |
+| 43 | **SPNSquattingProber** | LDAP + SPN registration test | Finds empty SPNs — attacker can register an SPN to draw Kerberoasting to users |
+| 44 | **KerberosSilverTicketForge** | Service account NT hash | Forges a TGS using the service hash rather than krbtgt — LANMAN/RC4 + AES |
+| 45 | **KerberosTicketCacheParser** | LSASS / KRB5CCNAME | Reads the local ticket cache — exports existing tickets (kirbi format) |
+| 46 | **KerberosKRBCCConverter** | kirbi ↔ ccache | Ticket format conversions — for Impacket/Rubeus compatibility |
+| 47 | **KerberosServiceAccountPivot** | Cracked service account | Builds a PtH/PtT and TGT request chain from a service account password |
+| 48 | **KerberosWeakPasswordScanner** | Service account wordlist | Spray against service accounts with a targeted wordlist (service, sql, svc prefixes) |
 
+---
 
-#	Alət adı	Texnika	Nə edir
-64	DCSync	MS-DRSR DRSGetNCChanges	Replication hüququ ilə bütün user hash-larını çıxarır — krbtgt daxil
-65	DCSyncSingleUser	DRSGetNCChanges + pmsgOut filter	Yalnız tək user-in hash-ini çıxarır — noise azaldır
-66	DCShadow	MS-DRSR DRSAddEntry	Sahte DC qeydiyyatı ilə obyekt yazır — SIDHistory, delegation config dəyişikliyi
-67	ZeroLogonChecker	NetrServerReqChallenge/NetrServerAuthenticate3	CVE-2020-1472 — DC hesab parolunu sıfırlamaq mümkündürmü (exploit edir, amma restore option)
-68	KerberosGoldenTicketForge	krbtgt NT hash	Golden Ticket forge edir — istənilən user, istənilən qrup, istənilən domain
-69	KerberosDiamondTicketForge	DCSync + krbtgt AES key	AES key ilə TGT sign edir — S4U ilə birləşərək "diamond" ticket
-70	KerberosSapphireTicketForge	krbtgt AES key + S4U	Sapphire ticket — S4U2Self ilə PAC yenilənərək forge
-71	krbtgtKeyIDAnalyzer	Key rotation monitoring	krbtgt kvno və key age monitoring — Golden Ticket ictimaiyyətində rotation yoxluğu
-72	KerberosRIDCyclingAnalyzer	RID analysis	RID cycling ilə DC-də user enumeration — DCSync olmadan
-73	KerberosGPPRefresher	SYSVOL + gPCFileSysPath	GPO-lardan delegation/SPN konfiqurasiya dəyişikliklərini tapır
-🛠️ Ticket Forge & Manipulation
-Ticket-ların yaradılması, dəyişdirilməsi, PAC manipulation.
+## ⚔️ Delegation Attacks
 
+> Exploiting delegation configurations.
 
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 49 | **S4U2SelfAbuser** | S4U2Self + S4U2Proxy | Obtains a ticket for any user on its own behalf via constrained delegation |
+| 50 | **S4U2ProxyPivot** | S4U2Proxy + forwardable TGT | Obtains a service ticket to the delegation SPN with a forwardable TGS — admin impersonation |
+| 51 | **RBCDAttacker** | Writes `msDS-AllowedToActOnBehalfOfOtherIdentity` | Writes RBCD configuration (if write access exists) — machine account control → impersonation |
+| 52 | **RBCDMachineAccountForge** | Machine account SPN + S4U | Registers a created machine account SPN and completes the RBCD relay |
+| 53 | **UnconstrainedDelegationListener** | TGT capture (DC + Tier-0) | Monitors an unconstrained delegation host — captures incoming TGTs (chain up to DCSync) |
+| 54 | **KerberosResourceConstrainedFinder** | LDAP + ACL analysis | Finds accounts with RBCD write access — builds an attack path graph |
+| 55 | **S4UTicketRogue** | S4U2Self + PAC manipulation | PAC manipulation in S4U tickets — user SID override |
+| 56 | **DelegationAttackPathPlanner** | Graph analysis | Builds an attack path graph from delegation configs — who can impersonate whom |
 
-#	Alət adı	Texnika	Nə edir
-74	TicketPACInjector	PAC construct + signature	PAC yaratmaq/dəyişmək — GroupSID, UserSID manipulation
-75	TicketSIDHistoryInjector	PAC_SID_HISTORY	SIDHistory ilə enterprise admin SID əlavə edir — forge edilmiş ticket-larda
-76	TicketGroupEditor	PAC_LOGON_INFO	Ticket-in qrup üzvlüyünü dəyişir — Domain Admins SID əlavə etmək
-77	TicketLifetimeExtender	endtime/renew-till patch	Ticket lifetime-nı uzadır — 10 il Golden Ticket pattern
-78	TicketEncoderKRB	ASN.1 DER encoder	Ticket/AP-REQ/TGS-REQ-ləri encode edir — C#-da raw ASN.1 builder
-79	TicketPassthruValidator	AP-REQ + service	Forge edilmiş ticket-ların real service-də qəbul olunub-olunmadığını test edir
-80	TicketCrossRealmForge	Cross-realm trust key	Inter-realm trust key-ə sahib olsaq cross-realm ticket forge edir
-⚔️ Authentication & Abuse
-Ticket-lardan istifadə edərək giriş/lateral movement.
+---
 
+## 🔶 Certificate & PKINIT Attacks
 
+> The ADCS + PKINIT + Kerberos intersection.
 
-#	Alət adı	Texnika	Nə edir
-81	KerberosSMBAuth	AP-REQ + SMB	Ticket ilə SMB auth — Pass-the-Ticket
-82	KerberosWinRMPTT	AP-REQ + WinRM	Pass-the-Ticket ilə WinRM giriş
-83	KerberosHTTPPTT	AP-REQ + HTTP	HTTP üzərindən ticket auth — Exchange EWS
-84	KerberosLDAPPacers	LDAP + PAC	LDAP üzərindən ticket auth — domain obyekt oxuma
-85	KerberosMSSQLPTT	TDS + Kerberos	MSSQL Server-ə ticket auth — xp_cmdshell pivot
-86	KerberosSilverTicketSMB	Silver TGS + SMB	Silver ticket ilə CIFS auth — local admin tip access
-87	KerberosPassTheCache	ccache/kirbi export	Ticket cache-dən birbaşa auth — Rubeus/Impacket uyğun
-🔶 Mitigation & Hardening Analysis
-Kerberos istismarına qarşı qorunma statusunun yoxlanması.
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 57 | **PKINITProber** | PA-PK-AS-REQ | Checks DC support for PKINIT — for certificate-based auth |
+| 58 | **UnPACTheHash** | PKINIT U2U → PA-PAC-REQUEST | Extracts an NT hash from a certificate — used with Shadow Credentials and ESC cases |
+| 59 | **ShadowCredentialsAbuser** | Writes `msDS-KeyCredentialLink` | Writes a KeyCredential, extracts the NT hash via PKINIT, and cleans up traces |
+| 60 | **ESC1Abuser** | ADCS `ENROLLEE_SUPPLIES_SUBJECT` | Obtains a certificate for any user from a misconfigured template → Kerberos auth |
+| 61 | **ESC2-ESC6Scanner** | ADCS template flags | Scans for dangerous template flags — AnyPurpose, EKU-less, `EDITF_ATTRIBUTESUBJECTALTNAME2` |
+| 62 | **ESC8RelayProber** | ADCS NTLM relay | Checks ADCS HTTP endpoint vulnerability to NTLM relay |
+| 63 | **CertToKerberosBridge** | Cert + PKINIT | Bridges an obtained certificate to a TGT — a PtH analog |
 
+---
 
+## 🎯 DC & Infrastructure Attacks
 
-#	Alət adı	Texnika	Nə edir
-88	KerberosAESOnlyChecker	LDAP + msDS-SupportedEncryptionTypes	RC4 disabling statusu — AES-only policy yoxlanışı
-89	KerberosPACSigningChecker	PAC signature validation	PAC signature enforcement statusu (CVE-2021-42287 hardening)
-90	KerberosPreAuthPolicyReader	LDAP — userAccountControl	Pre-auth disabled hesabların sayı — AS-REP Roast risk
-91	KerberosDelegationAudit	LDAP	Bütün delegation konfiqurasiyalarının audit reportu — risk scoring ilə
-92	KerberosADCSAudit	LDAP + ADCS templates	ADCS template risklərinin audit-i — ESC halları
-93	KerberosPrivilegedAccountExposure	LDAP kombinasiyası	Privileged hesabların SPN/pre-auth/delegation exposure-larını skan edir
-94	KerberosTier0ExposureMapper	Graph + LDAP	Tier-0 obyektlərin Kerberos attack surface map-i
-95	KerberosMitigationRecommender	Policy templates	Kerberos hardening rekomendasiyaları — AES-only, delegation restriction, krbtgt rotation
-🔧 Post-Exploitation
-Kerberos foothold sonrası lateral movement və kalıcılıq.
+> Attacks via the DC, krbtgt, and infrastructure.
 
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 64 | **DCSync** | MS-DRSR `DRSGetNCChanges` | Extracts all user hashes — including krbtgt — using replication rights |
+| 65 | **DCSyncSingleUser** | `DRSGetNCChanges` + pmsgOut filter | Extracts only a single user's hash — reduces noise |
+| 66 | **DCShadow** | MS-DRSR `DRSAddEntry` | Writes objects via a fake DC registration — SIDHistory, delegation config changes |
+| 67 | **ZeroLogonChecker** | `NetrServerReqChallenge` / `NetrServerAuthenticate3` | CVE-2020-1472 — checks whether the DC account password can be reset (exploits, but with a restore option) |
+| 68 | **KerberosGoldenTicketForge** | krbtgt NT hash | Forges a Golden Ticket — any user, any group, any domain |
+| 69 | **KerberosDiamondTicketForge** | DCSync + krbtgt AES key | Signs a TGT with the AES key — combined with S4U for a "diamond" ticket |
+| 70 | **KerberosSapphireTicketForge** | krbtgt AES key + S4U | Sapphire ticket — PAC refreshed via S4U2Self and forged |
+| 71 | **krbtgtKeyIDAnalyzer** | Key rotation monitoring | Monitors krbtgt kvno and key age — detects lack of rotation in the Golden Ticket window |
+| 72 | **KerberosRIDCyclingAnalyzer** | RID analysis | User enumeration on the DC via RID cycling — without DCSync |
+| 73 | **KerberosGPPRefresher** | SYSVOL + gPCFileSysPath | Finds delegation/SPN configuration changes from GPOs |
 
+---
 
-#	Alət adı	Texnika	Nə edir
-96	KerberosGoldenTicketPersistence	krbtgt hash saklamaq	Golden Ticket 2x yaradılıb — krbtgt hash-ı ikicə rotate edilse də, backup ilə daima qalır
-97	KerberosRODCTicketForge	RODC + krbtgt	RODC krbtgt hash-ı ilə ticket forge — RODC key cache-dən
-98	KerberosCrossRealmGoldenTicket	Trust key + forge	Cross-realm Golden Ticket — trust key-ə sahib olsaq
-99	KerberosADCSMasterBridge	ADCS + PKINIT + Golden	ADCS admin cert → DCSync → krbtgt → Golden zənciri
-100	KerberosSilverTicketFarm	Service hash reuse	Birdən çox servisdə eyni hash reuse tapılarsa — farm-wide Silver Ticket generator
+## 🛠️ Ticket Forge & Manipulation
+
+> Creating, modifying, and manipulating tickets and PACs.
+
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 74 | **TicketPACInjector** | PAC construct + signature | Creates/modifies a PAC — GroupSID, UserSID manipulation |
+| 75 | **TicketSIDHistoryInjector** | `PAC_SID_HISTORY` | Adds an Enterprise Admin SID via SIDHistory — for forged tickets |
+| 76 | **TicketGroupEditor** | `PAC_LOGON_INFO` | Modifies a ticket's group membership — adds the Domain Admins SID |
+| 77 | **TicketLifetimeExtender** | endtime/renew-till patch | Extends ticket lifetime — the 10-year Golden Ticket pattern |
+| 78 | **TicketEncoderKRB** | ASN.1 DER encoder | Encodes tickets/AP-REQ/TGS-REQs — a raw ASN.1 builder in C# |
+| 79 | **TicketPassthruValidator** | AP-REQ + service | Tests whether forged tickets are accepted by a real service |
+| 80 | **TicketCrossRealmForge** | Cross-realm trust key | Forges cross-realm tickets when the inter-realm trust key is in hand |
+
+---
+
+## ⚔️ Authentication & Abuse
+
+> Access and lateral movement using tickets.
+
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 81 | **KerberosSMBAuth** | AP-REQ + SMB | SMB auth with a ticket — Pass-the-Ticket |
+| 82 | **KerberosWinRMPTT** | AP-REQ + WinRM | WinRM access via Pass-the-Ticket |
+| 83 | **KerberosHTTPPTT** | AP-REQ + HTTP | Ticket auth over HTTP — Exchange EWS |
+| 84 | **KerberosLDAPPacers** | LDAP + PAC | Ticket auth over LDAP — reading domain objects |
+| 85 | **KerberosMSSQLPTT** | TDS + Kerberos | Ticket auth to MSSQL Server — xp_cmdshell pivot |
+| 86 | **KerberosSilverTicketSMB** | Silver TGS + SMB | CIFS auth with a Silver Ticket — local admin-level access |
+| 87 | **KerberosPassTheCache** | ccache/kirbi export | Direct auth from the ticket cache — Rubeus/Impacket compatible |
+
+---
+
+## 🔶 Mitigation & Hardening Analysis
+
+> Checking the protection status against Kerberos exploitation.
+
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 88 | **KerberosAESOnlyChecker** | LDAP + `msDS-SupportedEncryptionTypes` | RC4 disabling status — checks AES-only policy |
+| 89 | **KerberosPACSigningChecker** | PAC signature validation | PAC signature enforcement status (CVE-2021-42287 hardening) |
+| 90 | **KerberosPreAuthPolicyReader** | LDAP — `userAccountControl` | Number of accounts with pre-auth disabled — AS-REP Roast risk |
+| 91 | **KerberosDelegationAudit** | LDAP | Full audit report of all delegation configurations — with risk scoring |
+| 92 | **KerberosADCSAudit** | LDAP + ADCS templates | Audits ADCS template risks — ESC cases |
+| 93 | **KerberosPrivilegedAccountExposure** | LDAP combination | Scans privileged accounts for SPN/pre-auth/delegation exposure |
+| 94 | **KerberosTier0ExposureMapper** | Graph + LDAP | Kerberos attack surface map of Tier-0 objects |
+| 95 | **KerberosMitigationRecommender** | Policy templates | Kerberos hardening recommendations — AES-only, delegation restrictions, krbtgt rotation |
+
+---
+
+## 🔧 Post-Exploitation
+
+> Lateral movement and persistence via Kerberos after establishing a foothold.
+
+| # | Tool Name | Technique | What It Does |
+|---|---|---|---|
+| 96 | **KerberosGoldenTicketPersistence** | Storing the krbtgt hash | Creates two Golden Tickets — persists indefinitely with a backup even if krbtgt is rotated twice |
+| 97 | **KerberosRODCTicketForge** | RODC + krbtgt | Forges tickets with the RODC krbtgt hash — from the RODC key cache |
+| 98 | **KerberosCrossRealmGoldenTicket** | Trust key + forge | Cross-realm Golden Ticket — when the trust key is in hand |
+| 99 | **KerberosADCSMasterBridge** | ADCS + PKINIT + Golden | Full chain: ADCS admin cert → DCSync → krbtgt → Golden Ticket |
+| 100 | **KerberosSilverTicketFarm** | Service hash reuse | When the same hash reuse is found across multiple services — farm-wide Silver Ticket generator |
