@@ -1,8 +1,5 @@
 # SMB Expert Tool List — C# Implementation
 
-> **Məqsəd:** SMB protokolunun reconnaissance, enumeration və post-exploitation mərhələlərini əhatə edən expert-level C# alətlər toplusu.  
-> **Ardıcıllıq:** Hər kateqoriya əvvəlkinin üzərinə qurulur. Sırayla get.
-
 ---
 
 ## 📋 Mündəricat
@@ -107,6 +104,8 @@
 | 41 | **SRVSVCSessionEnum** | `srvsvc` — `NetSessionEnum` (Level 10) | Aktiv SMB sessiyaları — kim, hansı kompüterdən, neçə saniyədir |
 | 42 | **SRVSVCConnectionEnum** | `srvsvc` — `NetConnectionEnum` | Hansı share-ə kim connected-dir, PID ilə birlikdə |
 | 43 | **DFSShareMapper** | `netdfs` — `NetrDfsEnum` | Distributed File System share-lərini və referral target-larını tapır |
+| 44 | **ShareSecurityDescriptorReader** | `srvsvc` — `NetrShareGetInfo` (Level 502) | Share-in security descriptor-ını (DACL) RPC üzərindən, fiziki qoşulmadan oxuyur — kimlərin hansı icazəyə sahib olduğunu göstərir |
+| 45 | **PrinterShareEnum** | `spoolss` — `EnumPrinters` | SMB üzərindən paylaşılan printerləri siyahıya alır — PrintNightmare/coercion hədəflərini aşkarlayır |
 
 ---
 
@@ -116,10 +115,10 @@
 
 | # | Alət adı | RPC Interface | Nə edir |
 |---|---|---|---|
-| 44 | **WKSSVCUserEnum** | `wkssvc` — `NetWkstaUserEnum` | Kompüterdə hal-hazırda login olan bütün istifadəçilər (domain + local) |
-| 45 | **SAMRUserEnumerator** | `samr` — `SamrEnumerateUsersInDomain` | SAM RPC üzərindən lokal istifadəçiləri enumerate edir (null session-la da işləyə bilər) |
-| 46 | **SAMRGroupEnumerator** | `samr` — `SamrEnumerateGroupsInDomain` | Lokal qrupları enumerate edir |
-| 47 | **SAMRLocalAdminDumper** | `samr` — `SamrGetMembersInGroup` | Administrators qrupunun üzvlərini tam məlumatla çıxarır |
+| 46 | **WKSSVCUserEnum** | `wkssvc` — `NetWkstaUserEnum` | Kompüterdə hal-hazırda login olan bütün istifadəçilər (domain + local) |
+| 47 | **SAMRUserEnumerator** | `samr` — `SamrEnumerateUsersInDomain` | SAM RPC üzərindən lokal istifadəçiləri enumerate edir (null session-la da işləyə bilər) |
+| 48 | **SAMRGroupEnumerator** | `samr` — `SamrEnumerateGroupsInDomain` | Lokal qrupları enumerate edir |
+| 49 | **SAMRLocalAdminDumper** | `samr` — `SamrGetMembersInGroup` | Administrators qrupunun üzvlərini tam məlumatla çıxarır |
 
 ---
 
@@ -129,7 +128,10 @@
 
 | # | Alət adı | CVE / Texnika | Nə edir |
 |---|---|---|---|
-| 48 | **SMBGhostChecker** | CVE-2020-0796 — compression header | SMBv3.1.1 `NEGOTIATE_CONTEXT` — CompressionCapabilities — vulnerable host-u tapır |
+| 50 | **SMBGhostChecker** | CVE-2020-0796 — compression header | SMBv3.1.1 `NEGOTIATE_CONTEXT` — CompressionCapabilities — vulnerable host-u tapır |
+| 51 | **EternalBlueChecker** | CVE-2017-0144 (MS17-010) — SMBv1 `Trans2 SESSION_SETUP` | SMBv1-in EternalBlue-ya qarşı patch olunub-olunmadığını crafted paket cavabından yoxlayır (exploit etmədən) |
+| 52 | **SMBLorisDetector** | Connection exhaustion (DoS) — yarımçıq SMB bağlantıları | Çoxlu yarımçıq SMB session açaraq server-in connection table-ının limitini və DoS həssaslığını test edir |
+| 53 | **SMBCompoundRequestChecker** | CVE-2022-24500 sinfi — compound request flood | Çoxlu SMB2 compound request göndərərək server-in bu növ sorğulara qarşı zəifliyini yoxlayır |
 
 ---
 
@@ -139,14 +141,14 @@
 
 | # | Alət adı | API / Metod | Nə edir |
 |---|---|---|---|
-| 49 | **ShareAccessTester** | `WNetAddConnection2` + `CreateFile` | Hər share-ə read/write/no-access testini edir, nəticəni matris kimi göstərir |
-| 50 | **SensitiveFileHunter** | Recursive `FindFirstFile/FindNextFile` | Share-lərdə `*.txt, *.xml, *.config, *.kdbx, web.config, unattend.xml` axtarır |
-| 51 | **SYSVOLCrawler** | `\\domain\SYSVOL` recursive walk | `Groups.xml` (GPP cpassword), login script-lər, scheduled task XML-lərini tapır |
-| 52 | **GPPPasswordExtractor** | `Groups.xml` parser + AES-256 decrypt | SYSVOL-dakı `cpassword` dəyərini Microsoft-un public AES key-i ilə deşifrə edir |
-| 53 | **NETLOGONScriptAnalyzer** | `\\domain\NETLOGON` crawler | Logon script-ləri yükləyir, içindəki credential-ları və UNC path-ları analiz edir |
-| 54 | **ShareWriteProber** | Test file create/delete | Yazıla bilən share-lərə test faylı yazıb pozur — real write icazəsini təsdiqləyir |
-| 55 | **FileMetadataExtractor** | `GetFileInformationByHandle` | Fayl tarixlərini, sahibini, ACL-ini, alternate data stream-lərini oxuyur |
-| 56 | **SMBFileSearcher** | Pattern-based recursive search | Share-lərdə regex pattern ilə axtarış — məsələn `password`, `admin`, `secret` |
+| 54 | **ShareAccessTester** | `WNetAddConnection2` + `CreateFile` | Hər share-ə read/write/no-access testini edir, nəticəni matris kimi göstərir |
+| 55 | **SensitiveFileHunter** | Recursive `FindFirstFile/FindNextFile` | Share-lərdə `*.txt, *.xml, *.config, *.kdbx, web.config, unattend.xml` axtarır |
+| 56 | **SYSVOLCrawler** | `\\domain\SYSVOL` recursive walk | `Groups.xml` (GPP cpassword), login script-lər, scheduled task XML-lərini tapır |
+| 57 | **GPPPasswordExtractor** | `Groups.xml` parser + AES-256 decrypt | SYSVOL-dakı `cpassword` dəyərini Microsoft-un public AES key-i ilə deşifrə edir |
+| 58 | **NETLOGONScriptAnalyzer** | `\\domain\NETLOGON` crawler | Logon script-ləri yükləyir, içindəki credential-ları və UNC path-ları analiz edir |
+| 59 | **ShareWriteProber** | Test file create/delete | Yazıla bilən share-lərə test faylı yazıb pozur — real write icazəsini təsdiqləyir |
+| 60 | **FileMetadataExtractor** | `GetFileInformationByHandle` | Fayl tarixlərini, sahibini, ACL-ini, alternate data stream-lərini oxuyur |
+| 61 | **SMBFileSearcher** | Pattern-based recursive search | Share-lərdə regex pattern ilə axtarış — məsələn `password`, `admin`, `secret` |
 
 ---
 
@@ -156,12 +158,12 @@
 
 | # | Alət adı | Protokol / Texnika | Nə edir |
 |---|---|---|---|
-| 57 | **NTLMAuthTester** | `WNetAddConnection2` + NTLM | NTLM hash ilə SMB autentifikasiyasını test edir (Pass-the-Hash) |
-| 58 | **SMBRelayListener** | Raw TCP 445 + SMB handshake | Gələn NTLM autentifikasiyasını başqa host-a relay edir |
-| 59 | **PrintSpoolerCoercer** | `MS-RPRN` — `RpcRemoteFindFirstPrinterChangeNotification` | Print spooler-i attacker host-a NTLM auth göndərməyə məcbur edir |
-| 60 | **PetitPotamCoercer** | `MS-EFSRPC` — `EfsRpcOpenFileRaw` | EFSRPC üzərindən DC-ni autentifikasiya etməyə coerce edir |
-| 61 | **DFSCoercer** | `MS-DFSNM` — `NetrDfsAddStdRoot` | DFS namespace RPC üzərindən coercion (PrintSpooler-ə alternativ) |
-| 62 | **SMBAuthCapturer** | TCP listener + NTLMv2 challenge/response | Gələn NTLMv2 hash-ləri capture edib `hashcat` formatında saxlayır |
+| 62 | **NTLMAuthTester** | `WNetAddConnection2` + NTLM | NTLM hash ilə SMB autentifikasiyasını test edir (Pass-the-Hash) |
+| 63 | **SMBRelayListener** | Raw TCP 445 + SMB handshake | Gələn NTLM autentifikasiyasını başqa host-a relay edir |
+| 64 | **PrintSpoolerCoercer** | `MS-RPRN` — `RpcRemoteFindFirstPrinterChangeNotification` | Print spooler-i attacker host-a NTLM auth göndərməyə məcbur edir |
+| 65 | **PetitPotamCoercer** | `MS-EFSRPC` — `EfsRpcOpenFileRaw` | EFSRPC üzərindən DC-ni autentifikasiya etməyə coerce edir |
+| 66 | **DFSCoercer** | `MS-DFSNM` — `NetrDfsAddStdRoot` | DFS namespace RPC üzərindən coercion (PrintSpooler-ə alternativ) |
+| 67 | **SMBAuthCapturer** | TCP listener + NTLMv2 challenge/response | Gələn NTLMv2 hash-ləri capture edib `hashcat` formatında saxlayır |
 
 ---
 
@@ -171,110 +173,19 @@
 
 | # | Alət adı | API / Protokol | Nə edir |
 |---|---|---|---|
-| 63 | **RemoteServiceCreator** | `svcctl` RPC — `CreateServiceW` | Uzaq kompüterdə servis yaradır, shellcode-u servis kimi işlədir, silinir |
-| 64 | **RemoteServiceManager** | `svcctl` — `QueryServiceStatus/ChangeServiceConfig` | Mövcud servisləri listə alır, başladır, dayandırır, konfiqurasiya dəyişir |
-| 65 | **RemoteRegistryReader** | `winreg` RPC — `RegConnectRegistry` | Uzaq kompüterin registry-sini SMB üzərindən oxuyur |
-| 66 | **RemoteRegistryWriter** | `winreg` — `RegSetValueEx` | Uzaq registry-yə dəyər yazır (persistence, config dəyişikliyi) |
-| 67 | **SAMHiveExtractor** | `winreg` — `RegSaveKey` via SMB | SAM + SYSTEM hive-larını uzaqdan çıxarır, secretsdump üçün hazırlayır |
-| 68 | **RemoteFileDeployer** | `CreateFile` UNC + `WriteFile` | Uzaq share-ə fayl yazır — payload deploy etmək üçün |
-| 69 | **RemoteFileEraser** | `DeleteFile` over SMB | İz silmək üçün uzaq host-dan fayl silir |
-| 70 | **VSShadowAccessor** | `\\host\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy*` | Volume Shadow Copy üzərindən `ntds.dit` + SYSTEM hive-ını kopyalayır |
-| 71 | **TaskSchedulerSMB** | `atsvc` / `ITaskSchedulerV2` RPC | Uzaq kompüterdə scheduled task yaradır — lateral movement üçün |
-| 72 | **SCCMShareExplorer** | `\\SCCM\SMSPKG*` share crawler | SCCM deployment share-lərini axtarır, içindəki credential-ları tapır |
+| 68 | **RemoteServiceCreator** | `svcctl` RPC — `CreateServiceW` | Uzaq kompüterdə servis yaradır, shellcode-u servis kimi işlədir, silinir |
+| 69 | **RemoteServiceManager** | `svcctl` — `QueryServiceStatus/ChangeServiceConfig` | Mövcud servisləri listə alır, başladır, dayandırır, konfiqurasiya dəyişir |
+| 70 | **RemoteRegistryReader** | `winreg` RPC — `RegConnectRegistry` | Uzaq kompüterin registry-sini SMB üzərindən oxuyur |
+| 71 | **RemoteRegistryWriter** | `winreg` — `RegSetValueEx` | Uzaq registry-yə dəyər yazır (persistence, config dəyişikliyi) |
+| 72 | **SAMHiveExtractor** | `winreg` — `RegSaveKey` via SMB | SAM + SYSTEM hive-larını uzaqdan çıxarır, secretsdump üçün hazırlayır |
+| 73 | **RemoteFileDeployer** | `CreateFile` UNC + `WriteFile` | Uzaq share-ə fayl yazır — payload deploy etmək üçün |
+| 74 | **RemoteFileEraser** | `DeleteFile` over SMB | İz silmək üçün uzaq host-dan fayl silir |
+| 75 | **VSShadowAccessor** | `\\host\\?\GLOBALROOT\Device\HarddiskVolumeShadowCopy*` | Volume Shadow Copy üzərindən `ntds.dit` + SYSTEM hive-ını kopyalayır |
+| 76 | **TaskSchedulerSMB** | `atsvc` / `ITaskSchedulerV2` RPC | Uzaq kompüterdə scheduled task yaradır — lateral movement üçün |
+| 77 | **SCCMShareExplorer** | `\\SCCM\SMSPKG*` share crawler | SCCM deployment share-lərini axtarır, içindəki credential-ları tapır |
 
 ---
 
-## 🧠 Intelligence & Analysis
-
-> Yığılmış bütün məlumatları birləşdirib hücum yolu çəkmə və hesabat hazırlama.
-
-| # | Alət adı | Nə edir |
-|---|---|---|
-| 73 | **SMBAttackSurfaceMapper** | Bütün kateqoriyaların nəticələrini birləşdirib attack surface xəritəsi çıxarır — signing yoxdur + null session = relay candidate |
-| 74 | **LateralMovementPlanner** | Session enum + local admin tapıntılarını birləşdirib "user X, host A-da login-dir və host B-də local admin-dir" zənciri qurur |
-| 75 | **SMBTimestampAnalyzer** | Share-dəki faylların yaradılma/dəyişdirilmə tarixlərini analiz edib ən son aktiv faylları tapır |
-| 76 | **CredentialCorrelator** | GPP passwords, NETLOGON script-lər, sensitive file-lardakı tapıntıları birləşdirib credential siyahısı hazırlayır |
-| 77 | **SMBReconReporter** | Bütün tool-ların JSON output-larını oxuyub HTML report + attack path summary çıxarır |
-
----
-
-## 📊 Statistika
-
-| Kateqoriya | Tool sayı |
-|---|---|
-| 🔵 Common SMB | 10 |
-| 🟡 System Information | 14 |
-| 🟠 Domain Information | 7 |
-| 🔴 DC | 8 |
-| 🟢 Enumeration | 4 |
-| 🟣 Object Enumeration | 4 |
-| 🔶 Vulnerabilities | 1 |
-| 🗂️ Share & File | 8 |
-| ⚔️ Auth & Relay | 6 |
-| 🔧 Post-Exploitation | 10 |
-| 🧠 Intelligence | 5 |
-| **Yekun** | **77** |
-
----
-
-## 🚀 Başlamaq üçün ardıcıllıq
-
-### Bu həftə — Common SMB + System Info
-```
-#1  SMBDialectProber          → raw TCP + manual negotiate paketi
-#2  SMBSigningAuditor         → SecurityMode flag-ları
-#4  SMBv1Detector             → yalnız PC NETWORK PROGRAM 1.0 dialect
-#11 NetBIOSNameScanner        → UDP 137 raw socket
-#17 SystemTimeReader          → NetRemoteTOD
-```
-
-### Növbəti həftə — Domain + DC
-```
-#25 LSARPolicyReader          → lsarpc bind + policy oxu
-#27 DomainPasswordPolicyReader→ lockout threshold — spray əvvəli
-#30 DomainSIDExtractor        → S-1-5-21-X-X-X formatında
-#34 FSMORoleIdentifier        → 5 FSMO rolu
-#37 NetlogonSecureChannelProber → ZeroLogon ön yoxlama
-```
-
-### Sonra — Enumeration + Share Intel
-```
-#40 SRVSVCShareEnum           → IPC$ bind + NetShareEnumAll
-#51 SYSVOLCrawler             → Groups.xml tapıcı
-#52 GPPPasswordExtractor      → cpassword AES decrypt
-#20 AntivirusDetector         → AV/EDR servis adları
-```
-
-### Daha sonra — Auth & Relay
-```
-#57 NTLMAuthTester            → Pass-the-Hash SMB testi
-#59 PrintSpoolerCoercer       → MS-RPRN coercion
-#62 SMBAuthCapturer           → NTLMv2 hash capture
-```
-
-### Final — Post-Exploitation
-```
-#63 RemoteServiceCreator      → SCM lateral movement
-#67 SAMHiveExtractor          → uzaqdan SAM dump
-#70 VSShadowAccessor          → ntds.dit extraction
-#77 SMBReconReporter          → HTML report generator
-```
-
----
-
-## 📚 Faydalı Referanslar
-
-| Mənbə | Protokol |
-|---|---|
-| MS-SMB2 Spesifikasiyası | `[MS-SMB2]` — docs.microsoft.com |
-| MS-RPCE (RPC over SMB) | `[MS-RPCE]` — docs.microsoft.com |
-| MS-SRVS (srvsvc) | `[MS-SRVS]` — docs.microsoft.com |
-| MS-WKST (wkssvc) | `[MS-WKST]` — docs.microsoft.com |
-| MS-SAMR | `[MS-SAMR]` — docs.microsoft.com |
-| MS-LSAD / MS-LSAT | `[MS-LSAD]` — docs.microsoft.com |
-| MS-RPRN (Print Spooler) | `[MS-RPRN]` — docs.microsoft.com |
-| MS-DRSR (Replication) | `[MS-DRSR]` — docs.microsoft.com |
-| Impacket (Python reference) | github.com/fortra/impacket |
 
 ---
 
