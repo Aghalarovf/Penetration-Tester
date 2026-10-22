@@ -56,35 +56,6 @@ Each day follows this structure:
 
 ## 🔴 Stage 5 — Essentials (Steps 25–31)
 
-### Step 25 — Exception Handling
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | `try/catch/finally` — handle TCP connection failures. Work with `SocketException`, `TimeoutException` |
-| 2 | Write a custom exception class. Use `when` filter for specific exception handling. Nested try-catch |
-
----
-
-### Step 26 — Nullable Types & Null Safety
-**Duration: 1 day**
-
-| Day | Goal |
-|-----|------|
-| 1 | Use `string?`, `int?`, `?.`, `??`, `??=` — all in a single project |
-
----
-
-### Step 27 — Delegates, Lambda, Func/Action
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | Write a `delegate` type manually. Then simplify with `Func<>` and `Action<>` |
-| 2 | Lambda expressions — use in a LINQ chain. Write a callback pattern (log handler) |
-
----
-
 ### Step 28 — using & IDisposable
 **Duration: 1 day**
 
