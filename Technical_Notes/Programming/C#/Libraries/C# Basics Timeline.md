@@ -44,27 +44,6 @@ Each day follows this structure:
 
 ---
 
-## 🟡 Stage 4 — LINQ (Steps 22–24)
-
-### Step 22 — Where & Select
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | Filter a port list using `Where`. Transform a host list using `Select`. Method syntax vs query syntax |
-| 2 | Write your own recon result class, filter it with LINQ. Understand `ToList()` vs `ToArray()` |
-
----
-
-### Step 23 — OrderBy, GroupBy, Distinct
-**Duration: 2 days**
-
-| Day | Goal |
-|-----|------|
-| 1 | Sort a port list with `OrderBy`. Remove duplicate IPs with `Distinct` |
-| 2 | Group ports by service type using `GroupBy` (80/443 → HTTP, 22 → SSH) |
-
----
 
 ### Step 24 — First, Any, All, Count
 **Duration: 1 day**
