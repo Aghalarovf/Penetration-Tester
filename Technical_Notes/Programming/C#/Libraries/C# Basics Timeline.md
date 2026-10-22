@@ -1,5 +1,5 @@
 # C# Red Team — Study Plan (Step 19 → Step 135)
-> Updated plan — AD + Windows PrivEsc modules added after C2 infrastructure is complete.
+> Updated plan — SMB Basics + AD + Windows PrivEsc modules added.
 > Based on 2 hours of focused study per day.
 
 ---
@@ -173,6 +173,286 @@ Each day follows this structure:
 | Day | Goal |
 |-----|------|
 | 1 | `NetworkStream` read/write. `BinaryReader` / `BinaryWriter` over a stream. Length-prefixed message framing — send structured data without splitting issues |
+
+---
+
+## 🔵 Stage 5.6 — SMB Basics (Steps 34.1 → 34.10)
+
+> Start after Step 34 is complete. Build the protocol from scratch before touching any pentest tools.
+>
+> ⚠️ **Cross-platform requirement:** All code in this stage must run on both **Linux and Windows**.
+> No `DllImport`, no Windows-only APIs. Use only `TcpClient`, `NetworkStream`, `BinaryReader/Writer`,
+> `Span<byte>`, `BitConverter` and `StructLayout` — all available in .NET on any OS.
+> Test every tool on Linux first; if it runs there, it will run on Windows too.
+
+---
+
+### Step 34.1 — NetBIOS Session Layer
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | Connect to TCP port 445. Understand the 4-byte NetBIOS Session Service header that wraps every SMB packet — `0x00` + 3-byte big-endian length. Write `SendAsync` / `ReceiveAsync` using `NetworkStream`. Verify framing by sending a raw buffer and reading it back with Wireshark |
+
+```csharp
+// NetBIOS Session Service framing
+// [00][00][00][XX] — first byte is always 0x00, remaining 3 bytes are the payload length (big-endian)
+public async Task SendAsync(byte[] smbPacket, CancellationToken ct = default)
+{
+    var frame = new byte[4 + smbPacket.Length];
+    frame[0] = 0x00;
+    frame[1] = (byte)(smbPacket.Length >> 16);
+    frame[2] = (byte)(smbPacket.Length >> 8);
+    frame[3] = (byte)(smbPacket.Length);
+    smbPacket.CopyTo(frame, 4);
+    await _stream.WriteAsync(frame, ct);
+}
+
+public async Task<byte[]> ReceiveAsync(CancellationToken ct = default)
+{
+    var header = new byte[4];
+    await _stream.ReadExactlyAsync(header, ct);
+    int length = (header[1] << 16) | (header[2] << 8) | header[3];
+    var data = new byte[length];
+    await _stream.ReadExactlyAsync(data, ct);
+    return data;
+}
+```
+
+---
+
+### Step 34.2 — SMB2 Header Structure
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Open the MS-SMB2 specification — read the SMB2 Header section. Map every field to a C# struct using `StructLayout(LayoutKind.Sequential, Pack = 1)`. Fields: `ProtocolId`, `StructureSize`, `CreditCharge`, `Status`, `Command`, `CreditRequest`, `Flags`, `NextCommand`, `MessageId`, `Reserved`, `TreeId`, `SessionId`, `Signature` |
+| 2 | Capture a real SMB2 packet in Wireshark. Match each byte offset in the capture to the corresponding struct field. Manually parse the raw bytes in C# and print each field value |
+
+```csharp
+// Pure .NET — no P/Invoke, runs on Linux and Windows
+[StructLayout(LayoutKind.Sequential, Pack = 1)]
+public struct SMB2Header
+{
+    public uint   ProtocolId;      // 0xFE534D42 (\xFESMB)
+    public ushort StructureSize;   // always 64
+    public ushort CreditCharge;
+    public uint   Status;
+    public ushort Command;
+    public ushort CreditRequest;
+    public uint   Flags;
+    public uint   NextCommand;
+    public ulong  MessageId;
+    public uint   Reserved;
+    public uint   TreeId;
+    public ulong  SessionId;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 16)]
+    public byte[] Signature;
+}
+
+// Serialize struct → byte[] without any Windows API
+public static byte[] StructToBytes<T>(T structure) where T : struct
+{
+    int size = Marshal.SizeOf<T>();
+    var buffer = new byte[size];
+    var handle = GCHandle.Alloc(buffer, GCHandleType.Pinned);
+    try
+    {
+        Marshal.StructureToPtr(structure, handle.AddrOfPinnedObject(), false);
+        return buffer;
+    }
+    finally { handle.Free(); }
+}
+```
+
+---
+
+### Step 34.3 — NEGOTIATE Request & Response
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Build a NEGOTIATE request from scratch — SMB2 Header + Negotiate body. Fill `DialectCount`, `SecurityMode`, `Capabilities`, and `Dialects[]`. Send it to a live target (Samba on Linux or Windows share) |
+| 2 | Receive and parse the NEGOTIATE response. Extract `DialectRevision`, `ServerGuid`, `Capabilities`, `MaxTransactSize`, `SystemTime`, and `SecurityBuffer` (NTLMSSP blob). Print every field |
+
+```
+NEGOTIATE Request fields:
+  ├── StructureSize   = 36
+  ├── DialectCount    = N
+  ├── SecurityMode    = 0x0001 (signing enabled) / 0x0002 (signing required)
+  ├── Capabilities    = DFS, Leasing, LargeMTU, MultiChannel, Encryption...
+  ├── ClientGuid      = random 16 bytes
+  └── Dialects[]      = 0x0202, 0x0210, 0x0300, 0x0302, 0x0311
+
+NEGOTIATE Response fields:
+  ├── DialectRevision = dialect chosen by server
+  ├── ServerGuid
+  ├── Capabilities
+  ├── MaxTransactSize / MaxReadSize / MaxWriteSize
+  ├── SystemTime      = FILETIME (100-nanosecond intervals since 1601)
+  └── SecurityBuffer  = NTLMSSP / Kerberos SPNEGO blob
+```
+
+---
+
+### Step 34.4 — SESSION SETUP (Anonymous)
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Build the first SESSION_SETUP request — embed a minimal NTLMSSP NEGOTIATE blob (hand-crafted bytes, no library). Send it. Receive the server challenge — parse `STATUS_MORE_PROCESSING_REQUIRED` and extract the `SessionId` and NTLMSSP CHALLENGE blob |
+| 2 | Build the second SESSION_SETUP request — embed an NTLMSSP AUTHENTICATE message with empty credentials (anonymous). Send it. Receive `STATUS_SUCCESS` and confirm the session is established |
+
+```
+SESSION SETUP — 2-round NTLM handshake:
+
+  Round 1:
+    Client → SESSION_SETUP (NTLMSSP_NEGOTIATE blob)
+    Server → STATUS_MORE_PROCESSING_REQUIRED
+              SessionId assigned
+              SecurityBuffer = NTLMSSP_CHALLENGE
+
+  Round 2:
+    Client → SESSION_SETUP (NTLMSSP_AUTHENTICATE, empty credentials)
+    Server → STATUS_SUCCESS
+              Session is open
+```
+
+---
+
+### Step 34.5 — TREE CONNECT & TREE DISCONNECT
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | Build a TREE_CONNECT request. Encode the share path `\\host\IPC$` as a Unicode (UTF-16LE) string in the packet body. Send it. Parse the response and store the `TreeId`. Then send TREE_DISCONNECT and verify the server accepts it |
+
+```csharp
+// Share path encoding — pure .NET, cross-platform
+string sharePath = $@"\\{host}\IPC$";
+byte[] pathBytes = Encoding.Unicode.GetBytes(sharePath); // UTF-16LE, no P/Invoke
+```
+
+---
+
+### Step 34.6 — Packet Builder & Parser Classes
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Write `SMB2PacketBuilder` — one method per command. Each method fills the SMB2 header automatically, auto-increments `MessageId`, and returns a `byte[]` ready to send |
+| 2 | Write `SMB2PacketParser` — takes a `byte[]`, reads the header, dispatches to a per-command parse method, and returns a typed response object. Handle unknown `Status` codes without crashing |
+
+```
+SMB2PacketBuilder
+  ├── BuildNegotiate(dialects[])         → byte[]
+  ├── BuildSessionSetup(stage, blob)     → byte[]
+  ├── BuildTreeConnect(sessionId, path)  → byte[]
+  └── BuildTreeDisconnect(sessionId, treeId) → byte[]
+
+SMB2PacketParser
+  ├── ParseHeader(byte[])                → SMB2Header
+  ├── ParseNegotiateResponse(byte[])     → NegotiateResponse
+  ├── ParseSessionSetupResponse(byte[])  → SessionSetupResponse
+  └── ParseTreeConnectResponse(byte[])   → TreeConnectResponse
+```
+
+---
+
+### Step 34.7 — CREATE & File Operations
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Build a CREATE request to open a file on a share. Understand `DesiredAccess` (read/write/both), `CreateDisposition` (open existing vs create new), and `CreateOptions` flags. Parse the response and store the `FileId` (persistent + volatile handle pair) |
+| 2 | Build READ and CLOSE requests. Read a block of data from the opened file using `FileId`. Then send CLOSE. Complete the full `Open → Read → Close` cycle against a Samba share on Linux |
+
+---
+
+### Step 34.8 — Named Pipe Operations
+**Duration: 2 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Tree-connect to `IPC$`. Open the `\srvsvc` named pipe using a CREATE request — named pipes are opened exactly like files, with the pipe name as the path. Store the `FileId` |
+| 2 | Write raw bytes to the pipe using a WRITE request. Read the response using a READ request. This is the foundation for every RPC call in later stages. Verify round-trip with Wireshark |
+
+```
+Full path to a named pipe over SMB2:
+
+  TCP 445
+    └── NetBIOS frame (4-byte length prefix)
+          └── SMB2 NEGOTIATE
+                └── SESSION SETUP  (2 rounds)
+                      └── TREE CONNECT  → \\host\IPC$  (TreeId)
+                              └── CREATE  → \srvsvc     (FileId)
+                                    └── WRITE raw bytes
+                                          └── READ response
+```
+
+---
+
+### Step 34.9 — NT Status Codes & Error Handling
+**Duration: 1 day**
+
+| Day | Goal |
+|-----|------|
+| 1 | Learn the most common `STATUS_*` codes returned in the SMB2 header. Write a `NtStatus` static class with named constants. Wrap every send/receive call so that unexpected status codes throw a typed `SmbException` with a human-readable message |
+
+```csharp
+public static class NtStatus
+{
+    public const uint SUCCESS                   = 0x00000000;
+    public const uint MORE_PROCESSING_REQUIRED  = 0xC0000016;
+    public const uint ACCESS_DENIED             = 0xC0000022;
+    public const uint LOGON_FAILURE             = 0xC000006D;
+    public const uint BAD_NETWORK_NAME          = 0xC00000CC;
+    public const uint NOT_SUPPORTED             = 0xC00000BB;
+    public const uint OBJECT_NAME_NOT_FOUND     = 0xC0000034;
+    public const uint USER_SESSION_DELETED      = 0xC0000203;
+
+    public static string Describe(uint code) => code switch
+    {
+        SUCCESS                  => "Success",
+        MORE_PROCESSING_REQUIRED => "More processing required (NTLM round 2)",
+        ACCESS_DENIED            => "Access denied",
+        LOGON_FAILURE            => "Logon failure — bad credentials",
+        BAD_NETWORK_NAME         => "Share not found",
+        _                        => $"Unknown status 0x{code:X8}"
+    };
+}
+```
+
+---
+
+### Step 34.10 — SMBClient Class (Bring It All Together)
+**Duration: 3 days**
+
+| Day | Goal |
+|-----|------|
+| 1 | Write the `SMBClient` class — `ConnectAsync`, `NegotiateAsync`, `SessionSetupAnonymousAsync`, `TreeConnectAsync`. Each method stores its result (dialect, sessionId, treeId) as instance state |
+| 2 | Add `OpenPipeAsync`, `WritePipeAsync`, `ReadPipeAsync`, `CloseAsync`. Each method uses the stored state so callers never pass IDs manually |
+| 3 | Run the full flow against a Samba server on Linux: connect → negotiate → session → `IPC$` → open `\srvsvc` → write → read → close. Confirm every step in Wireshark |
+
+```csharp
+// Usage after Step 34.10 — this client is the foundation
+// all pentest tools in later stages are built on top of it.
+// Runs on Linux and Windows — zero P/Invoke.
+var client = new SMBClient("192.168.1.10");
+await client.ConnectAsync();
+await client.NegotiateAsync();
+await client.SessionSetupAnonymousAsync();
+await client.TreeConnectAsync("IPC$");
+var pipe = await client.OpenPipeAsync("srvsvc");
+var response = await client.WritePipeAsync(pipe, requestBytes);
+await client.CloseAsync(pipe);
+```
+
+---
+
+> **After Step 34.10:** SMB Tools 1–10 (Common SMB) can be built directly on top of `SMBClient`.
+> Tools 11–49 (RPC-based) require Steps 35–36 first — P/Invoke is needed for Windows API calls in those tools,
+> but `SMBClient` itself stays cross-platform throughout.
 
 ---
 
@@ -1251,3 +1531,5 @@ Each day follows this structure:
 | 3 | Run cleanup module — verify no indicators remain. Review what a defender would see in logs |
 
 ---
+
+> **Note:** All tools must be used only in environments you are authorized to test — your own lab, a CTF, or systems covered by a formal penetration-testing agreement.
