@@ -1,34 +1,41 @@
-# OSED Prep — Phase 4: ctypes & Windows API Interaction
+# OSED Prep — Phase 3: Fuzzing & Automation Basics
 
-## 1. Loading and Calling DLLs
+**Target duration:** ~1 week at 2–3 hours/day.
 
-- The `ctypes` module and why it exists: calling functions in compiled Windows DLLs directly from Python, with no wrapper library needed
-- Loading core DLLs: `ctypes.windll.kernel32`, `ctypes.windll.user32`, `ctypes.windll.ntdll`
-- Calling a simple function with no arguments first, to confirm the call mechanism works (`kernel32.GetCurrentProcessId()`)
-- A visible test case: calling `user32.MessageBoxW()` to pop up a message box — useful as an immediate, visual confirmation that the Python-to-WinAPI call succeeded
+## 1. Incremental Fuzzing Loops
 
-## 2. Argument and Return Types
+- The core pattern: a loop that sends a growing buffer size each iteration (e.g., 100, 200, 300… bytes) against a target over a socket
+- Reusing the Phase 2 `send_payload()` function as the transport layer, so the fuzzer doesn't duplicate socket logic
+- Detecting a crash indirectly: a failed connection, a timeout, or no response where one was previously expected
+- Deciding step size and starting point based on the target (a web-facing buffer vs. a tiny protocol field needs different ranges)
 
-- Why `ctypes` needs explicit type information to call a C function correctly: `argtypes` and `restype`
-- Common `ctypes` types: `ctypes.c_int`, `ctypes.c_uint`, `ctypes.c_void_p`, `ctypes.c_char_p`, `ctypes.c_wchar_p`
-- `ctypes.create_string_buffer()` — allocating a buffer in Python that a WinAPI call can write into
-- Passing pointers: `ctypes.byref()` for output parameters (functions that write a result back through a pointer argument)
+## 2. Logging & Result Tracking
 
-## 3. Memory-Related API Calls
+- Writing each attempt's buffer size and outcome (sent / no response / connection dropped) to a log file as the fuzzer runs
+- Why logging matters here specifically: a crash found at 2:00 AM during an unattended run is useless if there's no record of which input caused it
+- Structuring log entries so the exact buffer size and timestamp of the first failure are easy to find later
 
-- `VirtualAlloc` — allocating memory with a specified protection level (e.g., `PAGE_EXECUTE_READWRITE`), and why this matters conceptually for shellcode staging
-- `VirtualProtect` — changing the protection of an existing memory region (the Python-level signature mirrors what later shows up as a ROP-chain target)
-- `ReadProcessMemory` / `WriteProcessMemory` — signatures and parameter order; full practical use comes later once debugger tooling is introduced, but the calling pattern (handle, address, buffer, size, bytes-transferred pointer) is learned here
-- `OpenProcess` / `CreateProcess` — obtaining or creating a process handle, a prerequisite for several of the above calls
+## 3. Finding the Exact Offset: Cyclic Patterns
 
-## 4. Error Handling
+- The problem: once a crash is found, you know a buffer of roughly size N causes it, but not which byte lands in the instruction pointer
+- Building a non-repeating cyclic pattern (a unique sequence long enough that no 4-byte or 8-byte window repeats) — the same principle behind tools like `pattern_create`/`pattern_offset`
+- Writing your own pattern generator (e.g., cycling through letter/number combinations) instead of relying on a prebuilt tool, to build real understanding of why it works
+- Matching the value found in the crashed instruction pointer back against the generated pattern to compute the exact offset
 
-- `ctypes.GetLastError()` — retrieving the Windows error code after a failed API call
-- `ctypes.WinError()` — converting that code into a readable exception/message
-- Why checking return values matters: a `ctypes` call that "succeeds" syntactically can still fail at the Windows API level (e.g., `VirtualAlloc` returning `NULL`)
+## 4. Bad Character Identification
 
-## 5. Why This Matters for OSED
+- Why certain byte values corrupt a payload in transit or in memory (e.g., `\x00` often terminates a string early, `\x0a`/`\x0d` can be treated as line endings by a protocol)
+- Building a test buffer containing every byte value from `\x00` to `\xff`
+- Sending that buffer to the target and comparing what the debugger/memory shows against what was sent, to identify which bytes were altered, dropped, or stopped the transfer
+- Iteratively removing a confirmed bad byte and re-testing, until only clean bytes remain — producing the exclusion list later exploit payloads must avoid
 
-- Validating that a crafted shellcode stub behaves as expected in isolation, without needing a full exploit chain
-- Scripting small Windows-API-driven checks (e.g., confirming a target process's memory protections) directly from Python
-- Building intuition for the C function signatures that will be read constantly once C and Windows API work begins in the next phase — `ctypes` argument/return typing is a soft preview of C's own type system
+## 5. Making It Reusable: `argparse` and `subprocess`
+
+- Using `argparse` to accept target IP, port, buffer range, and log file path as command-line arguments, instead of hardcoding them per target
+- Turning a one-off fuzzing script into a tool that can be pointed at a new target without editing the code
+- `subprocess` basics for the case where the target is a local application rather than a networked service (launching the process, monitoring whether it's still alive)
+
+## 6. Structuring the Fuzzer as Functions
+
+- Splitting the fuzzer into clear functions: `build_buffer(size)`, `send_payload(ip, port, payload)` (from Phase 2), `log_attempt(size, result)`
+- Why this structure matters: the same functions get reused, almost unchanged, when the offset-finding and bad-character scripts are written next
