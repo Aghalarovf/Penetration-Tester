@@ -1,11 +1,5 @@
 # OSED Prep — Phase 1: Binary Data & Byte Manipulation
 
-## Overview
-
-Phase 1 is the single most important Python phase for OSED. Every exploit payload is ultimately a sequence of bytes sent to a target. This phase builds fluency in representing, converting, and packing binary data correctly. The most common beginner errors in exploit scripting — `str`/`bytes` confusion, wrong endianness, off-by-one byte counts — are eliminated here, before they can corrupt a real exploit later. Builds directly on Phase 0 (variables, strings, functions); feeds directly into Phase 2 (sending these payloads over a socket).
-
-**Target duration:** 1–2 weeks at 2–3 hours/day.
-
 ## 1. `str` vs. `bytes`
 
 - Why Python 3 keeps text (`str`) and binary data (`bytes`) as separate, non-interchangeable types
