@@ -76,194 +76,205 @@ Note: this is the grammar layer only. `bytes`/`bytearray` — the type actually 
 
 ---
 
-# OSED Phase 0 — Practical Tasks (10 Tasks)
+# OSED Phase 0 — 15 Practical Tasks
 
-Each task combines several Phase 0 topics at once. Ordered from easy to hard. Follow each task's "Requirements" section exactly — grading is based on those conditions.
-
----
-
-## Task 1 — Number Analysis Script
-**Topics:** variables/types, operators, conditionals, f-strings
-
-Take one integer from the user. The program should:
-- determine whether the number is even or odd
-- determine whether the number is negative, zero, or positive
-- print the number's hex and binary representation
-
-**Requirements:**
-- Output must be a single f-string printed on one line: `"Number: {x} | Type: even/odd | Sign: ... | Hex: ... | Bin: ..."`
-- Use `int(input())`; no extra libraries
+Each task maps directly to an OSED exploit-dev workflow element: buffer building, offset/address math, config tables, fuzzing logic, logging, and crash resilience. Ordered from easy to hard.
 
 ---
 
-## Task 2 — String Manipulation Tool
-**Topics:** strings, slicing, loops, conditionals
+## Task 1 — Ünvan Hesablayıcı
+**Mövzular:** dəyişənlər, hex/bin çevirmə, arifmetika, f-string
 
-Take a word from the user. The program should:
-- reverse the word
-- check whether the word is a palindrome (case-insensitive)
-- build a new word by repeating each letter 3 times (e.g., "ab" → "aaabbb")
+Base ünvanı (`0x10000000`) və bir neçə offset verilib. Proqram hər offset üçün yekun ünvanı hesablamalı və `0x` prefiksli, 8 rəqəmli hex formatında (`f"{addr:#010x}"`) çap etməlidir.
 
-**Requirements:**
-- All three results printed on separate lines
-- The palindrome check must be written manually with a `for` loop — use `[::-1]` slicing ONLY for the reversal, not for the palindrome comparison itself; write the comparison logic yourself with a loop
+**Tələblər:**
+- Offset-lər siyahı şəklində verilsin: `offsets = [0x1a4, 0x2b8, 0x3f0]`
+- Hər nəticə ayrı sətirdə: `"Base: ... + Offset: ... = Address: ..."`
+- Heç bir hazır kitabxana işlədilməsin
 
 ---
 
-## Task 3 — Buffer Simulation
-**Topics:** strings, loops, functions, f-strings
+## Task 2 — Təkrarlanan Bufer Generatoru
+**Mövzular:** strings, funksiyalar, loop
 
-Write a function `build_buffer(char, count)` that returns a string with the given character repeated `count` times.
+`build_buffer(char, count)` funksiyası yaz — verilən simvolu `count` dəfə təkrarlayıb qaytarsın.
 
-Then build a loop from 100 to 500 in steps of 50. At each step:
-- call `build_buffer("A", size)`
-- check the result's length (`len()`) against the expected size
-- print `"Size: {X}, Built buffer length: {Y}, Matches: {True/False}"`
+100-dən 1000-ə qədər 100-lük addımlarla bufer yarat, hər addımda uzunluğunu gözlənilən ölçü ilə müqayisə et.
 
-**Requirements:**
-- `build_buffer` must be a separate `def`; inline repetition is not allowed
-- The match check must use a plain `if`, not `assert`
+**Tələblər:**
+- Təkrarlama yalnız funksiya daxilində, inline yox
+- Nəticə `if` ilə yoxlanılsın: `"Size: {X} | Built: {Y} | Match: {True/False}"`
 
 ---
 
-## Task 4 — Configuration Table
-**Topics:** dict, list, tuple, loops, functions
+## Task 3 — Qarışıq Payload Qurucusu
+**Mövzular:** strings, concatenation, siyahı
 
-Build a `dict` with this structure (key: service name, value: a `(port, protocol)` tuple):
-```
-{"HTTP": (80, "TCP"), "DNS": (53, "UDP"), "FTP": (21, "TCP"), "HTTPS": (443, "TCP")}
-```
+Bir neçə hissədən ibarət payload qur: `"A" * 100` + `"B" * 4` + `"C" * 50`. Hər hissəni siyahıya `.append()` et, sonda `"".join()` ilə birləşdir.
 
-Write a function `find_by_protocol(services, protocol)` that returns a `list` of all service names matching the given protocol.
-
-The program should list all services, then use `find_by_protocol` to find and print only the "TCP" ones.
-
-**Requirements:**
-- Iterate the dict as `for key, value in services.items():`
-- Inside `find_by_protocol`, access the tuple elements by index (`value[0]`, `value[1]`)
+**Tələblər:**
+- Hər hissənin uzunluğunu ayrıca çap et
+- Yekun bufer uzunluğunun düzgünlüyünü yoxla (`100+4+50` ilə müqayisə)
 
 ---
 
-## Task 5 — File Logging
-**Topics:** file I/O, loops, f-strings, functions
+## Task 4 — Unikal Cyclic Pattern Generatoru
+**Mövzular:** strings, loop, modulo
 
-Write a function `log_attempt(filename, size, status)` that appends a line to the given file in the format `"[size={size}] status={status}"` (append mode, `"a"`).
+`generate_pattern(length)` funksiyası yaz: böyük hərf + kiçik hərf + rəqəm ardıcıllığı ilə (`Aa0Aa1Aa2...Ab0Ab1...`) verilən uzunluqda unikal pattern qaytarsın.
 
-Then build a loop from 1 to 10, calling `log_attempt` at each step (status: "OK" for even numbers, "FAIL" for odd numbers).
-
-After the loop finishes, read the file back and count how many "OK" entries there are.
-
-**Requirements:**
-- File opening/closing must use a `with` block
-- The counting logic must be its own function: `count_status(filename, status)`
+**Tələblər:**
+- Hərf indeksləri `%` (modulo) ilə hesablansın, hardcode olunmasın
+- Pattern-in uzunluğu dəqiq istənilən `length`-ə bərabər olsun (artıq hissə kəsilsin)
 
 ---
 
-## Task 6 — Error-Resilient Processor
-**Topics:** try/except, functions, list, dict
+## Task 5 — Offset Axtarış Simulyasiyası
+**Mövzular:** strings, slicing, find/index
 
-Write a program that processes this list:
-```
-inputs = ["42", "abc", "17", "", "99", "xyz"]
-```
+Verilmiş pattern (Task 4-dən) daxilində 4 hərflik "crash marker" (`"Ab1A"`) harada yerləşdiyini tap.
 
-Write a function `safe_convert(value)` that converts a string to `int`, returning `None` on failure (the program must never crash, regardless of input).
-
-Process every element and collect the results into a `dict`: `{"succeeded": [...], "failed": [...]}`. Print the count and contents of each category at the end.
-
-**Requirements:**
-- `try`/`except` must live only inside `safe_convert`, not in the main loop
-- The `except` block must be specific (`except ValueError:`) — do not use a bare `except Exception`
+**Tələblər:**
+- `.find()` metodundan istifadə et, əl ilə döngü yazma (burada `.find()` real OSED iş axınında istifadə olunan metoddur)
+- Tapılmazsa aydın mesaj ver (`-1` nəticəsini emal et)
+- Tapılan indeksi "bu, EIP-yə qədər olan offset-dir" izahı ilə çap et
 
 ---
 
-## Task 7 — Command-Line Configurator
-**Topics:** sys.argv, conditionals, functions, file writing
+## Task 6 — Fuzzing Döngüsü (prototip)
+**Mövzular:** while loop, funksiyalar, break
 
-The program should accept two command-line parameters: a target name and a repeat count (`python script.py "test" 5`).
+`fuzz_sizes(min_size, max_size, step)` funksiyası yaz — ölçülərin siyahısını qaytarsın (hələ heç nə göndərmir).
 
-- If the parameter count is wrong, show the correct usage and stop the program (`sys.exit()`)
-- Converting the second parameter to `int` can fail — catch this with `try`/`except`
-- Repeat the target name the given number of times, writing each numbered repetition to a file (`1: test`, `2: test`, ...)
+Əsas proqramda bu siyahı üzərində gəz, hər ölçüdə bufer yarat (Task 2-dəki funksiyadan istifadə et) və ölçü müəyyən həddi (`300`) keçəndə `break` ilə dayan.
 
-**Requirements:**
-- Use `sys.argv`; do NOT use `argparse` (not covered yet)
-- The output filename is fixed: `"output.txt"`
+**Tələblər:**
+- `while` istifadə et, `for` yox (sonrakı fazada socket-dən oxuma məntiqinin eyni forması)
+- Dayanma şərti ayrıca dəyişənlə idarə olunsun (`crash_threshold`)
 
 ---
 
-## Task 8 — Multi-Dimensional Inventory System
-**Topics:** list, dict, tuple, functions, loops, conditionals
+## Task 7 — Offset Konfiqurasiya Cədvəli
+**Mövzular:** dict, tuple, funksiyalar
 
-Build this data structure — a list of dicts, each with `name`, `size`, and `tags` (a tuple) fields:
-```
-records = [
-    {"name": "payload_a", "size": 128, "tags": ("test", "small")},
-    {"name": "payload_b", "size": 512, "tags": ("prod", "large")},
-    {"name": "payload_c", "size": 256, "tags": ("test", "medium")},
-]
-```
+Lüğət qur: `offsets = {"EIP": 524, "ESP": 528, "SEH": 1024}`. Dəyərlər əslində `(offset, description)` tuple-ı olsun: `{"EIP": (524, "instruction pointer")}`.
 
-Write these functions:
-- `filter_by_tag(records, tag)` — return all records containing the given tag
-- `total_size(records)` — return the sum of all records' `size` values
-- `largest_record(records)` — return the record with the largest `size`
+`get_offset(table, name)` funksiyası yaz: `.get()` ilə axtarsın, tapılmasa `None` qaytarsın.
 
-The program should call all three functions and print the results in a formatted way.
-
-**Requirements:**
-- Each function must have a single responsibility (one function, one job)
-- `largest_record` must use a manual comparison loop — the built-in `max()` function is NOT allowed
+**Tələblər:**
+- `for key, value in table.items():` ilə bütün cədvəli çap et
+- Mövcud olmayan açar üçün `get_offset` None qaytaranda əsas proqram bunu idarə etsin
 
 ---
 
-## Task 9 — Simulated "Fuzzing" Logger
-**Topics:** loops, functions, file I/O, try/except, string/list
+## Task 8 — Badchar Yoxlama Simulyasiyası
+**Mövzular:** strings, loop, list, conditional
 
-Simulate fuzzing logic without any real network:
+Fərz et ki, bu badchar siyahısı var: `bad_chars = ["\x00", "\x0a", "\x0d"]`. Bir "payload" string-i (`"\x01\x02\x00\x03"`) daxilində bu simvollardan hansının mövcud olduğunu tap.
 
-Write a function `simulate_send(size)` that raises `Exception("crash simulated")` if `size > 350`, otherwise returns `"OK"`.
-
-The main program builds a loop from 50 to 450 in steps of 25. At each step:
-- call `simulate_send(size)`, catching the result with `try`/`except`
-- log the result (success, or the "CRASH" message) to a file
-- as SOON as a crash occurs, stop the loop (`break`) and separately print at which size it happened
-
-**Requirements:**
-- `simulate_send` must be written as if it were an importable, standalone module function — it must not depend on any global variable
-- Logging must use a function similar to Task 5's `log_attempt` (rewrite it here)
+**Tələblər:**
+- Hər badchar üçün `in` operatoru ilə yoxla, tapılanları siyahıya yığ
+- Nəticəni "Tapılan badchar-lar: [...]" formasında çap et, heç biri tapılmasa aydın mesaj ver
 
 ---
 
-## Task 10 — Capstone Project: Mini Audit Tool
-**Topics:** ALL of the above (sys.argv, dict/list/tuple, functions, loops, try/except, file I/O, f-strings)
+## Task 9 — JMP/Gadget Ünvan Cədvəli
+**Mövzular:** dict, list, funksiyalar, loop
 
-Take a filename from the command line (`python script.py "report.txt"`). The program works on this fixed data:
-```
-checks = [
-    {"name": "port_scan", "result": "open", "severity": 3},
-    {"name": "ssl_check", "result": "weak", "severity": 2},
-    {"name": "auth_check", "result": "ok", "severity": 0},
-    {"name": "header_check", "result": "missing", "severity": 1},
-]
-```
+Modul adlarını gadget ünvanlarına uyğunlaşdıran lüğət qur: `{"user32.dll": [0x77D1A1A1, 0x77D1B2B2], "kernel32.dll": [0x76F1C3C3]}` (hər modulun bir neçə namizəd ünvanı var).
 
-Required functions:
-- `risk_score(checks)` — return the sum of all `severity` values
-- `group_by_result(checks)` — return a `dict` grouped by `result` value (key: result, value: list of names)
-- `write_report(filename, checks, score)` — write a formatted report to file: one line per check, ending with the total risk score
+`find_gadgets(table, module)` funksiyası yaz: verilən modulun bütün ünvanlarını hex formatında siyahı kimi qaytarsın.
 
-Program flow:
-1. Read the filename from `sys.argv`; if not provided, default to `"audit_report.txt"`
-2. Calculate the risk score and print it to the console
-3. Print the `group_by_result` output to the console
-4. Write the results to file using `write_report`
-5. Wrap all file operations in `try`/`except` — if writing fails, show a clear error message without crashing
-
-**Requirements:**
-- All three functions must be independently testable (no global variables — everything flows through parameters and return values)
-- The main logic must live inside an `if __name__ == "__main__":` block
-- If you can explain every part of this code without help once it's done, Phase 0 is considered fully mastered
+**Tələblər:**
+- Ünvanlar çap olunanda `f"{addr:#010x}"` formatında göstərilsin
+- Mövcud olmayan modul adı üçün boş siyahı qaytarılsın, xəta verilməsin
 
 ---
+
+## Task 10 — Fayla Crash Log Yazma
+**Mövzular:** file I/O, with block, funksiyalar
+
+`log_crash(filename, size, address)` funksiyası yaz: fayla `"[CRASH] size={size} eip={address:#010x}"` formatında sətir əlavə etsin (append rejimi).
+
+Task 6-dakı fuzzing döngüsünü bununla birləşdir: hər "crash" halında (ölçü həddi keçəndə) bu funksiyanı çağır.
+
+**Tələblər:**
+- `with open(..., "a")` istifadə olunsun
+- Hər çağırışda vaxt əlavə olunsun (`time.strftime`)
+
+---
+
+## Task 11 — Binary Fayl Yazma/Oxuma
+**Mövzular:** file I/O, binary mode
+
+Bufer massivini (`[0x41, 0x42, 0x43, 0x44]`) `bytes()` ilə çevir və `payload.bin` faylına `"wb"` rejimində yaz.
+
+Sonra faylı `"rb"` ilə geri oxu və `.hex()` metodu ilə hex string kimi çap et.
+
+**Tələblər:**
+- `bytes([...])` sintaksisini işlət (Phase 1-ə keçid üçün ilk tanışlıq)
+- Yazılan və oxunan datanın eyni olduğunu `if` ilə yoxla
+
+---
+
+## Task 12 — Xətaya Davamlı Konvertasiya
+**Mövzular:** try/except, funksiyalar
+
+`safe_hex_to_int(value)` funksiyası yaz: `"0x41414141"` kimi string-i `int(value, 16)` ilə çevirsin, səhv formatda olduqda `None` qaytarsın (çökməsin).
+
+Qarışıq siyahını (`["0x41414141", "invalid", "0xDEADBEEF", ""]`) emal et, uğurlu/uğursuzları ayrı siyahılara yığ.
+
+**Tələblər:**
+- `except ValueError:` spesifik tutulsun
+- `try/except` yalnız funksiya daxilində olsun, əsas döngüdə yox
+
+---
+
+## Task 13 — Komanda Sətri ilə Exploit Konfiqurasiyası
+**Mövzular:** sys.argv, try/except, conditional
+
+Proqram üç arqument qəbul etsin: hədəf ünvan (string kimi, hələ IP formatı yoxlanmır), port və bufer ölçüsü (`python script.py 127.0.0.1 9999 500`).
+
+**Tələblər:**
+- Arqument sayı səhvdirsə `"Usage: script.py <host> <port> <size>"` göstər və `sys.exit(1)`
+- Port və ölçünün `int()`-ə çevrilməsi `try/except` ilə qorunsun
+- Doğru parametrlər daxil olanda hamısını f-string ilə çap et: `"Target: {host}:{port} | Buffer size: {size}"`
+
+---
+
+## Task 14 — Struct Pack Sintaksisinə Giriş
+**Mövzular:** import struct, funksiyalar
+
+`pack_address(addr)` funksiyası yaz: `struct.pack("<I", addr)` istifadə edərək 32-bitlik ünvanı little-endian bytes-a çevirsin.
+
+Bir neçə ünvan üçün (`0x41424344`, `0x7FFDF000`) nəticəni çevir və `.hex()` ilə çap et.
+
+**Tələblər:**
+- `"<I"` (little-endian) ilə `">I"` (big-endian) arasındakı fərqi eyni ünvan üçün çap edib müqayisə et
+- Sintaksisə alışmaq məqsədlidir — endianness-in **niyə** vacib olduğunu izah etməyə çalışma, bu Phase 1 mövzusudur
+
+---
+
+## Task 15 — Capstone: Mini Exploit Skeleton
+**Mövzular:** HAMISI birlikdə (sys.argv, dict/tuple, funksiyalar, loop, try/except, file I/O, struct)
+
+Aşağıdakı axını izləyən tam skript yaz (real şəbəkə əlaqəsi YOXDUR, hər şey simulyasiyadır):
+
+1. `sys.argv`-dən host, port, max bufer ölçüsü oxu (default dəyərlərlə)
+2. Offset cədvəli (Task 7-dəki kimi) təyin et
+3. `fuzz_sizes()` (Task 6) ilə ölçü siyahısı yarat
+4. Hər ölçü üçün bufer qur (Task 2), `simulate_send(size)` çağır — bu funksiya ölçü müəyyən həddi keçəndə `Exception` atsın
+5. Çökmə baş verəndə: offset cədvəlindən EIP dəyərini oxu, `pack_address()` (Task 14) ilə bytes-a çevir, nəticəni `log_crash()` (Task 10) ilə fayla yaz
+6. Bütün proses `try/except` ilə qorunsun, heç bir halda skript çökməsin
+
+**Tələblər:**
+- Bütün funksiyalar qlobal dəyişənə müraciət etməsin, hər şey parametr/return ilə işləsin
+- Əsas məntiq `if __name__ == "__main__":` daxilində olsun
+- Bu skripti başdan sona izah edə bilirsənsə, Phase 1-ə (bytes, socket, real struct işi) keçməyə hazırsan
+
+---
+
+## Qeyd
+
+Task 11 və 14 artıq `bytes` və `struct`-a toxunur — bu, Phase 0-ın "qrammatika" sərhədini bir az aşır, amma OSED-ə keçiddə bu iki alət o qədər mərkəzidir ki, onlarsız siyahı "sırf OSED üçün" sayıla bilməzdi.
 
